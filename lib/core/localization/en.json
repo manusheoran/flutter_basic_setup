@@ -1,0 +1,10 @@
+{
+  "@@locale": "en",
+  "loginButton": "Log In",
+  "emailHint": "Enter your email",
+  "passwordHint": "Enter your password",
+  "forgotPassword": "Forgot password?",
+  "dontHaveAccount": "Don't have an account?",
+  "signUp": "Sign Up",
+  "welcomeBack": "Welcome Back"
+}
