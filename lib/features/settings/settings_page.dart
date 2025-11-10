@@ -31,6 +31,8 @@ class SettingsPage extends StatelessWidget {
           children: [
             _buildProfileCard(context),
             const SizedBox(height: AppConstants.kSpacingL),
+            _buildSecurityCard(context),
+            const SizedBox(height: AppConstants.kSpacingL),
             _buildThemeCard(),
             const SizedBox(height: AppConstants.kSpacingL),
             _buildMentorCard(),
@@ -167,6 +169,342 @@ class SettingsPage extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSecurityCard(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.kSpacingM),
+        child: Obx(() {
+          final user = _authService.firebaseUser.value;
+          final isEmailProvider = user?.providerData.any((p) => p.providerId == 'password') ?? false;
+          final isEmailVerified = user?.emailVerified ?? true;
+          
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Security',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: AppConstants.kSpacingM),
+              
+              // Email Verification Status (only for email/password users)
+              if (isEmailProvider && !isEmailVerified) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.orange),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.warning_amber, color: Colors.orange),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Email Not Verified',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Please verify your email to secure your account',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.email, size: 18),
+                          label: const Text('Resend Verification Email'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.orange,
+                            side: const BorderSide(color: Colors.orange),
+                          ),
+                          onPressed: () async {
+                            final error = await _authService.resendVerificationEmail();
+                            if (error != null) {
+                              Get.snackbar(
+                                'Error',
+                                error,
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                              );
+                            } else {
+                              Get.snackbar(
+                                'Success',
+                                'Verification email sent! Check your inbox.',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.green,
+                                colorText: Colors.white,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Divider(),
+              ],
+              
+              // Reset Password (only for email/password users)
+              if (isEmailProvider) ...[
+                ListTile(
+                  leading: const Icon(Icons.lock_reset),
+                  title: const Text('Reset Password'),
+                  subtitle: const Text('Change your password'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _showResetPasswordDialog(context),
+                ),
+                const Divider(),
+              ],
+              
+              // Biometric Login
+              ListTile(
+                leading: const Icon(Icons.fingerprint),
+                title: const Text('Biometric Login'),
+                subtitle: Text(
+                  _authService.canCheckBiometrics.value
+                      ? 'Use fingerprint/face ID to login'
+                      : 'Not available on this device',
+                ),
+                trailing: Switch(
+                  value: _authService.isBiometricEnabled.value,
+                  onChanged: _authService.canCheckBiometrics.value
+                      ? (value) async {
+                          if (value) {
+                            // Test biometric auth before enabling
+                            final authenticated = await _authService.authenticateWithBiometrics();
+                            if (authenticated) {
+                              await _authService.setBiometricEnabled(true);
+                              Get.snackbar(
+                                'Success',
+                                'Biometric login enabled',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.green,
+                                colorText: Colors.white,
+                              );
+                            } else {
+                              Get.snackbar(
+                                'Failed',
+                                'Biometric authentication failed',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                              );
+                            }
+                          } else {
+                            await _authService.setBiometricEnabled(false);
+                            Get.snackbar(
+                              'Success',
+                              'Biometric login disabled',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.orange,
+                              colorText: Colors.white,
+                            );
+                          }
+                        }
+                      : null,
+                  activeColor: AppColors.primaryOrange,
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
+  void _showResetPasswordDialog(BuildContext context) {
+    final TextEditingController currentPasswordController = TextEditingController();
+    final TextEditingController newPasswordController = TextEditingController();
+    final TextEditingController confirmPasswordController = TextEditingController();
+    final RxBool isLoading = false.obs;
+    final RxBool showCurrentPassword = false.obs;
+    final RxBool showNewPassword = false.obs;
+    final RxBool showConfirmPassword = false.obs;
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Reset Password'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Obx(() => TextField(
+                controller: currentPasswordController,
+                decoration: InputDecoration(
+                  labelText: 'Current Password',
+                  hintText: 'Enter current password',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      showCurrentPassword.value
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () => showCurrentPassword.value = !showCurrentPassword.value,
+                  ),
+                ),
+                obscureText: !showCurrentPassword.value,
+              )),
+              const SizedBox(height: 16),
+              Obx(() => TextField(
+                controller: newPasswordController,
+                decoration: InputDecoration(
+                  labelText: 'New Password',
+                  hintText: 'Enter new password',
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      showNewPassword.value
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () => showNewPassword.value = !showNewPassword.value,
+                  ),
+                ),
+                obscureText: !showNewPassword.value,
+              )),
+              const SizedBox(height: 16),
+              Obx(() => TextField(
+                controller: confirmPasswordController,
+                decoration: InputDecoration(
+                  labelText: 'Confirm New Password',
+                  hintText: 'Confirm new password',
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      showConfirmPassword.value
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () => showConfirmPassword.value = !showConfirmPassword.value,
+                  ),
+                ),
+                obscureText: !showConfirmPassword.value,
+              )),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              currentPasswordController.dispose();
+              newPasswordController.dispose();
+              confirmPasswordController.dispose();
+              Get.back();
+            },
+            child: const Text('Cancel'),
+          ),
+          Obx(() => ElevatedButton(
+            onPressed: isLoading.value
+                ? null
+                : () async {
+                    final currentPassword = currentPasswordController.text;
+                    final newPassword = newPasswordController.text;
+                    final confirmPassword = confirmPasswordController.text;
+
+                    if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+                      Get.snackbar(
+                        'Error',
+                        'Please fill in all fields',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
+                      );
+                      return;
+                    }
+
+                    if (newPassword != confirmPassword) {
+                      Get.snackbar(
+                        'Error',
+                        'New passwords do not match',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
+                      );
+                      return;
+                    }
+
+                    if (newPassword.length < 6) {
+                      Get.snackbar(
+                        'Error',
+                        'Password must be at least 6 characters',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
+                      );
+                      return;
+                    }
+
+                    isLoading.value = true;
+
+                    final error = await _authService.resetPassword(
+                      currentPassword: currentPassword,
+                      newPassword: newPassword,
+                    );
+
+                    isLoading.value = false;
+
+                    Get.back(); // Close dialog
+
+                    if (error != null) {
+                      Get.snackbar(
+                        'Error',
+                        error,
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
+                      );
+                    } else {
+                      Get.snackbar(
+                        'Success',
+                        'Password updated successfully',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.green,
+                        colorText: Colors.white,
+                      );
+                    }
+
+                    currentPasswordController.dispose();
+                    newPasswordController.dispose();
+                    confirmPasswordController.dispose();
+                  },
+            child: isLoading.value
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text('Update Password'),
+          )),
         ],
       ),
     );

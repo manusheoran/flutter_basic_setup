@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../core/theme/app_colors.dart';
+import 'splash_controller.dart';
 
 class SplashPage extends StatelessWidget {
-  const SplashPage({super.key});
+  SplashPage({super.key});
+  
+  final SplashController controller = Get.put(SplashController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryOrange,
       body: Center(
-        child: Column(
+        child: Obx(() => Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // App Logo/Icon
@@ -27,8 +31,10 @@ class SplashPage extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.self_improvement,
+              child: Icon(
+                controller.isAuthenticating.value 
+                    ? Icons.fingerprint 
+                    : Icons.self_improvement,
                 size: 70,
                 color: AppColors.primaryOrange,
               ),
@@ -45,22 +51,50 @@ class SplashPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Track Your Spiritual Journey',
+            // Status Text
+            Text(
+              controller.authenticationFailed.value
+                  ? 'Authentication Failed'
+                  : controller.isAuthenticating.value
+                      ? 'Please Authenticate'
+                      : 'Track Your Spiritual Journey',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.white70,
+                color: controller.authenticationFailed.value 
+                    ? Colors.red[200]
+                    : Colors.white70,
                 letterSpacing: 1,
               ),
             ),
             const SizedBox(height: 50),
-            // Loading Indicator
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              strokeWidth: 3,
-            ),
+            // Loading Indicator or Action Buttons
+            if (controller.authenticationFailed.value) ...[
+              ElevatedButton.icon(
+                onPressed: controller.retryBiometricAuth,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppColors.primaryOrange,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: controller.skipBiometricAndLogout,
+                child: const Text(
+                  'Sign Out',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+            ] else ...[
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                strokeWidth: 3,
+              ),
+            ],
           ],
-        ),
+        )),
       ),
     );
   }

@@ -17,7 +17,7 @@ class AppPages {
   static final routes = [
     GetPage(
       name: '/splash',
-      page: () => const SplashPage(),
+      page: () => SplashPage(),
     ),
     GetPage(
       name: '/login',

@@ -176,7 +176,22 @@ class LoginController extends GetxController {
           );
         }
       } else {
-        print('✅ Signup successful! AuthService will handle navigation');
+        print('✅ Signup successful!');
+        // Show success message
+        if (Get.currentRoute == '/login') {
+          Get.snackbar(
+            'Success! 🎉',
+            'Account created! Now try to login - we\'ll send a verification email that you need to click before you can access the app.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 7),
+          );
+        }
+        // Switch to login mode
+        toggleMode();
+        emailController.clear();
+        passwordController.clear();
       }
     } catch (e) {
       print('❌ Unexpected error during signup: $e');
@@ -193,5 +208,146 @@ class LoginController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+  
+  Future<void> signInWithGoogle() async {
+    if (isLoading.value) {
+      print('⚠️ Google Sign-In already in progress, ignoring duplicate request');
+      return;
+    }
+    
+    if (Get.isSnackbarOpen) {
+      Get.closeAllSnackbars();
+    }
+    
+    if (_authService == null) {
+      Get.snackbar(
+        'Preview Mode',
+        'Firebase is not configured. Please run: flutterfire configure',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 5),
+      );
+      return;
+    }
+    
+    isLoading.value = true;
+    print('🔐 Attempting Google Sign-In');
+    
+    try {
+      final error = await _authService!.signInWithGoogle();
+      
+      if (error != null) {
+        print('❌ Google Sign-In failed: $error');
+        if (Get.currentRoute == '/login') {
+          Get.snackbar(
+            'Google Sign-In Failed',
+            error,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+        }
+      } else {
+        print('✅ Google Sign-In successful! AuthService will handle navigation');
+      }
+    } catch (e) {
+      print('❌ Unexpected error during Google Sign-In: $e');
+      if (Get.currentRoute == '/login') {
+        Get.snackbar(
+          'Error',
+          'An unexpected error occurred',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+  
+  void showForgotPasswordDialog() {
+    final TextEditingController emailResetController = TextEditingController();
+    
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Reset Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Enter your email address and we\'ll send you a link to reset your password.',
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailResetController,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                hintText: 'Enter your email',
+                prefixIcon: Icon(Icons.email_outlined),
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              emailResetController.dispose();
+              Get.back();
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final email = emailResetController.text.trim();
+              
+              if (email.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please enter your email',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+                return;
+              }
+              
+              if (_authService == null) return;
+              
+              Get.back(); // Close dialog
+              
+              final error = await _authService!.sendPasswordResetEmail(email);
+              
+              if (error != null) {
+                Get.snackbar(
+                  'Error',
+                  error,
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                Get.snackbar(
+                  'Success',
+                  'Password reset email sent! Check your inbox.',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.green,
+                  colorText: Colors.white,
+                  duration: const Duration(seconds: 4),
+                );
+              }
+              
+              emailResetController.dispose();
+            },
+            child: const Text('Send Reset Link'),
+          ),
+        ],
+      ),
+    );
   }
 }

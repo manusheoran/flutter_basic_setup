@@ -99,9 +99,7 @@ class LoginPage extends StatelessWidget {
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            onPressed: () {
-              // TODO: Implement forgot password
-            },
+            onPressed: controller.showForgotPasswordDialog,
             child: Text(
               'Forgot password?',
               style: AppTextStyles.bodySmall(context),
@@ -125,6 +123,51 @@ class LoginPage extends StatelessWidget {
                     ),
                   )
                 : const Text('Log In'),
+          ),
+        )),
+        const SizedBox(height: AppConstants.kSpacingM),
+        
+        // Divider with OR
+        Row(
+          children: [
+            const Expanded(child: Divider()),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppConstants.kSpacingM),
+              child: Text(
+                'OR',
+                style: AppTextStyles.bodySmall(context).copyWith(
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+            const Expanded(child: Divider()),
+          ],
+        ),
+        const SizedBox(height: AppConstants.kSpacingM),
+        
+        // Google Sign-In Button
+        Obx(() => SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: controller.isLoading.value ? null : controller.signInWithGoogle,
+            icon: controller.isLoading.value
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Image.network(
+                    'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                    height: 24,
+                    width: 24,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.login),
+                  ),
+            label: const Text('Continue with Google'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
           ),
         )),
         const SizedBox(height: AppConstants.kSpacingM),
