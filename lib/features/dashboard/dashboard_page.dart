@@ -110,14 +110,18 @@ class DashboardPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryOrange : Colors.grey[200],
+          color: isSelected ? AppColors.primaryOrange : AppColors.lightSurface,
           borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryOrange : AppColors.lightBorder,
+            width: 1.5,
+          ),
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black87,
+            color: isSelected ? Colors.white : AppColors.lightTextPrimary,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -127,8 +131,11 @@ class DashboardPage extends StatelessWidget {
 
   Widget _buildDateRangeSelector(DashboardController controller, BuildContext context) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.lightBorder, width: 1),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -176,12 +183,12 @@ class DashboardPage extends StatelessWidget {
             Obx(() => Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.primaryOrange.withOpacity(0.1),
+                color: AppColors.sageLight,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.date_range, color: AppColors.primaryOrange, size: 20),
+                  const Icon(Icons.date_range, color: AppColors.deepTeal, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
@@ -191,7 +198,7 @@ class DashboardPage extends StatelessWidget {
                           controller.selectedRangeLabel.value,
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
-                            color: AppColors.primaryOrange,
+                            color: AppColors.deepTeal,
                           ),
                         ),
                         if (controller.actualDaysCount.value > 0)
@@ -199,7 +206,7 @@ class DashboardPage extends StatelessWidget {
                             'Data for ${controller.actualDaysCount.value} days',
                             style: TextStyle(
                               fontSize: 11,
-                              color: Colors.grey[600],
+                              color: Colors.grey[700],
                             ),
                           ),
                       ],
@@ -222,13 +229,17 @@ class DashboardPage extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryOrange : Colors.grey[200],
+            color: isSelected ? AppColors.primaryOrange : AppColors.lightSurface,
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? AppColors.primaryOrange : AppColors.lightBorder,
+              width: 1.5,
+            ),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black87,
+              color: isSelected ? Colors.white : AppColors.lightTextPrimary,
               fontSize: 13,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
@@ -270,23 +281,20 @@ class DashboardPage extends StatelessWidget {
   }) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primaryOrange, AppColors.lightOrange],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.lightSurface,
+        border: Border.all(color: AppColors.primaryOrange.withOpacity(0.35), width: 1),
         borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: AppColors.primaryOrange.withOpacity(0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            color: AppColors.shadowMedium,
+            blurRadius: 10,
+            offset: Offset(0, 4),
             spreadRadius: 0,
           ),
           BoxShadow(
-            color: AppColors.shadowMedium,
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: AppColors.shadowLight,
+            blurRadius: 6,
+            offset: Offset(0, 2),
             spreadRadius: 0,
           ),
         ],
@@ -301,18 +309,18 @@ class DashboardPage extends StatelessWidget {
           children: [
             Text(
               title,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
+              style: const TextStyle(
+                color: AppColors.textOrange,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
+                letterSpacing: 0.8,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               value,
               style: const TextStyle(
-                color: Colors.white,
+                color: AppColors.primaryOrange,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 letterSpacing: -0.5,
@@ -321,8 +329,8 @@ class DashboardPage extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               subtitle,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+              style: const TextStyle(
+                color: AppColors.lightTextSecondary,
                 fontSize: 11,
                 fontWeight: FontWeight.w400,
               ),

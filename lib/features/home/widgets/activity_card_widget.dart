@@ -27,21 +27,21 @@ class ActivityCardWidget extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
         border: Border.all(
-          color: AppColors.lightBorder.withOpacity(0.6),
-          width: 1.5,
+          color: AppColors.lightBorder,
+          width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowMedium,
-            blurRadius: 12,
-            offset: const Offset(0, 3),
+            color: AppColors.shadowLight,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
             spreadRadius: 0,
           ),
           BoxShadow(
-            color: AppColors.shadowStrong,
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-            spreadRadius: -4,
+            color: AppColors.shadowMedium,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+            spreadRadius: -2,
           ),
         ],
       ),
@@ -50,16 +50,9 @@ class ActivityCardWidget extends StatelessWidget {
         children: [
           // Header with icon and title
           Container(
-            padding: const EdgeInsets.all(AppConstants.kSpacingL),
+            padding: const EdgeInsets.all(AppConstants.kSpacingM),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  color.withOpacity(0.12),
-                  color.withOpacity(0.06),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppColors.lightSurface,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(AppConstants.kRadiusL),
                 topRight: Radius.circular(AppConstants.kRadiusL),
@@ -85,7 +78,7 @@ class ActivityCardWidget extends StatelessWidget {
                     size: 20,
                   ),
                 ),
-                const SizedBox(width: AppConstants.kSpacingM),
+                const SizedBox(width: AppConstants.kSpacingS),
                 // Title
                 Expanded(
                   child: Text(
@@ -102,24 +95,17 @@ class ActivityCardWidget extends StatelessWidget {
                 if (score != null && maxScore != null)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                      horizontal: 10,
+                      vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: score! < 0
-                            ? [
-                                AppColors.maroonDanger,
-                                AppColors.maroonDanger.withOpacity(0.8)
-                              ]
-                            : [color, color.withOpacity(0.8)],
-                      ),
+                      color: score! < 0 ? AppColors.coralDanger : AppColors.primaryOrange,
                       borderRadius: BorderRadius.circular(AppConstants.kRadiusFull),
                       boxShadow: [
                         BoxShadow(
                           color: (score! < 0 ? AppColors.maroonDanger : color)
-                              .withOpacity(0.3),
-                          blurRadius: 8,
+                              .withOpacity(0.2),
+                          blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
                       ],
@@ -147,11 +133,12 @@ class ActivityCardWidget extends StatelessWidget {
               ],
             ),
           ),
-          // Thin divider between header and content
-          Container(height: 1, color: AppColors.lightDivider),
           // Content area
           Padding(
-            padding: const EdgeInsets.all(AppConstants.kSpacingM),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.kSpacingM,
+              vertical: AppConstants.kSpacingS,
+            ),
             child: child,
           ),
         ],
