@@ -50,7 +50,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
     super.initState();
     _nameController = TextEditingController(text: widget.user.name);
     _emailController = TextEditingController(text: widget.user.email);
-    _phoneController = TextEditingController(text: widget.user.phone ?? '');
+    _phoneController = TextEditingController(text: widget.user.phoneNumber ?? '');
     _selectedOccupation = widget.user.occupation;
     _selectedGender = widget.user.gender;
   }
@@ -74,7 +74,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
 
       final updatedUser = widget.user.copyWith(
         name: _nameController.text.trim(),
-        phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+        phoneNumber: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
         occupation: _selectedOccupation,
         gender: _selectedGender,
         updatedAt: DateTime.now(),

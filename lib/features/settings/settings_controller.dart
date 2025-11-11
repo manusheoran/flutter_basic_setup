@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/services/firestore_service.dart';
 
@@ -14,6 +15,17 @@ class SettingsController extends GetxController {
   RxBool isRequestingMentor = false.obs;
   
   final mentorIdController = TextEditingController();
+  
+  // Activity tracking toggles (all active by default)
+  RxMap<String, bool> trackedActivities = <String, bool>{
+    'nindra': true,
+    'wake_up': true,
+    'day_sleep': true,
+    'japa': true,
+    'pathan': true,
+    'sravan': true,
+    'seva': true,
+  }.obs;
   
   @override
   void onInit() {
@@ -61,7 +73,9 @@ class SettingsController extends GetxController {
   
   Future<void> requestMentor() async {
     final userId = _authService.currentUserId;
-    final userName = _authService.currentUser.value?.name ?? 'Unknown';
+    final currentUserData = _authService.currentUser.value;
+    final userName = currentUserData?.name ?? 'Unknown';
+    final userEmail = currentUserData?.email ?? '';
     
     if (userId == null || mentorIdController.text.isEmpty) {
       Get.snackbar('Error', 'Please enter a Mentor ID');
@@ -71,10 +85,19 @@ class SettingsController extends GetxController {
     isRequestingMentor.value = true;
     
     try {
+      // First get master details
+      final masterData = await _firestoreService.getUserById(mentorIdController.text);
+      if (masterData == null) {
+        throw Exception('Master not found');
+      }
+      
       await _firestoreService.requestMentor(
-        userId,
-        mentorIdController.text,
-        userName,
+        userId,                    // discipleUid
+        userName,                  // discipleName
+        userEmail,                 // discipleEmail
+        masterData.uid,            // masterUid
+        masterData.name,           // masterName
+        masterData.email,          // masterEmail
       );
       
       Get.snackbar(
@@ -96,6 +119,36 @@ class SettingsController extends GetxController {
       );
     } finally {
       isRequestingMentor.value = false;
+    }
+  }
+  
+  // Toggle activity tracking for today only
+  Future<void> toggleActivityTracking(String activityKey) async {
+    final userId = _authService.currentUserId;
+    if (userId == null) return;
+    
+    // Toggle the local state
+    final currentState = trackedActivities[activityKey] ?? true;
+    trackedActivities[activityKey] = !currentState;
+    
+    // If turning OFF, remove from today's activity
+    if (!trackedActivities[activityKey]!) {
+      final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      await _firestoreService.removeActivityForDate(userId, today, activityKey);
+      
+      Get.snackbar(
+        'Tracking Disabled',
+        'Activity removed from today\'s tracking',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    } else {
+      Get.snackbar(
+        'Tracking Enabled',
+        'You can now track this activity for today',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
     }
   }
   

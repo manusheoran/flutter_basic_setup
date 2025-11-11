@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'core/my_app.dart';
 import 'data/services/auth_service.dart';
 import 'data/services/firestore_service.dart';
+import 'data/services/parameter_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +24,10 @@ void main() async {
     // Initialize GetX services
     await Get.putAsync(() async => AuthService());
     Get.put(FirestoreService());
+    
+    // Initialize and load parameters
+    final parameterService = Get.put(ParameterService());
+    await parameterService.loadParameters();
     
     firebaseInitialized = true;
     print('✅ All services initialized successfully');

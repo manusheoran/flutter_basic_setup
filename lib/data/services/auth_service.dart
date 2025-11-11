@@ -46,7 +46,9 @@ class AuthService extends GetxService {
             _setInitialScreen(user);
           } else {
             print('📱 No user found - going to login');
-            Get.offAllNamed('/login');
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Get.offAllNamed('/login');
+            });
           }
         }
       });
@@ -55,7 +57,9 @@ class AuthService extends GetxService {
       // Navigate to login page in preview mode
       Future.delayed(const Duration(milliseconds: 500), () {
         print('🔀 Navigating to login (Firebase unavailable)');
-        Get.offAllNamed('/login');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Get.offAllNamed('/login');
+        });
       });
     }
   }
@@ -77,7 +81,9 @@ class AuthService extends GetxService {
       // User is logged out - go to login
       if (currentRoute != '/login') {
         print('🔀 Navigating to login page');
-        Get.offAllNamed('/login');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Get.offAllNamed('/login');
+        });
       }
     } else {
       // Check if email is verified (only for email/password users)
@@ -116,7 +122,18 @@ class AuthService extends GetxService {
           currentRoute == '/login' ||
           currentRoute != targetRoute) {
         print('🔀 Navigating to $targetRoute');
-        Get.offAllNamed(targetRoute);
+        
+        // Wait a frame to ensure GetMaterialApp is ready
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (Get.key.currentContext != null) {
+            Get.offAllNamed(targetRoute);
+          } else {
+            // If still not ready, try again after a short delay
+            Future.delayed(const Duration(milliseconds: 100), () {
+              Get.offAllNamed(targetRoute);
+            });
+          }
+        });
       } else {
         print('✅ Already on correct route: $targetRoute');
       }
@@ -146,16 +163,7 @@ class AuthService extends GetxService {
                 firebaseUser.email?.split('@')[0] ??
                 'User',
             role: 'user',
-            disciples: [],
-            displayParameters: {
-              'nindra': true,
-              'wakeUp': true,
-              'daySleep': true,
-              'japa': true,
-              'pathan': true,
-              'sravan': true,
-              'seva': true,
-            },
+            trackingActivities: [], // Empty means track all
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
           );
@@ -221,16 +229,7 @@ class AuthService extends GetxService {
         email: email,
         name: name,
         role: role,
-        disciples: [],
-        displayParameters: {
-          'nindra': true,
-          'wakeUp': true,
-          'daySleep': true,
-          'japa': true,
-          'pathan': true,
-          'sravan': true,
-          'seva': true,
-        },
+        trackingActivities: [], // Empty means track all parameters
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -371,16 +370,7 @@ class AuthService extends GetxService {
           email: userCredential.user!.email ?? '',
           name: userCredential.user!.displayName ?? 'User',
           role: 'user',
-          disciples: [],
-          displayParameters: {
-            'nindra': true,
-            'wakeUp': true,
-            'daySleep': true,
-            'japa': true,
-            'pathan': true,
-            'sravan': true,
-            'seva': true,
-          },
+          trackingActivities: [], // Empty means track all parameters
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );

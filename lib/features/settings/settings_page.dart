@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../data/services/auth_service.dart';
 import 'profile_edit_dialog.dart';
+import 'scoring_rules_page.dart';
 
 class SettingsPage extends StatelessWidget {
   SettingsPage({super.key});
@@ -22,6 +23,7 @@ class SettingsPage extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        automaticallyImplyLeading: false, // Remove back button
         title: const Text('Settings'),
       ),
       body: SingleChildScrollView(
@@ -30,6 +32,10 @@ class SettingsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildProfileCard(context),
+            const SizedBox(height: AppConstants.kSpacingL),
+            _buildActivityTrackingCard(),
+            const SizedBox(height: AppConstants.kSpacingL),
+            _buildScoringRulesCard(),
             const SizedBox(height: AppConstants.kSpacingL),
             _buildSecurityCard(context),
             const SizedBox(height: AppConstants.kSpacingL),
@@ -127,12 +133,12 @@ class SettingsPage extends StatelessWidget {
                 ),
               ],
             ),
-            if (user?.phone != null || user?.occupation != null || user?.gender != null) ...[
+            if (user?.phoneNumber != null || user?.occupation != null || user?.gender != null) ...[
               const Divider(height: 24),
               Column(
                 children: [
-                  if (user?.phone != null)
-                    _buildInfoRow(Icons.phone, 'Phone', user!.phone!),
+                  if (user?.phoneNumber != null)
+                    _buildInfoRow(Icons.phone, 'Phone', user!.phoneNumber!),
                   if (user?.occupation != null)
                     _buildInfoRow(Icons.work, 'Occupation', user!.occupation!),
                   if (user?.gender != null)
@@ -580,6 +586,118 @@ class SettingsPage extends StatelessWidget {
             child: const Text('Cancel'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActivityTrackingCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.kSpacingM),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Activity Tracking for Today',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Turn off tracking for specific activities (only for today)',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: AppConstants.kSpacingM),
+            _buildActivityToggle('🌙 Nindra (To Bed)', 'nindra'),
+            _buildActivityToggle('🌅 Wake Up', 'wake_up'),
+            _buildActivityToggle('😴 Day Sleep', 'day_sleep'),
+            _buildActivityToggle('📿 Japa', 'japa'),
+            _buildActivityToggle('📖 Pathan', 'pathan'),
+            _buildActivityToggle('👂 Sravan', 'sravan'),
+            _buildActivityToggle('🙏 Seva', 'seva'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActivityToggle(String label, String activityKey) {
+    return Obx(() {
+      final isTracking = controller.trackedActivities[activityKey] ?? true;
+      
+      return InkWell(
+        onTap: () => controller.toggleActivityTracking(activityKey),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(fontSize: 14),
+              ),
+              Switch(
+                value: isTracking,
+                onChanged: (_) => controller.toggleActivityTracking(activityKey),
+                activeColor: AppColors.primaryOrange,
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildScoringRulesCard() {
+    return Card(
+      child: InkWell(
+        onTap: () => Get.to(() => const ScoringRulesPage()),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.kSpacingL),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryOrange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.emoji_events,
+                  color: AppColors.primaryOrange,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: AppConstants.kSpacingM),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'View Scoring Rules',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Learn how points are calculated',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right,
+                color: Colors.grey,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

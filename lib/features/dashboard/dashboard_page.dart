@@ -381,7 +381,7 @@ class DashboardPage extends StatelessWidget {
                     lineBarsData: [
                       LineChartBarData(
                         spots: controller.activities.asMap().entries.map((entry) {
-                          return FlSpot(entry.key.toDouble(), entry.value.totalScore);
+                          return FlSpot(entry.key.toDouble(), entry.value.totalPoints);
                         }).toList(),
                         isCurved: true,
                         color: AppColors.primaryOrange,

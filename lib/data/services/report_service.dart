@@ -15,7 +15,7 @@ class ReportService {
   // Generate Excel Report from Activity Data
   static Future<void> exportToExcel(
     UserModel user,
-    List<ActivityModel> activities,
+    List<DailyActivity> activities,
     BuildContext context,
   ) async {
     var excel = Excel.createExcel();
@@ -37,7 +37,7 @@ class ReportService {
   static void _createUserProfileSheet(
     Excel excel,
     UserModel user,
-    List<ActivityModel> activities,
+    List<DailyActivity> activities,
   ) {
     var sheet = excel['User Profile'];
 
@@ -64,7 +64,7 @@ class ReportService {
 
     // Statistics
     int totalDays = activities.length;
-    double totalScore = activities.fold(0.0, (sum, a) => sum + a.totalScore);
+    double totalScore = activities.fold(0.0, (sum, a) => sum + a.totalPoints);
     double avgScore = totalDays > 0 ? totalScore / totalDays : 0;
     double avgPercentage = activities.fold(0.0, (sum, a) => sum + a.percentage) / (totalDays > 0 ? totalDays : 1);
 
@@ -78,7 +78,7 @@ class ReportService {
     sheet.cell(CellIndex.indexByString("B10")).value = TextCellValue('${avgPercentage.toStringAsFixed(1)}%');
   }
 
-  static void _createDailySummarySheet(Excel excel, List<ActivityModel> activities) {
+  static void _createDailySummarySheet(Excel excel, List<DailyActivity> activities) {
     var sheet = excel['Daily Summary'];
 
     // Headers
@@ -107,29 +107,29 @@ class ReportService {
       var row = i + 1;
 
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row)).value =
-          TextCellValue(activity.date);
+          TextCellValue(activity.dateString);
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row)).value =
-          TextCellValue(activity.nindra.score.toStringAsFixed(1));
+          TextCellValue((activity.getActivity('nindra')?.analytics?.pointsAchieved ?? 0).toStringAsFixed(1));
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: row)).value =
-          TextCellValue(activity.wakeUp.score.toStringAsFixed(1));
+          TextCellValue((activity.getActivity('wake_up')?.analytics?.pointsAchieved ?? 0).toStringAsFixed(1));
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: row)).value =
-          TextCellValue(activity.daySleep.score.toStringAsFixed(1));
+          TextCellValue((activity.getActivity('day_sleep')?.analytics?.pointsAchieved ?? 0).toStringAsFixed(1));
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row)).value =
-          TextCellValue(activity.japa.score.toStringAsFixed(1));
+          TextCellValue((activity.getActivity('japa')?.analytics?.pointsAchieved ?? 0).toStringAsFixed(1));
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: row)).value =
-          TextCellValue(activity.pathan.score.toStringAsFixed(1));
+          TextCellValue((activity.getActivity('pathan')?.analytics?.pointsAchieved ?? 0).toStringAsFixed(1));
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 6, rowIndex: row)).value =
-          TextCellValue(activity.sravan.score.toStringAsFixed(1));
+          TextCellValue((activity.getActivity('sravan')?.analytics?.pointsAchieved ?? 0).toStringAsFixed(1));
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 7, rowIndex: row)).value =
-          TextCellValue(activity.seva.score.toStringAsFixed(1));
+          TextCellValue((activity.getActivity('seva')?.analytics?.pointsAchieved ?? 0).toStringAsFixed(1));
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 8, rowIndex: row)).value =
-          TextCellValue(activity.totalScore.toStringAsFixed(1));
+          TextCellValue(activity.totalPoints.toStringAsFixed(1));
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 9, rowIndex: row)).value =
           TextCellValue('${activity.percentage.toStringAsFixed(1)}%');
     }
   }
 
-  static void _createDetailedSheet(Excel excel, List<ActivityModel> activities) {
+  static void _createDetailedSheet(Excel excel, List<DailyActivity> activities) {
     var sheet = excel['Detailed Data'];
 
     // Headers
@@ -157,23 +157,23 @@ class ReportService {
       var row = i + 1;
 
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row)).value =
-          TextCellValue(activity.date);
+          TextCellValue(activity.dateString);
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row)).value =
-          TextCellValue(activity.nindra.time ?? '-');
+          TextCellValue(activity.getActivity('nindra')?.extras['value']?.toString() ?? '-');
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: row)).value =
-          TextCellValue(activity.wakeUp.time ?? '-');
+          TextCellValue(activity.getActivity('wake_up')?.extras['value']?.toString() ?? '-');
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: row)).value =
-          IntCellValue(activity.daySleep.minutes ?? 0);
+          IntCellValue((activity.getActivity('day_sleep')?.extras['duration'] as num?)?.toInt() ?? 0);
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row)).value =
-          IntCellValue(activity.japa.rounds ?? 0);
+          IntCellValue((activity.getActivity('japa')?.extras['rounds'] as num?)?.toInt() ?? 0);
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: row)).value =
-          IntCellValue(activity.pathan.minutes ?? 0);
+          IntCellValue((activity.getActivity('pathan')?.extras['duration'] as num?)?.toInt() ?? 0);
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 6, rowIndex: row)).value =
-          IntCellValue(activity.sravan.minutes ?? 0);
+          IntCellValue((activity.getActivity('sravan')?.extras['duration'] as num?)?.toInt() ?? 0);
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 7, rowIndex: row)).value =
-          TextCellValue((activity.seva.hours ?? 0).toStringAsFixed(1));
+          TextCellValue(((activity.getActivity('seva')?.extras['duration'] as num?)?.toDouble() ?? 0 / 60).toStringAsFixed(1));
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 8, rowIndex: row)).value =
-          TextCellValue(activity.totalScore.toStringAsFixed(1));
+          TextCellValue(activity.totalPoints.toStringAsFixed(1));
     }
   }
 
@@ -310,14 +310,14 @@ class ReportService {
   // Generate PDF Report
   static Future<void> exportToPdf(
     UserModel user,
-    List<ActivityModel> activities,
+    List<DailyActivity> activities,
     BuildContext context,
   ) async {
     final pdf = pw.Document();
 
     // Calculate stats
     int totalDays = activities.length;
-    double totalScore = activities.fold(0.0, (sum, a) => sum + a.totalScore);
+    double totalScore = activities.fold(0.0, (sum, a) => sum + a.totalPoints);
     double avgScore = totalDays > 0 ? totalScore / totalDays : 0;
     double avgPercentage = activities.fold(0.0, (sum, a) => sum + a.percentage) / (totalDays > 0 ? totalDays : 1);
 
@@ -426,7 +426,7 @@ class ReportService {
     }
   }
 
-  static pw.Widget _buildPdfTable(List<ActivityModel> activities) {
+  static pw.Widget _buildPdfTable(List<DailyActivity> activities) {
     return pw.Table(
       border: pw.TableBorder.all(color: PdfColors.grey400),
       children: [
@@ -442,17 +442,17 @@ class ReportService {
           ],
         ),
         // Data rows
-        ...activities.take(10).map((activity) {
+        ...activities.take(10).toList().map((activity) {
           return pw.TableRow(
             children: [
-              _buildPdfCell(activity.date),
-              _buildPdfCell(activity.nindra.score.toStringAsFixed(1)),
-              _buildPdfCell(activity.japa.score.toStringAsFixed(1)),
-              _buildPdfCell(activity.totalScore.toStringAsFixed(1)),
+              _buildPdfCell(activity.dateString),
+              _buildPdfCell((activity.getActivity('nindra')?.analytics?.pointsAchieved ?? 0).toStringAsFixed(1)),
+              _buildPdfCell((activity.getActivity('japa')?.analytics?.pointsAchieved ?? 0).toStringAsFixed(1)),
+              _buildPdfCell(activity.totalPoints.toStringAsFixed(1)),
               _buildPdfCell('${activity.percentage.toStringAsFixed(1)}%'),
             ],
           );
-        }),
+        }).toList(),
       ],
     );
   }

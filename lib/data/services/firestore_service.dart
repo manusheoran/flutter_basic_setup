@@ -2,47 +2,47 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import '../models/activity_model.dart';
 import '../models/user_model.dart';
+import '../models/disciple_model.dart';
+import '../models/disciple_request_model.dart';
 import 'package:intl/intl.dart';
 
 class FirestoreService extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Activities Collection
-  CollectionReference get _activities => _firestore.collection('activities');
-  
-  // Users Collection
+  // Collections
+  CollectionReference get _dailyActivities => _firestore.collection('daily_activities');
   CollectionReference get _users => _firestore.collection('users');
+  CollectionReference get _discipleRequests => _firestore.collection('disciple_requests');
 
-  // Create or Update Activity
-  Future<void> saveActivity(ActivityModel activity) async {
+  // Generate consistent docId from userId and date
+  String _generateDocId(String userId, String date) {
+    return '${userId}_$date';
+  }
+
+  // Create or Update Daily Activity
+  Future<void> saveDailyActivity(DailyActivity activity) async {
     try {
-      if (activity.id.isEmpty) {
-        // Create new with auto-generated ID
-        await _activities.add(activity.toFirestore());
-      } else {
-        // Update existing or create new with specific ID
-        // Use set with merge to create if doesn't exist or update if exists
-        await _activities.doc(activity.id).set(
-          activity.toFirestore(),
-          SetOptions(merge: true),
-        );
-      }
+      // Always use consistent docId format: userId_date
+      final docId = _generateDocId(activity.uid, activity.dateString);
+      
+      await _dailyActivities.doc(docId).set(
+        activity.toFirestore(),
+        SetOptions(merge: true),
+      );
     } catch (e) {
       throw Exception('Failed to save activity: $e');
     }
   }
 
   // Get activity for a specific date
-  Future<ActivityModel?> getActivityByDate(String userId, String date) async {
+  Future<DailyActivity?> getActivityByDate(String userId, String date) async {
     try {
-      final querySnapshot = await _activities
-          .where('userId', isEqualTo: userId)
-          .where('date', isEqualTo: date)
-          .limit(1)
-          .get();
+      // Use consistent docId to fetch directly
+      final docId = _generateDocId(userId, date);
+      final docSnapshot = await _dailyActivities.doc(docId).get();
 
-      if (querySnapshot.docs.isNotEmpty) {
-        return ActivityModel.fromFirestore(querySnapshot.docs.first);
+      if (docSnapshot.exists) {
+        return DailyActivity.fromFirestore(docSnapshot);
       }
       return null;
     } catch (e) {
@@ -50,9 +50,72 @@ class FirestoreService extends GetxService {
       return null;
     }
   }
+  
+  // Create default activity with all parameters set to 0/empty
+  Future<void> createDefaultActivity(String userId, String date) async {
+    try {
+      final docId = _generateDocId(userId, date);
+      
+      // Check if activity already exists
+      final existing = await getActivityByDate(userId, date);
+      if (existing != null) {
+        print('Activity for $date already exists');
+        return;
+      }
+      
+      // Create empty activities map - no activities tracked by default
+      final activity = DailyActivity(
+        docId: docId,
+        uid: userId,
+        date: date,
+        activities: {}, // Empty - user will add activities
+        analytics: DailyAnalytics(
+          totalPointsAchieved: 0,
+          totalMaxAchievablePoints: 230,
+        ),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      
+      await _dailyActivities.doc(docId).set(activity.toFirestore());
+      print('✅ Created default activity for $date');
+    } catch (e) {
+      print('Error creating default activity: $e');
+    }
+  }
+  
+  // Remove specific activity from a date (for turning off tracking)
+  Future<void> removeActivityForDate(String userId, String date, String activityKey) async {
+    try {
+      final docId = _generateDocId(userId, date);
+      final docSnapshot = await _dailyActivities.doc(docId).get();
+      
+      if (!docSnapshot.exists) {
+        print('No activity document found for $date');
+        return;
+      }
+      
+      // Get current data
+      final data = docSnapshot.data() as Map<String, dynamic>;
+      final activities = Map<String, dynamic>.from(data['activities'] ?? {});
+      
+      // Remove the specific activity
+      activities.remove(activityKey);
+      
+      // Update document
+      await _dailyActivities.doc(docId).update({
+        'activities': activities,
+        'updatedAt': Timestamp.now(),
+      });
+      
+      print('✅ Removed $activityKey from $date');
+    } catch (e) {
+      print('Error removing activity: $e');
+    }
+  }
 
   // Get activities for date range
-  Future<List<ActivityModel>> getActivitiesInRange(
+  Future<List<DailyActivity>> getActivitiesInRange(
     String userId,
     DateTime startDate,
     DateTime endDate,
@@ -64,16 +127,17 @@ class FirestoreService extends GetxService {
       print('🔍 Querying activities: userId=$userId, start=$start, end=$end');
 
       // Query all user activities (no composite index needed)
-      final querySnapshot = await _activities
-          .where('userId', isEqualTo: userId)
+      final querySnapshot = await _dailyActivities
+          .where('uid', isEqualTo: userId)
           .get();
 
       // Filter by date range in app code
       final activities = querySnapshot.docs
-          .map((doc) => ActivityModel.fromFirestore(doc))
+          .map((doc) => DailyActivity.fromFirestore(doc))
           .where((activity) {
-            return activity.date.compareTo(start) >= 0 && 
-                   activity.date.compareTo(end) <= 0;
+            final activityDate = activity.dateString;
+            return activityDate.compareTo(start) >= 0 && 
+                   activityDate.compareTo(end) <= 0;
           })
           .toList();
       
@@ -87,18 +151,18 @@ class FirestoreService extends GetxService {
   }
 
   // Get all activities for a user
-  Stream<List<ActivityModel>> getUserActivitiesStream(String userId) {
-    return _activities
-        .where('userId', isEqualTo: userId)
+  Stream<List<DailyActivity>> getUserActivitiesStream(String userId) {
+    return _dailyActivities
+        .where('uid', isEqualTo: userId)
         .orderBy('date', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
-            .map((doc) => ActivityModel.fromFirestore(doc))
+            .map((doc) => DailyActivity.fromFirestore(doc))
             .toList());
   }
 
   // Get activities for mentor's disciples
-  Future<List<ActivityModel>> getDiscipleActivities(
+  Future<List<DailyActivity>> getDiscipleActivities(
     List<String> discipleIds,
     DateTime startDate,
     DateTime endDate,
@@ -109,14 +173,14 @@ class FirestoreService extends GetxService {
       final start = DateFormat('yyyy-MM-dd').format(startDate);
       final end = DateFormat('yyyy-MM-dd').format(endDate);
 
-      final querySnapshot = await _activities
-          .where('userId', whereIn: discipleIds)
+      final querySnapshot = await _dailyActivities
+          .where('uid', whereIn: discipleIds)
           .where('date', isGreaterThanOrEqualTo: start)
           .where('date', isLessThanOrEqualTo: end)
           .get();
 
       return querySnapshot.docs
-          .map((doc) => ActivityModel.fromFirestore(doc))
+          .map((doc) => DailyActivity.fromFirestore(doc))
           .toList();
     } catch (e) {
       print('Error getting disciple activities: $e');
@@ -164,8 +228,8 @@ class FirestoreService extends GetxService {
       await _users.doc(uid).delete();
       
       // Delete user's activities
-      final activities = await _activities
-          .where('userId', isEqualTo: uid)
+      final activities = await _dailyActivities
+          .where('uid', isEqualTo: uid)
           .get();
       
       for (var doc in activities.docs) {
@@ -176,59 +240,84 @@ class FirestoreService extends GetxService {
     }
   }
 
-  // Request mentor
-  Future<void> requestMentor(String userId, String mentorId, String mentorName) async {
+  // Request mentor (using new disciple_requests collection)
+  Future<void> requestMentor(
+    String discipleUid,
+    String discipleName,
+    String discipleEmail,
+    String masterUid,
+    String masterName,
+    String masterEmail,
+  ) async {
     try {
-      final userDoc = await _users.doc(userId).get();
-      final userData = userDoc.data() as Map<String, dynamic>;
+      final request = DiscipleRequestModel(
+        requestId: '',
+        disciple: DiscipleInfo(
+          uid: discipleUid,
+          name: discipleName,
+          email: discipleEmail,
+        ),
+        master: MasterRequestInfo(
+          uid: masterUid,
+          name: masterName,
+          email: masterEmail,
+        ),
+        status: 'pending',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
       
-      List<dynamic> requests = userData['mentorRequests'] ?? [];
-      requests.add({
-        'mentorId': mentorId,
-        'mentorName': mentorName,
-        'status': 'pending',
-        'requestedAt': Timestamp.now(),
-      });
-      
-      await _users.doc(userId).update({'mentorRequests': requests});
+      await _discipleRequests.add(request.toFirestore());
     } catch (e) {
       throw Exception('Failed to request mentor: $e');
     }
   }
 
-  // Approve/Reject mentor request
+  // Approve/Reject mentor request (using new schema)
   Future<void> handleMentorRequest(
-    String discipleId,
-    String mentorId,
+    String requestId,
     bool approve,
   ) async {
     try {
+      final requestDoc = await _discipleRequests.doc(requestId).get();
+      if (!requestDoc.exists) {
+        throw Exception('Request not found');
+      }
+      
+      final request = DiscipleRequestModel.fromFirestore(requestDoc);
+      
       if (approve) {
-        // Update disciple's mentorId
-        await _users.doc(discipleId).update({'mentorId': mentorId});
+        // Update disciple's master field
+        await _users.doc(request.disciple.uid).update({
+          'master': {
+            'uid': request.master.uid,
+            'name': request.master.name,
+            'email': request.master.email,
+          },
+          'updatedAt': Timestamp.now(),
+        });
         
-        // Add disciple to mentor's disciples list
-        final mentorDoc = await _users.doc(mentorId).get();
-        final mentorData = mentorDoc.data() as Map<String, dynamic>;
-        List<String> disciples = List<String>.from(mentorData['disciples'] ?? []);
-        if (!disciples.contains(discipleId)) {
-          disciples.add(discipleId);
-          await _users.doc(mentorId).update({'disciples': disciples});
-        }
+        // Add disciple to master's disciples subcollection
+        final discipleModel = DiscipleModel(
+          uid: request.disciple.uid,
+          name: request.disciple.name,
+          email: request.disciple.email,
+          joinedAt: DateTime.now(),
+          status: 'active',
+        );
+        
+        await _users
+            .doc(request.master.uid)
+            .collection('disciples')
+            .doc(request.disciple.uid)
+            .set(discipleModel.toFirestore());
       }
       
-      // Update request status in disciple's document
-      final discipleDoc = await _users.doc(discipleId).get();
-      final discipleData = discipleDoc.data() as Map<String, dynamic>;
-      List<dynamic> requests = discipleData['mentorRequests'] ?? [];
-      
-      for (var request in requests) {
-        if (request['mentorId'] == mentorId) {
-          request['status'] = approve ? 'approved' : 'rejected';
-        }
-      }
-      
-      await _users.doc(discipleId).update({'mentorRequests': requests});
+      // Update request status
+      await _discipleRequests.doc(requestId).update({
+        'status': approve ? 'approved' : 'rejected',
+        'updatedAt': Timestamp.now(),
+      });
     } catch (e) {
       throw Exception('Failed to handle mentor request: $e');
     }
@@ -249,5 +338,62 @@ class FirestoreService extends GetxService {
       print('Error searching users: $e');
       return [];
     }
+  }
+
+  // Get disciples for a master (from subcollection)
+  Future<List<DiscipleModel>> getDisciples(String masterUid) async {
+    try {
+      final querySnapshot = await _users
+          .doc(masterUid)
+          .collection('disciples')
+          .where('status', isEqualTo: 'active')
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => DiscipleModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print('Error getting disciples: $e');
+      return [];
+    }
+  }
+
+  // Get disciple UIDs for a master
+  Future<List<String>> getDiscipleUids(String masterUid) async {
+    try {
+      final disciples = await getDisciples(masterUid);
+      return disciples.map((d) => d.uid).toList();
+    } catch (e) {
+      print('Error getting disciple UIDs: $e');
+      return [];
+    }
+  }
+
+  // Get pending disciple requests for a master
+  Future<List<DiscipleRequestModel>> getPendingRequests(String masterUid) async {
+    try {
+      final querySnapshot = await _discipleRequests
+          .where('master.uid', isEqualTo: masterUid)
+          .where('status', isEqualTo: 'pending')
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => DiscipleRequestModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print('Error getting pending requests: $e');
+      return [];
+    }
+  }
+
+  // Get all disciple requests for a master
+  Stream<List<DiscipleRequestModel>> getDiscipleRequestsStream(String masterUid) {
+    return _discipleRequests
+        .where('master.uid', isEqualTo: masterUid)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => DiscipleRequestModel.fromFirestore(doc))
+            .toList());
   }
 }

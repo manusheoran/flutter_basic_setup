@@ -25,6 +25,9 @@ class AppConstants {
   static const Duration kShortAnimationDuration = Duration(milliseconds: 300);
   static const Duration kMediumAnimationDuration = Duration(milliseconds: 500);
 
+  // Activity Settings
+  static const int visibleActivityDays = 3; // Show current day + previous 2 days on home
+  
   // Activity Parameters
   static const List<String> activities = [
     'nindra',
@@ -52,7 +55,7 @@ class AppConstants {
   static const double averageThreshold = 40.0;
 
   // Max scores
-  static const int maxTotalScore = 175;
+  static const int maxTotalScore = 260; // 4x25 (nindra+wakeup+daysleep+japa) + 2x30 (pathan+sravan) + 100 (seva)
   static const int maxActivityScore = 25;
 
   // User roles

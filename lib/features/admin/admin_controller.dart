@@ -84,15 +84,8 @@ class AdminController extends GetxController {
       final userIndex = users.indexWhere((user) => user.uid == userId);
       if (userIndex == -1) return;
       
-      final updatedUser = UserModel(
-        uid: users[userIndex].uid,
-        email: users[userIndex].email,
-        name: users[userIndex].name,
+      final updatedUser = users[userIndex].copyWith(
         role: newRole,
-        mentorId: users[userIndex].mentorId,
-        disciples: users[userIndex].disciples,
-        displayParameters: users[userIndex].displayParameters,
-        createdAt: users[userIndex].createdAt,
         updatedAt: DateTime.now(),
       );
       

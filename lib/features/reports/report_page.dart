@@ -27,7 +27,7 @@ class _ReportPageState extends State<ReportPage> {
   final AuthService _authService = Get.find<AuthService>();
   
   bool isLoading = false;
-  List<ActivityModel> activities = [];
+  List<DailyActivity> activities = [];
   UserModel? currentUser;
   
   late DateTime startDate;
@@ -70,7 +70,7 @@ class _ReportPageState extends State<ReportPage> {
         endDate,
       );
       
-      activities.sort((a, b) => b.date.compareTo(a.date));
+      activities.sort((a, b) => b.dateString.compareTo(a.dateString));
       
       print('✅ Report Page: Loaded ${activities.length} activities');
       
@@ -231,7 +231,7 @@ class _ReportPageState extends State<ReportPage> {
       );
     }
 
-    double totalScore = activities.fold(0.0, (sum, a) => sum + a.totalScore);
+    double totalScore = activities.fold(0.0, (sum, a) => sum + a.totalPoints);
     double avgScore = totalScore / activities.length;
     double avgPercentage = activities.fold(0.0, (sum, a) => sum + a.percentage) / activities.length;
 
@@ -344,13 +344,13 @@ class _ReportPageState extends State<ReportPage> {
                 return ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(
-                    activity.date,
+                    activity.dateString,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    'Nindra: ${activity.nindra.score.toStringAsFixed(1)} | '
-                    'Japa: ${activity.japa.score.toStringAsFixed(1)} | '
-                    'Total: ${activity.totalScore.toStringAsFixed(1)}',
+                    'Nindra: ${(activity.getActivity('nindra')?.analytics?.pointsAchieved ?? 0).toStringAsFixed(1)} | '
+                    'Japa: ${(activity.getActivity('japa')?.analytics?.pointsAchieved ?? 0).toStringAsFixed(1)} | '
+                    'Total: ${activity.totalPoints.toStringAsFixed(1)}',
                   ),
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

@@ -9,7 +9,7 @@ class DashboardController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
   
   RxInt selectedTab = 0.obs;
-  RxList<ActivityModel> activities = <ActivityModel>[].obs;
+  RxList<DailyActivity> activities = <DailyActivity>[].obs;
   RxBool isLoading = false.obs;
   
   // Overall averages
@@ -71,7 +71,7 @@ class DashboardController extends GetxController {
       );
       
       // Sort activities by date descending
-      fetchedActivities.sort((a, b) => b.date.compareTo(a.date));
+      fetchedActivities.sort((a, b) => b.dateString.compareTo(a.dateString));
       
       activities.value = fetchedActivities;
       calculateAllAverages();
@@ -103,15 +103,15 @@ class DashboardController extends GetxController {
     double totalSeva = 0.0;
     
     for (var activity in activities) {
-      totalScore += activity.totalScore;
+      totalScore += activity.totalPoints;
       totalPercentage += activity.percentage;
-      totalNindra += activity.nindra.score;
-      totalWakeUp += activity.wakeUp.score;
-      totalDaySleep += activity.daySleep.score;
-      totalJapa += activity.japa.score;
-      totalPathan += activity.pathan.score;
-      totalSravan += activity.sravan.score;
-      totalSeva += activity.seva.score;
+      totalNindra += activity.getActivity('nindra')?.analytics?.pointsAchieved ?? 0;
+      totalWakeUp += activity.getActivity('wake_up')?.analytics?.pointsAchieved ?? 0;
+      totalDaySleep += activity.getActivity('day_sleep')?.analytics?.pointsAchieved ?? 0;
+      totalJapa += activity.getActivity('japa')?.analytics?.pointsAchieved ?? 0;
+      totalPathan += activity.getActivity('pathan')?.analytics?.pointsAchieved ?? 0;
+      totalSravan += activity.getActivity('sravan')?.analytics?.pointsAchieved ?? 0;
+      totalSeva += activity.getActivity('seva')?.analytics?.pointsAchieved ?? 0;
     }
     
     final count = activities.length.toDouble();
