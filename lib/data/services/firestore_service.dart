@@ -51,6 +51,20 @@ class FirestoreService extends GetxService {
     }
   }
   
+  // Stream activity for a specific date (real-time updates)
+  Stream<DailyActivity?> getActivityStreamByDate(String userId, String date) {
+    final docId = _generateDocId(userId, date);
+    return _dailyActivities
+        .doc(docId)
+        .snapshots()
+        .map((snapshot) {
+      if (snapshot.exists) {
+        return DailyActivity.fromFirestore(snapshot);
+      }
+      return null;
+    });
+  }
+  
   // Create default activity with all parameters set to 0/empty
   Future<void> createDefaultActivity(String userId, String date) async {
     try {
@@ -161,6 +175,28 @@ class FirestoreService extends GetxService {
             .toList());
   }
 
+  // Get user's first activity date
+  Future<DateTime?> getFirstActivityDate(String userId) async {
+    try {
+      final querySnapshot = await _dailyActivities
+          .where('uid', isEqualTo: userId)
+          .orderBy('date', descending: false)
+          .limit(1)
+          .get();
+      
+      if (querySnapshot.docs.isNotEmpty) {
+        final firstDoc = querySnapshot.docs.first;
+        final data = firstDoc.data() as Map<String, dynamic>;
+        final dateStr = data['date'] as String;
+        return DateTime.parse(dateStr);
+      }
+      return null;
+    } catch (e) {
+      print('Error getting first activity date: $e');
+      return null;
+    }
+  }
+
   // Get activities for mentor's disciples
   Future<List<DailyActivity>> getDiscipleActivities(
     List<String> discipleIds,
@@ -219,6 +255,131 @@ class FirestoreService extends GetxService {
       await _users.doc(user.uid).update(user.toFirestore());
     } catch (e) {
       throw Exception('Failed to update user: $e');
+    }
+  }
+
+  Future<void> updateUserActivityTracking(
+    String uid,
+    Map<String, bool> activityTracking,
+    List<String> trackingActivities,
+  ) async {
+    try {
+      await _users.doc(uid).update({
+        'activityTracking': activityTracking,
+        'trackingActivities': trackingActivities,
+        'updatedAt': Timestamp.now(),
+      });
+      print('✅ Updated activity tracking configuration for user $uid');
+      print('   Enabled activities: ${trackingActivities.join(", ")}');
+    } catch (e) {
+      throw Exception('Failed to update activity tracking: $e');
+    }
+  }
+
+  Future<void> updateDailyActivitiesForTracking(
+    String userId,
+    String date,
+    Map<String, bool> activityTracking,
+  ) async {
+    try {
+      final docId = _generateDocId(userId, date);
+      final docSnapshot = await _dailyActivities.doc(docId).get();
+
+      if (!docSnapshot.exists) {
+        print('📭 No document found for $date, skipping daily_activities update');
+        return;
+      }
+
+      final data = docSnapshot.data() as Map<String, dynamic>;
+      final activities = Map<String, dynamic>.from(data['activities'] ?? {});
+
+      // For each activity in tracking config
+      for (var entry in activityTracking.entries) {
+        final activityKey = entry.key;
+        final isEnabled = entry.value;
+
+        if (isEnabled && !activities.containsKey(activityKey)) {
+          // Activity enabled but not in map - add with default value
+          activities[activityKey] = {
+            'extras': _getDefaultExtras(activityKey),
+            'analytics': {
+              'pointsAchieved': 0,
+              'maxPoints': _getMaxPoints(activityKey),
+            },
+          };
+          print('➕ Added $activityKey with default values');
+        } else if (!isEnabled && activities.containsKey(activityKey)) {
+          // Activity disabled but still in map - remove it
+          activities.remove(activityKey);
+          print('➖ Removed $activityKey from activities');
+        }
+      }
+
+      // Recalculate total points and percentage
+      double totalPointsAchieved = 0;
+      double totalMaxPoints = 0;
+      
+      activities.forEach((key, value) {
+        final analytics = value['analytics'] as Map<String, dynamic>?;
+        if (analytics != null) {
+          totalPointsAchieved += (analytics['pointsAchieved'] as num?)?.toDouble() ?? 0;
+          totalMaxPoints += (analytics['maxPoints'] as num?)?.toDouble() ?? 0;
+        }
+      });
+      
+      final percentage = totalMaxPoints > 0 ? (totalPointsAchieved / totalMaxPoints) * 100 : 0;
+
+      // Update document with recalculated analytics
+      await _dailyActivities.doc(docId).update({
+        'activities': activities,
+        'analytics': {
+          'totalPointsAchieved': totalPointsAchieved,
+          'totalMaxAchievablePoints': totalMaxPoints,
+          'percentage': percentage,
+        },
+        'updatedAt': Timestamp.now(),
+      });
+
+      print('✅ Updated daily_activities for $date');
+      print('   Total Points: $totalPointsAchieved / $totalMaxPoints (${percentage.toStringAsFixed(1)}%)');
+    } catch (e) {
+      print('❌ Error updating daily_activities: $e');
+      throw Exception('Failed to update daily activities: $e');
+    }
+  }
+
+  Map<String, dynamic> _getDefaultExtras(String activityKey) {
+    switch (activityKey) {
+      case 'nindra':
+      case 'wake_up':
+        return {'value': ''};
+      case 'day_sleep':
+      case 'pathan':
+      case 'sravan':
+        return {'duration': 0};
+      case 'japa':
+        return {'rounds': 0, 'time': ''};
+      case 'seva':
+        return {'duration': 0};
+      default:
+        return {};
+    }
+  }
+
+  int _getMaxPoints(String activityKey) {
+    switch (activityKey) {
+      case 'nindra':
+      case 'wake_up':
+      case 'day_sleep':
+      case 'japa':
+        return 25;
+      case 'pathan':
+      case 'sravan':
+        return 30;
+      case 'seva':
+        return 100;
+      default:
+        return 0;
     }
   }
 

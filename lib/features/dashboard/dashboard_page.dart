@@ -19,6 +19,7 @@ class DashboardPage extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        automaticallyImplyLeading: false, // Remove back button
         title: const Text('My Dashboard'),
       ),
       body: Obx(() {
@@ -38,6 +39,10 @@ class DashboardPage extends StatelessWidget {
               _buildAverageCards(controller),
               const SizedBox(height: AppConstants.kSpacingL),
               _buildLineChart(controller),
+              const SizedBox(height: AppConstants.kSpacingL),
+              _buildBarChart(controller),
+              const SizedBox(height: AppConstants.kSpacingL),
+              _buildRadarChart(controller),
               const SizedBox(height: AppConstants.kSpacingL),
               _buildActivityBreakdown(controller),
               const SizedBox(height: AppConstants.kSpacingL),
@@ -189,19 +194,26 @@ class DashboardPage extends StatelessWidget {
                 children: [
                   const Icon(Icons.date_range, color: AppColors.primaryOrange, size: 20),
                   const SizedBox(width: 8),
-                  Text(
-                    controller.selectedRangeLabel.value,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primaryOrange,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${controller.activities.length} days',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          controller.selectedRangeLabel.value,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryOrange,
+                          ),
+                        ),
+                        if (controller.actualDaysCount.value > 0)
+                          Text(
+                            'Data for ${controller.actualDaysCount.value} days',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
@@ -250,12 +262,12 @@ class DashboardPage extends StatelessWidget {
         ),
         const SizedBox(width: AppConstants.kSpacingM),
         Expanded(
-          child: _buildStatCard(
+          child: Obx(() => _buildStatCard(
             title: 'Avg. %',
             value: '${controller.avgPercentage.value.toStringAsFixed(1)}%',
-            subtitle: 'Last 7 days',
+            subtitle: controller.selectedRangeLabel.value,
             color: AppColors.getScoreColor(controller.avgPercentage.value),
-          ),
+          )),
         ),
       ],
     ));
@@ -332,10 +344,10 @@ class DashboardPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Score Trend (Last 7 Days)',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
+              Obx(() => Text(
+                'Score Trend (${controller.selectedRangeLabel.value})',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              )),
               const SizedBox(height: AppConstants.kSpacingL),
               SizedBox(
                 height: 200,
@@ -393,8 +405,228 @@ class DashboardPage extends StatelessWidget {
                         ),
                       ),
                     ],
-                    minY: 0,
+                    minY: -20, // Allow negative scores
                     maxY: AppConstants.maxTotalScore.toDouble(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildBarChart(DashboardController controller) {
+    return Obx(() {
+      if (controller.activities.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.kSpacingM),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Activity Scores Comparison',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Red = Negative score (below target)',
+                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppConstants.kSpacingL),
+              SizedBox(
+                height: 250,
+                child: BarChart(
+                  BarChartData(
+                    alignment: BarChartAlignment.spaceAround,
+                    minY: -10, // Allow negative scores
+                    maxY: 105, // Max is 100 for Seva, add 5 for padding
+                    barTouchData: BarTouchData(
+                      enabled: true,
+                      touchTooltipData: BarTouchTooltipData(
+                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                          final activities = ['Nindra', 'Wake', 'Sleep', 'Japa', 'Pathan', 'Sravan', 'Seva'];
+                          return BarTooltipItem(
+                            '${activities[group.x.toInt()]}\n${rod.toY.toStringAsFixed(1)} pts',
+                            const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          );
+                        },
+                      ),
+                    ),
+                    titlesData: FlTitlesData(
+                      show: true,
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            const activities = ['Nindra', 'Wake', 'Sleep', 'Japa', 'Pathan', 'Sravan', 'Seva'];
+                            if (value.toInt() >= 0 && value.toInt() < activities.length) {
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Text(
+                                  activities[value.toInt()],
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                              );
+                            }
+                            return const Text('');
+                          },
+                        ),
+                      ),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 30,
+                          getTitlesWidget: (value, meta) {
+                            return Text(
+                              value.toInt().toString(),
+                              style: const TextStyle(fontSize: 10),
+                            );
+                          },
+                        ),
+                      ),
+                      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    ),
+                    gridData: FlGridData(show: true, drawVerticalLine: false),
+                    borderData: FlBorderData(show: false),
+                    barGroups: [
+                      BarChartGroupData(x: 0, barRods: [BarChartRodData(
+                        toY: controller.avgNindra.value, 
+                        color: controller.avgNindra.value < 0 ? Colors.red : AppColors.primaryOrange, 
+                        width: 16
+                      )]),
+                      BarChartGroupData(x: 1, barRods: [BarChartRodData(
+                        toY: controller.avgWakeUp.value, 
+                        color: controller.avgWakeUp.value < 0 ? Colors.red : Colors.blue, 
+                        width: 16
+                      )]),
+                      BarChartGroupData(x: 2, barRods: [BarChartRodData(
+                        toY: controller.avgDaySleep.value, 
+                        color: controller.avgDaySleep.value < 0 ? Colors.red : Colors.purple, 
+                        width: 16
+                      )]),
+                      BarChartGroupData(x: 3, barRods: [BarChartRodData(
+                        toY: controller.avgJapa.value, 
+                        color: controller.avgJapa.value < 0 ? Colors.red : Colors.green, 
+                        width: 16
+                      )]),
+                      BarChartGroupData(x: 4, barRods: [BarChartRodData(
+                        toY: controller.avgPathan.value, 
+                        color: controller.avgPathan.value < 0 ? Colors.red : Colors.teal, 
+                        width: 16
+                      )]),
+                      BarChartGroupData(x: 5, barRods: [BarChartRodData(
+                        toY: controller.avgSravan.value, 
+                        color: controller.avgSravan.value < 0 ? Colors.red : Colors.indigo, 
+                        width: 16
+                      )]),
+                      BarChartGroupData(x: 6, barRods: [BarChartRodData(
+                        toY: controller.avgSeva.value, 
+                        color: controller.avgSeva.value < 0 ? Colors.red : Colors.red.shade400, 
+                        width: 16
+                      )]),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildRadarChart(DashboardController controller) {
+    return Obx(() {
+      if (controller.activities.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.kSpacingM),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Performance Radar',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Visual representation of activity balance (negative scores normalized to 0)',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: AppConstants.kSpacingL),
+              SizedBox(
+                height: 300,
+                child: RadarChart(
+                  RadarChartData(
+                    dataSets: [
+                      RadarDataSet(
+                        fillColor: AppColors.primaryOrange.withOpacity(0.3),
+                        borderColor: AppColors.primaryOrange,
+                        entryRadius: 3,
+                        dataEntries: [
+                          // Normalize to 0-5 scale, treating negative as 0 for radar visualization
+                          RadarEntry(value: ((controller.avgNindra.value.clamp(-5, 25) + 5) / 30) * 5),
+                          RadarEntry(value: ((controller.avgWakeUp.value.clamp(-5, 25) + 5) / 30) * 5),
+                          RadarEntry(value: ((controller.avgDaySleep.value.clamp(-5, 25) + 5) / 30) * 5),
+                          RadarEntry(value: ((controller.avgJapa.value.clamp(0, 25)) / 25) * 5),
+                          RadarEntry(value: ((controller.avgPathan.value.clamp(0, 30)) / 30) * 5),
+                          RadarEntry(value: ((controller.avgSravan.value.clamp(0, 30)) / 30) * 5),
+                          RadarEntry(value: ((controller.avgSeva.value.clamp(0, 100)) / 100) * 5),
+                        ],
+                      ),
+                    ],
+                    radarBackgroundColor: Colors.transparent,
+                    borderData: FlBorderData(show: false),
+                    radarBorderData: const BorderSide(color: Colors.transparent),
+                    titlePositionPercentageOffset: 0.2,
+                    titleTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                    getTitle: (index, angle) {
+                      switch (index) {
+                        case 0:
+                          return const RadarChartTitle(text: 'Nindra');
+                        case 1:
+                          return const RadarChartTitle(text: 'Wake Up');
+                        case 2:
+                          return const RadarChartTitle(text: 'Day Sleep');
+                        case 3:
+                          return const RadarChartTitle(text: 'Japa');
+                        case 4:
+                          return const RadarChartTitle(text: 'Pathan');
+                        case 5:
+                          return const RadarChartTitle(text: 'Sravan');
+                        case 6:
+                          return const RadarChartTitle(text: 'Seva');
+                        default:
+                          return const RadarChartTitle(text: '');
+                      }
+                    },
+                    tickCount: 5,
+                    ticksTextStyle: const TextStyle(fontSize: 10, color: Colors.transparent),
+                    tickBorderData: const BorderSide(color: Colors.grey, width: 1),
+                    gridBorderData: const BorderSide(color: Colors.grey, width: 1),
                   ),
                 ),
               ),

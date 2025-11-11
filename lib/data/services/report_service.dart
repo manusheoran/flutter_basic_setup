@@ -307,12 +307,32 @@ class ReportService {
     }
   }
 
-  // Generate PDF Report
+  // Generate and Share PDF Report
   static Future<void> exportToPdf(
     UserModel user,
     List<DailyActivity> activities,
     BuildContext context,
   ) async {
+    // Show generating dialog
+    Get.dialog(
+      barrierDismissible: false,
+      AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(color: AppColors.primaryOrange),
+            const SizedBox(height: 16),
+            const Text('Generating PDF...', style: TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
+            Text(
+              'Please wait while we create your report',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      ),
+    );
+    
     final pdf = pw.Document();
 
     // Calculate stats
@@ -386,32 +406,33 @@ class ReportService {
       ),
     );
 
-    // Generate and show PDF
+    // Generate and share PDF
     try {
       print('📄 Generating PDF...');
       
-      await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async {
-          print('📄 PDF layout callback triggered');
-          return pdf.save();
-        },
+      final pdfBytes = await pdf.save();
+      
+      // Close loading dialog
+      Get.back();
+      
+      print('📄 PDF bytes generated: ${pdfBytes.length}');
+      
+      // Show share dialog
+      await Printing.sharePdf(
+        bytes: pdfBytes,
+        filename: 'Sadhana_Report_${user.name.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.pdf',
       );
 
-      print('✅ PDF generated successfully!');
+      print('✅ PDF shared successfully!');
       
-      if (context.mounted) {
-        Get.snackbar(
-          'Success',
-          'PDF report generated and ready to save',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.greenSuccess,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 4),
-        );
-      }
     } catch (e, stackTrace) {
       print('❌ PDF generation error: $e');
       print('Stack trace: $stackTrace');
+      
+      // Close loading dialog if still open
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
       
       if (context.mounted) {
         Get.snackbar(

@@ -6,6 +6,7 @@ import '../../core/constants/app_constants.dart';
 import '../../data/services/auth_service.dart';
 import 'profile_edit_dialog.dart';
 import 'scoring_rules_page.dart';
+import 'parameter_tracking_page.dart';
 
 class SettingsPage extends StatelessWidget {
   SettingsPage({super.key});
@@ -592,59 +593,57 @@ class SettingsPage extends StatelessWidget {
 
   Widget _buildActivityTrackingCard() {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.kSpacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Activity Tracking for Today',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Turn off tracking for specific activities (only for today)',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
-            const SizedBox(height: AppConstants.kSpacingM),
-            _buildActivityToggle('🌙 Nindra (To Bed)', 'nindra'),
-            _buildActivityToggle('🌅 Wake Up', 'wake_up'),
-            _buildActivityToggle('😴 Day Sleep', 'day_sleep'),
-            _buildActivityToggle('📿 Japa', 'japa'),
-            _buildActivityToggle('📖 Pathan', 'pathan'),
-            _buildActivityToggle('👂 Sravan', 'sravan'),
-            _buildActivityToggle('🙏 Seva', 'seva'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActivityToggle(String label, String activityKey) {
-    return Obx(() {
-      final isTracking = controller.trackedActivities[activityKey] ?? true;
-      
-      return InkWell(
-        onTap: () => controller.toggleActivityTracking(activityKey),
+      child: InkWell(
+        onTap: () => Get.to(() => const ParameterTrackingPage()),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.all(AppConstants.kSpacingL),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                label,
-                style: const TextStyle(fontSize: 14),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryOrange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.toggle_on,
+                  color: AppColors.primaryOrange,
+                  size: 28,
+                ),
               ),
-              Switch(
-                value: isTracking,
-                onChanged: (_) => controller.toggleActivityTracking(activityKey),
-                activeColor: AppColors.primaryOrange,
+              const SizedBox(width: AppConstants.kSpacingM),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Set Parameter Tracking',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Configure which activities to track',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right,
+                color: Colors.grey,
               ),
             ],
           ),
         ),
-      );
-    });
+      ),
+    );
   }
 
   Widget _buildScoringRulesCard() {

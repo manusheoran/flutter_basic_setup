@@ -109,6 +109,7 @@ class UserModel {
   final MasterInfo? master;
   final ParentInfo? parent;
   final List<String> trackingActivities; // parameter keys user is tracking
+  final Map<String, bool>? activityTracking; // parameter key -> enabled/disabled
   final bool? initiated;
   final String? initiatedName;
   final Address? address;
@@ -131,6 +132,7 @@ class UserModel {
     this.master,
     this.parent,
     this.trackingActivities = const [],
+    this.activityTracking,
     this.initiated,
     this.initiatedName,
     this.address,
@@ -159,6 +161,9 @@ class UserModel {
       trackingActivities: data['trackingActivities'] != null
           ? List<String>.from(data['trackingActivities'])
           : [],
+      activityTracking: data['activityTracking'] != null
+          ? Map<String, bool>.from(data['activityTracking'])
+          : null,
       initiated: data['initiated'],
       initiatedName: data['initiatedName'],
       address: data['address'] != null ? Address.fromMap(data['address']) : null,
@@ -201,6 +206,7 @@ class UserModel {
       if (master != null) 'master': master!.toMap(),
       if (parent != null) 'parent': parent!.toMap(),
       'trackingActivities': trackingActivities,
+      if (activityTracking != null) 'activityTracking': activityTracking,
       if (initiated != null) 'initiated': initiated,
       if (initiatedName != null) 'initiatedName': initiatedName,
       if (address != null) 'address': address!.toMap(),
@@ -225,6 +231,7 @@ class UserModel {
     MasterInfo? master,
     ParentInfo? parent,
     List<String>? trackingActivities,
+    Map<String, bool>? activityTracking,
     bool? initiated,
     String? initiatedName,
     Address? address,
@@ -247,6 +254,7 @@ class UserModel {
       master: master ?? this.master,
       parent: parent ?? this.parent,
       trackingActivities: trackingActivities ?? this.trackingActivities,
+      activityTracking: activityTracking ?? this.activityTracking,
       initiated: initiated ?? this.initiated,
       initiatedName: initiatedName ?? this.initiatedName,
       address: address ?? this.address,

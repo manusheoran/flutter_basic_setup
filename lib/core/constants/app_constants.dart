@@ -26,7 +26,7 @@ class AppConstants {
   static const Duration kMediumAnimationDuration = Duration(milliseconds: 500);
 
   // Activity Settings
-  static const int visibleActivityDays = 3; // Show current day + previous 2 days on home
+  static const int visibleActivityDays = 3; // Show today and 2 days before
   
   // Activity Parameters
   static const List<String> activities = [

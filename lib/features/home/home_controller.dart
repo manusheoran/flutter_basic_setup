@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:get/get.dart';
 import '../../data/models/activity_model.dart';
 import '../../data/services/firestore_service.dart';
@@ -17,6 +18,10 @@ class HomeController extends GetxController {
   RxList<DateTime> visibleDates = <DateTime>[].obs; // Show multiple days
   RxBool isLoading = false.obs;
   RxBool isSaving = false.obs;
+  RxBool documentNotFound = false.obs; // Track if document doesn't exist
+  
+  // User's activity tracking configuration
+  RxMap<String, bool> userActivityTracking = <String, bool>{}.obs;
   
   // Activity input values
   RxString nindraTime = ''.obs;
@@ -32,11 +37,66 @@ class HomeController extends GetxController {
   RxDouble percentage = 0.0.obs;
   RxDouble maxTotalScore = 260.0.obs; // Dynamic max score from ParameterService
   
+  // Stream subscription
+  StreamSubscription<DailyActivity?>? _activitySubscription;
+  
   @override
   void onInit() {
     super.onInit();
     _initializeVisibleDates();
-    loadActivityForDate(selectedDate.value);
+    loadUserActivityConfig();
+    setupActivityStream(selectedDate.value);
+  }
+  
+  @override
+  void onClose() {
+    _activitySubscription?.cancel();
+    super.onClose();
+  }
+  
+  // Load user's activity tracking configuration
+  Future<void> loadUserActivityConfig() async {
+    final userId = _authService.currentUserId;
+    if (userId == null) return;
+    
+    try {
+      final user = await _firestoreService.getUserById(userId);
+      if (user != null && user.activityTracking != null) {
+        userActivityTracking.value = user.activityTracking!;
+      } else {
+        // Default: all enabled
+        userActivityTracking.value = {
+          'nindra': true,
+          'wake_up': true,
+          'day_sleep': true,
+          'japa': true,
+          'pathan': true,
+          'sravan': true,
+          'seva': true,
+        };
+      }
+    } catch (e) {
+      print('❌ Error loading user activity config: $e');
+    }
+  }
+  
+  // Check if an activity is enabled for tracking
+  bool isActivityEnabled(String key) {
+    return userActivityTracking[key] ?? true;
+  }
+  
+  // Check if activity should be shown in UI
+  // Logic: If no document exists -> show all activities
+  //        If document exists -> show only activities in the activities map
+  bool shouldShowActivity(String key) {
+    if (currentActivity.value == null) {
+      // No document - show all activities so user can fill them
+      return true;
+    } else {
+      // Document exists - show only activities that are being tracked
+      // (present in the activities map)
+      return currentActivity.value!.activities.containsKey(key);
+    }
   }
   
   void _initializeVisibleDates() {
@@ -48,42 +108,59 @@ class HomeController extends GetxController {
     }
   }
   
-  Future<void> loadActivityForDate(DateTime date) async {
+  // Setup stream for real-time updates
+  void setupActivityStream(DateTime date) {
+    // Cancel existing subscription
+    _activitySubscription?.cancel();
+    
     isLoading.value = true;
+    documentNotFound.value = false;
     
     final userId = _authService.currentUserId;
-    if (userId == null) return;
+    if (userId == null) {
+      isLoading.value = false;
+      return;
+    }
     
     final dateStr = DateFormat('yyyy-MM-dd').format(date);
-    var activity = await _firestoreService.getActivityByDate(userId, dateStr);
     
-    // If activity doesn't exist, create default one
-    if (activity == null) {
-      await _firestoreService.createDefaultActivity(userId, dateStr);
-      activity = await _firestoreService.getActivityByDate(userId, dateStr);
-    }
-    
-    if (activity != null) {
-      currentActivity.value = activity;
-      // Populate fields from activity
-      nindraTime.value = activity.getActivity('nindra')?.extras['value']?.toString() ?? '';
-      wakeUpTime.value = activity.getActivity('wake_up')?.extras['value']?.toString() ?? '';
-      japaTime.value = activity.getActivity('japa')?.extras['time']?.toString() ?? '';
-      daySleepMinutes.value = (activity.getActivity('day_sleep')?.extras['duration'] as num?)?.toInt() ?? 0;
-      japaRounds.value = (activity.getActivity('japa')?.extras['rounds'] as num?)?.toInt() ?? 0;
-      pathanMinutes.value = (activity.getActivity('pathan')?.extras['duration'] as num?)?.toInt() ?? 0;
-      sravanMinutes.value = (activity.getActivity('sravan')?.extras['duration'] as num?)?.toInt() ?? 0;
-      sevaMinutes.value = (activity.getActivity('seva')?.extras['duration'] as num?)?.toInt() ?? 0;
-      
-      // Always recalculate scores based on current values and parameter service rules
-      // Don't use stored values to ensure accuracy
-      calculateScores();
-    } else {
-      currentActivity.value = null;
-      clearFields();
-    }
-    
-    isLoading.value = false;
+    // Listen to activity stream
+    _activitySubscription = _firestoreService
+        .getActivityStreamByDate(userId, dateStr)
+        .listen(
+      (activity) {
+        isLoading.value = false;
+        
+        if (activity == null) {
+          documentNotFound.value = true;
+          currentActivity.value = null;
+          clearFields();
+          print('📭 No document found for $dateStr');
+        } else {
+          documentNotFound.value = false;
+          currentActivity.value = activity;
+          
+          // Populate fields from activity
+          nindraTime.value = activity.getActivity('nindra')?.extras['value']?.toString() ?? '';
+          wakeUpTime.value = activity.getActivity('wake_up')?.extras['value']?.toString() ?? '';
+          japaTime.value = activity.getActivity('japa')?.extras['time']?.toString() ?? '';
+          daySleepMinutes.value = (activity.getActivity('day_sleep')?.extras['duration'] as num?)?.toInt() ?? 0;
+          japaRounds.value = (activity.getActivity('japa')?.extras['rounds'] as num?)?.toInt() ?? 0;
+          pathanMinutes.value = (activity.getActivity('pathan')?.extras['duration'] as num?)?.toInt() ?? 0;
+          sravanMinutes.value = (activity.getActivity('sravan')?.extras['duration'] as num?)?.toInt() ?? 0;
+          sevaMinutes.value = (activity.getActivity('seva')?.extras['duration'] as num?)?.toInt() ?? 0;
+          
+          // Always recalculate scores
+          calculateScores();
+          
+          print('🔄 Activity updated from stream for $dateStr');
+        }
+      },
+      onError: (error) {
+        isLoading.value = false;
+        print('❌ Stream error: $error');
+      },
+    );
   }
   
   void clearFields() {
@@ -293,9 +370,9 @@ class HomeController extends GetxController {
     }
   }
   
-  void changeDate(int daysAgo) {
-    selectedDate.value = DateTime.now().subtract(Duration(days: daysAgo));
-    loadActivityForDate(selectedDate.value);
+  void changeDate(DateTime date) {
+    selectedDate.value = date;
+    setupActivityStream(date);
   }
   
   // Helper to parse time string (HH:mm) to DateTime

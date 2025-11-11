@@ -88,7 +88,7 @@ class HomePage extends StatelessWidget {
                         child: InkWell(
                           onTap: () {
                             controller.selectedDate.value = date;
-                            controller.loadActivityForDate(date);
+                            controller.setupActivityStream(date);
                           },
                           borderRadius: BorderRadius.circular(12),
                           child: Container(
@@ -323,127 +323,144 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildActivityCards(HomeController controller, BuildContext context) {
-    return Column(
+    return Obx(() => Column(
       children: [
         // Timestamp Activities (with 12-hour format + AM/PM)
-        _buildActivityWithScore(
-          controller,
-          TimestampPicker(
-            title: '🌙 Nindra (To Bed)',
-            selectedTime: controller.nindraTime,
-            onTimeChanged: (val) {
-              controller.nindraTime.value = val;
-              controller.calculateScores();
-            },
-            minTime: '21:45', // 9:45 PM minimum
-            defaultTime: '21:45',
+        if (controller.shouldShowActivity('nindra')) ...[
+          _buildActivityWithScore(
+            controller,
+            TimestampPicker(
+              title: '🌙 Nindra (To Bed)',
+              selectedTime: controller.nindraTime,
+              onTimeChanged: (val) {
+                controller.nindraTime.value = val;
+                controller.calculateScores();
+              },
+              minTime: '21:45', // 9:45 PM minimum
+              defaultTime: '21:45',
+            ),
+            'nindra',
           ),
-          'nindra',
-        ),
-        const SizedBox(height: AppConstants.kSpacingM),
-        _buildActivityWithScore(
-          controller,
-          TimestampPicker(
-            title: '🌅 Wake Up Time',
-            selectedTime: controller.wakeUpTime,
-            onTimeChanged: (val) {
-              controller.wakeUpTime.value = val;
-              controller.calculateScores();
-            },
-            minTime: '03:45', // 3:45 AM minimum
-            defaultTime: '03:45',
+          const SizedBox(height: AppConstants.kSpacingM),
+        ],
+        
+        if (controller.shouldShowActivity('wake_up')) ...[
+          _buildActivityWithScore(
+            controller,
+            TimestampPicker(
+              title: '🌅 Wake Up Time',
+              selectedTime: controller.wakeUpTime,
+              onTimeChanged: (val) {
+                controller.wakeUpTime.value = val;
+                controller.calculateScores();
+              },
+              minTime: '03:45', // 3:45 AM minimum
+              defaultTime: '03:45',
+            ),
+            'wake_up',
           ),
-          'wake_up',
-        ),
-        const SizedBox(height: AppConstants.kSpacingM),
+          const SizedBox(height: AppConstants.kSpacingM),
+        ],
 
         // Duration Activities (Hours + Minutes, no AM/PM)
-        _buildActivityWithScore(
-          controller,
-          DurationPicker(
-            title: '😴 Day Sleep',
-            subtitle: 'Total sleep during the day',
-            value: controller.daySleepMinutes,
-            onChanged: (val) {
-              controller.daySleepMinutes.value = val;
-              controller.calculateScores();
-            },
-            maxHours: 4, // Max 4 hours
+        if (controller.shouldShowActivity('day_sleep')) ...[
+          _buildActivityWithScore(
+            controller,
+            DurationPicker(
+              title: '😴 Day Sleep',
+              subtitle: 'Total sleep during the day',
+              value: controller.daySleepMinutes,
+              onChanged: (val) {
+                controller.daySleepMinutes.value = val;
+                controller.calculateScores();
+              },
+              maxHours: 4, // Max 4 hours
+            ),
+            'day_sleep',
           ),
-          'day_sleep',
-        ),
-        const SizedBox(height: AppConstants.kSpacingM),
+          const SizedBox(height: AppConstants.kSpacingM),
+        ],
 
         // Japa with both rounds and completion time
-        _buildActivityWithScore(
-          controller,
-          TimestampPicker(
-            title: '📿 Japa',
-            selectedTime: controller.japaTime,
-            onTimeChanged: (val) {
-              controller.japaTime.value = val;
-              controller.calculateScores();
-            },
-            defaultTime: '07:00',
+        if (controller.shouldShowActivity('japa')) ...[
+          _buildActivityWithScore(
+            controller,
+            TimestampPicker(
+              title: '📿 Japa',
+              selectedTime: controller.japaTime,
+              onTimeChanged: (val) {
+                controller.japaTime.value = val;
+                controller.calculateScores();
+              },
+              defaultTime: '07:00',
+            ),
+            'japa',
           ),
-          'japa',
-        ),
-        const SizedBox(height: AppConstants.kSpacingS),
-        RoundsPicker(
-          title: '📿 Japa Rounds (optional)',
-          value: controller.japaRounds,
-          onChanged: (val) {
-            controller.japaRounds.value = val;
-          },
-        ),
-        const SizedBox(height: AppConstants.kSpacingM),
+          const SizedBox(height: AppConstants.kSpacingS),
+          RoundsPicker(
+            title: '📿 Japa Rounds (optional)',
+            value: controller.japaRounds,
+            onChanged: (val) {
+              controller.japaRounds.value = val;
+            },
+          ),
+          const SizedBox(height: AppConstants.kSpacingM),
+        ],
 
-        _buildActivityWithScore(
-          controller,
-          DurationPicker(
-            title: '📖 Pathan (Reading)',
-            subtitle: 'Reading duration',
-            value: controller.pathanMinutes,
-            onChanged: (val) {
-              controller.pathanMinutes.value = val;
-              controller.calculateScores();
-            },
-            maxHours: 5, // Max 5 hours
+        if (controller.shouldShowActivity('pathan')) ...[
+          _buildActivityWithScore(
+            controller,
+            DurationPicker(
+              title: '📖 Pathan (Reading)',
+              subtitle: 'Reading duration',
+              value: controller.pathanMinutes,
+              onChanged: (val) {
+                controller.pathanMinutes.value = val;
+                controller.calculateScores();
+              },
+              maxHours: 5, // Max 5 hours
+            ),
+            'pathan',
           ),
-          'pathan',
-        ),
-        const SizedBox(height: AppConstants.kSpacingM),
-        _buildActivityWithScore(
-          controller,
-          DurationPicker(
-            title: '👂 Sravan (Listening)',
-            subtitle: 'Listening duration',
-            value: controller.sravanMinutes,
-            onChanged: (val) {
-              controller.sravanMinutes.value = val;
-              controller.calculateScores();
-            },
-            maxHours: 5, // Max 5 hours
+          const SizedBox(height: AppConstants.kSpacingM),
+        ],
+        
+        if (controller.shouldShowActivity('sravan')) ...[
+          _buildActivityWithScore(
+            controller,
+            DurationPicker(
+              title: '👂 Sravan (Listening)',
+              subtitle: 'Listening duration',
+              value: controller.sravanMinutes,
+              onChanged: (val) {
+                controller.sravanMinutes.value = val;
+                controller.calculateScores();
+              },
+              maxHours: 5, // Max 5 hours
+            ),
+            'sravan',
           ),
-          'sravan',
-        ),
-        const SizedBox(height: AppConstants.kSpacingM),
-        _buildActivityWithScore(
-          controller,
-          DurationPicker(
-            title: '🙏 Seva (Service)',
-            subtitle: 'Service duration',
-            value: controller.sevaMinutes,
-            onChanged: (val) {
-              controller.sevaMinutes.value = val;
-              controller.calculateScores();
-            },
-            maxHours: 12, // Max 12 hours
+          const SizedBox(height: AppConstants.kSpacingM),
+        ],
+        
+        if (controller.shouldShowActivity('seva')) ...[
+          _buildActivityWithScore(
+            controller,
+            DurationPicker(
+              title: '🙏 Seva (Service)',
+              subtitle: 'Service duration',
+              value: controller.sevaMinutes,
+              onChanged: (val) {
+                controller.sevaMinutes.value = val;
+                controller.calculateScores();
+              },
+              maxHours: 12, // Max 12 hours
+            ),
+            'seva',
           ),
-          'seva',
-        ),
+        ],
       ],
-    );
+    ));
   }
 
   Widget _buildSaveButton(HomeController controller) {
