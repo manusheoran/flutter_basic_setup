@@ -4,8 +4,9 @@ import 'package:intl/intl.dart';
 import 'home_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/app_constants.dart';
-import '../../data/services/auth_service.dart';
+import 'widgets/activity_card_widget.dart';
 import '../../data/services/parameter_service.dart';
+import '../../data/services/auth_service.dart';
 import '../../widgets/time_duration_pickers.dart';
 
 class HomePage extends StatelessWidget {
@@ -58,95 +59,97 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildDateSelector(HomeController controller) {
-    return Obx(() => Card(
-          child: Padding(
-            padding: const EdgeInsets.all(AppConstants.kSpacingM),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Select Date',
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey),
-                ),
-                const SizedBox(height: 8),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: controller.visibleDates.map((date) {
-                      final isSelected =
-                          DateFormat('yyyy-MM-dd').format(date) ==
-                              DateFormat('yyyy-MM-dd')
-                                  .format(controller.selectedDate.value);
-                      final isToday = DateFormat('yyyy-MM-dd').format(date) ==
-                          DateFormat('yyyy-MM-dd').format(DateTime.now());
+    return Obx(() => Container(
+          margin: const EdgeInsets.only(bottom: AppConstants.kSpacingM),
+          decoration: BoxDecoration(
+            color: AppColors.lightCardBackground,
+            borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadowLight,
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.kSpacingM,
+              vertical: AppConstants.kSpacingS,
+            ),
+            child: Row(
+              children: controller.visibleDates.map((date) {
+                final isSelected = DateFormat('yyyy-MM-dd').format(date) ==
+                    DateFormat('yyyy-MM-dd').format(controller.selectedDate.value);
+                final isToday = DateFormat('yyyy-MM-dd').format(date) ==
+                    DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: InkWell(
-                          onTap: () {
-                            controller.selectedDate.value = date;
-                            controller.setupActivityStream(date);
-                          },
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.primaryOrange
-                                  : Colors.grey[200],
-                              borderRadius: BorderRadius.circular(12),
-                              border: isToday
-                                  ? Border.all(
-                                      color: AppColors.primaryOrange, width: 2)
-                                  : null,
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  DateFormat('EEE').format(date),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.grey[600],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  DateFormat('dd').format(date),
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.black,
-                                  ),
-                                ),
-                                if (isToday)
-                                  Text(
-                                    'Today',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : AppColors.primaryOrange,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                              ],
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: InkWell(
+                    onTap: () {
+                      controller.selectedDate.value = date;
+                      controller.setupActivityStream(date);
+                    },
+                    borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+                    child: Container(
+                      width: 70,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected 
+                            ? AppColors.primaryOrange 
+                            : AppColors.accentPeach,
+                        borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+                        border: isToday && !isSelected
+                            ? Border.all(color: AppColors.primaryOrange, width: 2)
+                            : null,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            DateFormat('EEE').format(date),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isSelected ? Colors.white : AppColors.lightTextSecondary,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
+                          const SizedBox(height: 2),
+                          Text(
+                            DateFormat('dd').format(date),
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: isSelected ? Colors.white : AppColors.lightTextPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (isToday)
+                            Container(
+                              margin: const EdgeInsets.only(top: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? Colors.white.withOpacity(0.3)
+                                    : AppColors.primaryOrange.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Today',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: isSelected ? Colors.white : AppColors.darkOrange,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                );
+              }).toList(),
             ),
           ),
         ));
@@ -154,70 +157,118 @@ class HomePage extends StatelessWidget {
 
   Widget _buildScoreCard(HomeController controller) {
     return Obx(() => Container(
-          padding: const EdgeInsets.all(AppConstants.kSpacingL),
           decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
             gradient: LinearGradient(
               colors: [
                 AppColors.getScoreColor(controller.percentage.value),
-                AppColors.getScoreColor(controller.percentage.value)
-                    .withOpacity(0.7),
+                AppColors.getScoreColor(controller.percentage.value).withOpacity(0.85),
               ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Column(
-                children: [
-                  const Text(
-                    'Total Score',
-                    style: TextStyle(color: Colors.white, fontSize: 14),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    controller.totalScore.value.toStringAsFixed(1),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    '/ ${controller.maxTotalScore.value.toStringAsFixed(0)}',
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ],
-              ),
-              Container(
-                width: 1,
-                height: 60,
-                color: Colors.white30,
-              ),
-              Column(
-                children: [
-                  const Text(
-                    'Percentage',
-                    style: TextStyle(color: Colors.white, fontSize: 14),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${controller.percentage.value.toStringAsFixed(1)}%',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.getScoreColor(controller.percentage.value).withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+                spreadRadius: 0,
               ),
             ],
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.kSpacingL,
+              vertical: AppConstants.kSpacingM,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Total Score',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${controller.totalScore.value.toStringAsFixed(1)}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'of ${controller.maxTotalScore.value.toStringAsFixed(0)} points',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 60,
+                  color: Colors.white.withOpacity(0.2),
+                  margin: const EdgeInsets.symmetric(horizontal: AppConstants.kSpacingM),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Completion',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${controller.percentage.value.toStringAsFixed(1)}%',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'today',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ));
   }
 
   Widget _buildActivityWithScore(
-      HomeController controller, Widget activityWidget, String activityKey) {
+      HomeController controller, Widget activityWidget, String activityKey,
+      {required String title, required IconData icon, required Color color}) {
     return Obx(() {
       double score = 0;
       double maxScore = 0;
@@ -274,50 +325,13 @@ class HomePage extends StatelessWidget {
           break;
       }
 
-      return Stack(
-        children: [
-          activityWidget,
-          if (score != 0)
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: score < 0 ? Colors.red : AppColors.primaryOrange,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: (score < 0 ? Colors.red : AppColors.primaryOrange)
-                          .withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      score < 0 ? Icons.arrow_downward : Icons.star,
-                      color: Colors.white,
-                      size: 14,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${score.toStringAsFixed(0)}/${maxScore.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
+      return ActivityCardWidget(
+        title: title,
+        icon: icon,
+        color: color,
+        score: score != 0 ? score : null,
+        maxScore: score != 0 ? maxScore : null,
+        child: activityWidget,
       );
     });
   }
@@ -330,7 +344,7 @@ class HomePage extends StatelessWidget {
           _buildActivityWithScore(
             controller,
             TimestampPicker(
-              title: '🌙 Nindra (To Bed)',
+              title: '',
               selectedTime: controller.nindraTime,
               onTimeChanged: (val) {
                 controller.nindraTime.value = val;
@@ -340,6 +354,9 @@ class HomePage extends StatelessWidget {
               defaultTime: '21:45',
             ),
             'nindra',
+            title: 'Nindra (To Bed)',
+            icon: Icons.bedtime,
+            color: AppColors.activityNindra,
           ),
           const SizedBox(height: AppConstants.kSpacingM),
         ],
@@ -348,7 +365,7 @@ class HomePage extends StatelessWidget {
           _buildActivityWithScore(
             controller,
             TimestampPicker(
-              title: '🌅 Wake Up Time',
+              title: '',
               selectedTime: controller.wakeUpTime,
               onTimeChanged: (val) {
                 controller.wakeUpTime.value = val;
@@ -358,6 +375,9 @@ class HomePage extends StatelessWidget {
               defaultTime: '03:45',
             ),
             'wake_up',
+            title: 'Wake Up Time',
+            icon: Icons.wb_sunny,
+            color: AppColors.activityWakeUp,
           ),
           const SizedBox(height: AppConstants.kSpacingM),
         ],
@@ -367,7 +387,7 @@ class HomePage extends StatelessWidget {
           _buildActivityWithScore(
             controller,
             DurationPicker(
-              title: '😴 Day Sleep',
+              title: '',
               subtitle: 'Total sleep during the day',
               value: controller.daySleepMinutes,
               onChanged: (val) {
@@ -377,6 +397,9 @@ class HomePage extends StatelessWidget {
               maxHours: 4, // Max 4 hours
             ),
             'day_sleep',
+            title: 'Day Sleep',
+            icon: Icons.hotel,
+            color: AppColors.activityDaySleep,
           ),
           const SizedBox(height: AppConstants.kSpacingM),
         ],
@@ -386,7 +409,7 @@ class HomePage extends StatelessWidget {
           _buildActivityWithScore(
             controller,
             TimestampPicker(
-              title: '📿 Japa',
+              title: '',
               selectedTime: controller.japaTime,
               onTimeChanged: (val) {
                 controller.japaTime.value = val;
@@ -395,6 +418,9 @@ class HomePage extends StatelessWidget {
               defaultTime: '07:00',
             ),
             'japa',
+            title: 'Japa (Chanting)',
+            icon: Icons.self_improvement,
+            color: AppColors.activityJapa,
           ),
           const SizedBox(height: AppConstants.kSpacingS),
           RoundsPicker(
@@ -411,16 +437,19 @@ class HomePage extends StatelessWidget {
           _buildActivityWithScore(
             controller,
             DurationPicker(
-              title: '📖 Pathan (Reading)',
-              subtitle: 'Reading duration',
+              title: '',
+              subtitle: 'Scripture reading time',
               value: controller.pathanMinutes,
               onChanged: (val) {
                 controller.pathanMinutes.value = val;
                 controller.calculateScores();
               },
-              maxHours: 5, // Max 5 hours
+              maxHours: 2, // Max 2 hours
             ),
             'pathan',
+            title: 'Pathan (Reading)',
+            icon: Icons.menu_book,
+            color: AppColors.activityPathan,
           ),
           const SizedBox(height: AppConstants.kSpacingM),
         ],
@@ -429,16 +458,19 @@ class HomePage extends StatelessWidget {
           _buildActivityWithScore(
             controller,
             DurationPicker(
-              title: '👂 Sravan (Listening)',
-              subtitle: 'Listening duration',
+              title: '',
+              subtitle: 'Spiritual audio/lecture time',
               value: controller.sravanMinutes,
               onChanged: (val) {
                 controller.sravanMinutes.value = val;
                 controller.calculateScores();
               },
-              maxHours: 5, // Max 5 hours
+              maxHours: 3, // Max 3 hours
             ),
             'sravan',
+            title: 'Sravan (Listening)',
+            icon: Icons.headset,
+            color: AppColors.activitySravan,
           ),
           const SizedBox(height: AppConstants.kSpacingM),
         ],
@@ -447,8 +479,8 @@ class HomePage extends StatelessWidget {
           _buildActivityWithScore(
             controller,
             DurationPicker(
-              title: '🙏 Seva (Service)',
-              subtitle: 'Service duration',
+              title: '',
+              subtitle: 'Service hours',
               value: controller.sevaMinutes,
               onChanged: (val) {
                 controller.sevaMinutes.value = val;
@@ -457,6 +489,9 @@ class HomePage extends StatelessWidget {
               maxHours: 12, // Max 12 hours
             ),
             'seva',
+            title: 'Seva (Service)',
+            icon: Icons.volunteer_activism,
+            color: AppColors.activitySeva,
           ),
         ],
       ],
@@ -464,24 +499,43 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildSaveButton(HomeController controller) {
-    return Obx(() => SizedBox(
+    return Obx(() => Container(
           width: double.infinity,
-          height: 50,
+          height: 56,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.gradientStart, AppColors.gradientEnd],
+            ),
+            borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryOrange.withOpacity(0.4),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
           child: ElevatedButton(
             onPressed: controller.isSaving.value
                 ? null
                 : () => controller.saveActivity(),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryOrange,
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+                borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
               ),
             ),
             child: controller.isSaving.value
-                ? const CircularProgressIndicator(color: Colors.white)
+                ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 3)
                 : const Text(
                     'Save Activity',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                      color: Colors.white,
+                    ),
                   ),
           ),
         ));

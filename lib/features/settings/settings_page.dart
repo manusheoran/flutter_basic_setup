@@ -57,9 +57,24 @@ class SettingsPage extends StatelessWidget {
     return Obx(() {
       final user = Get.find<AuthService>().currentUser.value;
       
-      return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.kSpacingL),
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+          border: Border.all(
+            color: AppColors.lightBorder,
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadowMedium,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.kSpacingL),
         child: Column(
           children: [
             Row(
@@ -518,9 +533,24 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _buildThemeCard() {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+        border: Border.all(
+          color: AppColors.lightBorder,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowMedium,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(AppConstants.kSpacingM),
+        padding: const EdgeInsets.all(AppConstants.kSpacingL),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -592,10 +622,25 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _buildActivityTrackingCard() {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+        border: Border.all(
+          color: AppColors.lightBorder,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowMedium,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: InkWell(
         onTap: () => Get.to(() => const ParameterTrackingPage()),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
         child: Padding(
           padding: const EdgeInsets.all(AppConstants.kSpacingL),
           child: Row(
@@ -647,10 +692,25 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _buildScoringRulesCard() {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+        border: Border.all(
+          color: AppColors.lightBorder,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowMedium,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: InkWell(
         onTap: () => Get.to(() => const ScoringRulesPage()),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
         child: Padding(
           padding: const EdgeInsets.all(AppConstants.kSpacingL),
           child: Row(
@@ -702,9 +762,24 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _buildMentorCard() {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+        border: Border.all(
+          color: AppColors.lightBorder,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowMedium,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(AppConstants.kSpacingM),
+        padding: const EdgeInsets.all(AppConstants.kSpacingL),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -151,21 +151,10 @@ class DashboardPage extends StatelessWidget {
                   final start = end.subtract(const Duration(days: 6));
                   controller.selectDateRange('Last 7 Days', start, end);
                 }),
-                _buildRangeChip('Last 15 Days', controller, () {
-                  final end = DateTime.now();
-                  final start = end.subtract(const Duration(days: 14));
-                  controller.selectDateRange('Last 15 Days', start, end);
-                }),
                 _buildRangeChip('Last 30 Days', controller, () {
                   final end = DateTime.now();
                   final start = end.subtract(const Duration(days: 29));
                   controller.selectDateRange('Last 30 Days', start, end);
-                }),
-                _buildRangeChip('This Month', controller, () {
-                  final now = DateTime.now();
-                  final start = DateTime(now.year, now.month, 1);
-                  final end = DateTime.now();
-                  controller.selectDateRange('This Month', start, end);
                 }),
                 _buildRangeChip('Custom', controller, () async {
                   final DateTimeRange? picked = await showDateRangePicker(
@@ -279,25 +268,37 @@ class DashboardPage extends StatelessWidget {
     required String subtitle,
     required Color color,
   }) {
-    return Card(
-      child: Container(
-        padding: const EdgeInsets.all(AppConstants.kSpacingL),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [color, color.withOpacity(0.7)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [color, color.withOpacity(0.85)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
-          borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+        ],
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.kSpacingM,
+          vertical: AppConstants.kSpacingM,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
               ),
             ),
             const SizedBox(height: 8),
@@ -305,15 +306,18 @@ class DashboardPage extends StatelessWidget {
               value,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 28,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
               ),
             ),
+            const SizedBox(height: 2),
             Text(
               subtitle,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 11,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ],
@@ -338,17 +342,37 @@ class DashboardPage extends StatelessWidget {
         );
       }
 
-      return Card(
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+          border: Border.all(
+            color: AppColors.lightBorder,
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadowMedium,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(AppConstants.kSpacingM),
+          padding: const EdgeInsets.all(AppConstants.kSpacingXL),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Obx(() => Text(
                 'Score Trend (${controller.selectedRangeLabel.value})',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.lightTextPrimary,
+                  letterSpacing: -0.5,
+                ),
               )),
-              const SizedBox(height: AppConstants.kSpacingL),
+              const SizedBox(height: AppConstants.kSpacingXL),
               SizedBox(
                 height: 200,
                 child: LineChart(
@@ -423,15 +447,35 @@ class DashboardPage extends StatelessWidget {
         return const SizedBox.shrink();
       }
 
-      return Card(
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+          border: Border.all(
+            color: AppColors.lightBorder,
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadowMedium,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(AppConstants.kSpacingM),
+          padding: const EdgeInsets.all(AppConstants.kSpacingXL),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 'Activity Scores Comparison',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.lightTextPrimary,
+                  letterSpacing: -0.5,
+                ),
               ),
               const SizedBox(height: 4),
               Row(
@@ -561,15 +605,35 @@ class DashboardPage extends StatelessWidget {
         return const SizedBox.shrink();
       }
 
-      return Card(
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+          border: Border.all(
+            color: AppColors.lightBorder,
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadowMedium,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(AppConstants.kSpacingM),
+          padding: const EdgeInsets.all(AppConstants.kSpacingXL),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 'Performance Radar',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.lightTextPrimary,
+                  letterSpacing: -0.5,
+                ),
               ),
               const SizedBox(height: 4),
               Text(

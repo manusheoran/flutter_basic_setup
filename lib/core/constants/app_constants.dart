@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 
 class AppConstants {
-  // Spacing
+  // Spacing - Modern 8-point grid system
   static const double kSpacingXS = 4.0;
   static const double kSpacingS = 8.0;
   static const double kSpacingM = 16.0;
   static const double kSpacingL = 24.0;
   static const double kSpacingXL = 32.0;
+  static const double kSpacing2XL = 40.0;
+  static const double kSpacing3XL = 48.0;
   static const double kDefaultPadding = 16.0;
   static const double kGutterPadding = 24.0;
 
-  // Border Radius
+  // Border Radius - Smooth, modern curves
+  static const double kRadiusXS = 6.0;
   static const double kRadiusS = 8.0;
   static const double kRadiusM = 12.0;
   static const double kRadiusL = 16.0;
+  static const double kRadiusXL = 20.0;
+  static const double kRadius2XL = 24.0;
+  static const double kRadiusFull = 9999.0; // For pills
   static const double kDefaultRadius = 12.0;
 
   // Icon Sizes
