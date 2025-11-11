@@ -15,6 +15,11 @@ class AppColors {
   static const Color peachWarning = Color(0xFFFFD4A3); // Soft peach 40-60%
   static const Color coralDanger = Color(0xFFFF7A5C); // Warm coral <40%
   
+  // Calming Accents - Sage and Deep Teal (spiritual, grounding)
+  static const Color accentSage = Color(0xFF8DBF9F); // Calming sage accent
+  static const Color sageLight = Color(0xFFEFF7F2); // Very light sage for badges/chips
+  static const Color deepTeal = Color(0xFF2F7D73); // Deep teal for text on sage
+  
   // Gradient Colors - Analogous warm tones (creates harmony)
   static const Color gradientStart = Color(0xFFFFA94D); // Warm orange
   static const Color gradientMiddle = Color(0xFFFFBF7A); // Light warm orange  

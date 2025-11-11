@@ -108,14 +108,14 @@ class HomePage extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isSelected 
                             ? AppColors.primaryOrange 
-                            : AppColors.lightCardAlt,
+                            : AppColors.lightSurface,
                         borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
                         border: Border.all(
                           color: isToday && !isSelected
                               ? AppColors.primaryOrange
                               : isSelected
                                   ? AppColors.primaryOrange.withOpacity(0.3)
-                                  : AppColors.lightBorder.withOpacity(0.8),
+                                  : AppColors.lightBorder,
                           width: isToday && !isSelected ? 2 : 1.5,
                         ),
                       ),
@@ -145,15 +145,15 @@ class HomePage extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? Colors.white.withOpacity(0.3)
-                                    : AppColors.primaryOrange.withOpacity(0.2),
+                                    ? Colors.white.withOpacity(0.25)
+                                    : AppColors.sageLight,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 'Today',
                                 style: TextStyle(
                                   fontSize: 9,
-                                  color: isSelected ? Colors.white : AppColors.darkOrange,
+                                  color: isSelected ? Colors.white : AppColors.deepTeal,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -173,22 +173,22 @@ class HomePage extends StatelessWidget {
     return Obx(() => Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
-            color: AppColors.primaryOrange,
+            color: AppColors.lightSurface,
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
-              width: 2,
+              color: AppColors.primaryOrange.withOpacity(0.35),
+              width: 1,
             ),
             boxShadow: [
-              BoxShadow(
-                color: AppColors.primaryOrange.withOpacity(0.4),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+              const BoxShadow(
+                color: AppColors.shadowMedium,
+                blurRadius: 10,
+                offset: Offset(0, 4),
                 spreadRadius: 0,
               ),
-              BoxShadow(
-                color: AppColors.shadowStrong,
-                blurRadius: 12,
-                offset: const Offset(0, 6),
+              const BoxShadow(
+                color: AppColors.shadowLight,
+                blurRadius: 6,
+                offset: Offset(0, 2),
                 spreadRadius: 0,
               ),
             ],
@@ -208,7 +208,7 @@ class HomePage extends StatelessWidget {
                       Text(
                         'Total Score',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: AppColors.textOrange,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.8,
@@ -218,7 +218,7 @@ class HomePage extends StatelessWidget {
                       Text(
                         '${controller.totalScore.value.toStringAsFixed(1)}',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppColors.primaryOrange,
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           letterSpacing: -1,
@@ -228,7 +228,7 @@ class HomePage extends StatelessWidget {
                       Text(
                         'of ${controller.maxTotalScore.value.toStringAsFixed(0)} points',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: AppColors.lightTextSecondary,
                           fontSize: 10,
                           fontWeight: FontWeight.w400,
                         ),
@@ -239,7 +239,7 @@ class HomePage extends StatelessWidget {
                 Container(
                   width: 1,
                   height: 60,
-                  color: Colors.white.withOpacity(0.2),
+                  color: AppColors.lightBorder,
                   margin: const EdgeInsets.symmetric(horizontal: AppConstants.kSpacingM),
                 ),
                 Expanded(
@@ -249,7 +249,7 @@ class HomePage extends StatelessWidget {
                       Text(
                         'Completion',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: AppColors.textOrange,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.8,
@@ -259,7 +259,7 @@ class HomePage extends StatelessWidget {
                       Text(
                         '${controller.percentage.value.toStringAsFixed(1)}%',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppColors.primaryOrange,
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           letterSpacing: -1,
@@ -269,7 +269,7 @@ class HomePage extends StatelessWidget {
                       Text(
                         'today',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: AppColors.lightTextSecondary,
                           fontSize: 10,
                           fontWeight: FontWeight.w400,
                         ),
