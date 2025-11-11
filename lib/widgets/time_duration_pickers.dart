@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../core/theme/app_colors.dart';
+import '../core/constants/app_constants.dart';
 
 /// 12-Hour Time Picker with AM/PM for timestamp activities
 class TimestampPicker extends StatelessWidget {
@@ -23,11 +24,14 @@ class TimestampPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
+        side: const BorderSide(color: AppColors.lightBorder, width: 1),
+      ),
       child: InkWell(
         onTap: () => _showTimePicker(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -36,15 +40,19 @@ class TimestampPicker extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: AppColors.primaryOrange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
                 ),
                 child: const Icon(Icons.access_time, color: AppColors.primaryOrange, size: 24),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  title,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  title.isEmpty ? 'Time' : title,
+                  style: TextStyle(
+                    fontSize: title.isEmpty ? 12 : 16,
+                    fontWeight: FontWeight.w600,
+                    color: title.isEmpty ? Colors.grey[600] : null,
+                  ),
                 ),
               ),
               Obx(() => Text(
@@ -286,11 +294,14 @@ class DurationPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
+        side: const BorderSide(color: AppColors.lightBorder, width: 1),
+      ),
       child: InkWell(
         onTap: () => _showDurationPicker(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -299,7 +310,7 @@ class DurationPicker extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: AppColors.primaryOrange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
                 ),
                 child: const Icon(Icons.timer, color: AppColors.primaryOrange, size: 24),
               ),
@@ -309,8 +320,12 @@ class DurationPicker extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      title.isEmpty ? 'Duration' : title,
+                      style: TextStyle(
+                        fontSize: title.isEmpty ? 12 : 16,
+                        fontWeight: FontWeight.w600,
+                        color: title.isEmpty ? Colors.grey[600] : null,
+                      ),
                     ),
                     if (subtitle.isNotEmpty)
                       Text(
@@ -473,11 +488,14 @@ class RoundsPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
+        side: const BorderSide(color: AppColors.lightBorder, width: 1),
+      ),
       child: InkWell(
         onTap: () => _showRoundsPicker(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -486,15 +504,19 @@ class RoundsPicker extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: AppColors.primaryOrange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
                 ),
                 child: const Icon(Icons.repeat, color: AppColors.primaryOrange, size: 24),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  title,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  title.isEmpty ? 'Rounds' : title,
+                  style: TextStyle(
+                    fontSize: title.isEmpty ? 12 : 16,
+                    fontWeight: FontWeight.w600,
+                    color: title.isEmpty ? Colors.grey[600] : null,
+                  ),
                 ),
               ),
               Obx(() => Text(

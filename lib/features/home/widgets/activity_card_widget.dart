@@ -69,24 +69,20 @@ class ActivityCardWidget extends StatelessWidget {
               children: [
                 // Icon container
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [color.withOpacity(0.25), color.withOpacity(0.15)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: color.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
                     border: Border.all(
                       color: color.withOpacity(0.4),
-                      width: 2,
+                      width: 1.5,
                     ),
                   ),
                   child: Icon(
                     icon,
                     color: color,
-                    size: 24,
+                    size: 20,
                   ),
                 ),
                 const SizedBox(width: AppConstants.kSpacingM),
@@ -151,9 +147,11 @@ class ActivityCardWidget extends StatelessWidget {
               ],
             ),
           ),
+          // Thin divider between header and content
+          Container(height: 1, color: AppColors.lightDivider),
           // Content area
           Padding(
-            padding: const EdgeInsets.all(AppConstants.kSpacingL),
+            padding: const EdgeInsets.all(AppConstants.kSpacingM),
             child: child,
           ),
         ],

@@ -85,7 +85,7 @@ class HomePage extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(
               horizontal: AppConstants.kSpacingM,
-              vertical: AppConstants.kSpacingS,
+              vertical: 6,
             ),
             child: Row(
               children: controller.visibleDates.map((date) {
@@ -104,19 +104,19 @@ class HomePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
                     child: Container(
                       width: 70,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 6),
                       decoration: BoxDecoration(
                         color: isSelected 
                             ? AppColors.primaryOrange 
-                            : const Color(0xFFFFF0E0),
+                            : AppColors.lightCardAlt,
                         borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
                         border: Border.all(
                           color: isToday && !isSelected
                               ? AppColors.primaryOrange
                               : isSelected
                                   ? AppColors.primaryOrange.withOpacity(0.3)
-                                  : AppColors.lightBorder.withOpacity(0.5),
-                          width: isToday && !isSelected ? 2 : 1,
+                                  : AppColors.lightBorder.withOpacity(0.8),
+                          width: isToday && !isSelected ? 2 : 1.5,
                         ),
                       ),
                       child: Column(
@@ -173,14 +173,7 @@ class HomePage extends StatelessWidget {
     return Obx(() => Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
-            gradient: const LinearGradient(
-              colors: [
-                AppColors.primaryOrange,
-                AppColors.lightOrange,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: AppColors.primaryOrange,
             border: Border.all(
               color: Colors.white.withOpacity(0.2),
               width: 2,
@@ -218,7 +211,7 @@ class HomePage extends StatelessWidget {
                           color: Colors.white.withOpacity(0.9),
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
+                          letterSpacing: 0.8,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -259,7 +252,7 @@ class HomePage extends StatelessWidget {
                           color: Colors.white.withOpacity(0.9),
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
+                          letterSpacing: 0.8,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -523,29 +516,17 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildSaveButton(HomeController controller) {
-    return Obx(() => Container(
+    return Obx(() => SizedBox(
           width: double.infinity,
           height: 56,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.gradientStart, AppColors.gradientEnd],
-            ),
-            borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primaryOrange.withOpacity(0.4),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
           child: ElevatedButton(
             onPressed: controller.isSaving.value
                 ? null
                 : () => controller.saveActivity(),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
+              backgroundColor: AppColors.primaryOrange,
+              elevation: 8,
+              shadowColor: AppColors.primaryOrange.withOpacity(0.4),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
               ),
