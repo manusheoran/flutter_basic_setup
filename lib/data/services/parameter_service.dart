@@ -29,32 +29,30 @@ class ParameterService extends GetxService {
         _cachedParameters[parameter.key] = parameter;
       }
 
-      // If no parameters found in Firestore, use hardcoded defaults
+      // If no parameters found in Firestore, initialize them from defaults
       if (_cachedParameters.isEmpty) {
-        print('📦 No parameters in Firestore, using hardcoded defaults');
-        _loadHardcodedDefaults();
+        print('📦 No parameters in Firestore, initializing from defaults...');
+        await initializeDefaultParameters();
+        // Reload after initialization
+        final newSnapshot = await _parameters
+            .where('enabled', isEqualTo: true)
+            .get();
+        _cachedParameters.clear();
+        for (var doc in newSnapshot.docs) {
+          final parameter = ParameterModel.fromFirestore(doc);
+          _cachedParameters[parameter.key] = parameter;
+        }
       }
 
       _isLoaded.value = true;
-      print('✅ Loaded ${_cachedParameters.length} parameters');
+      print('✅ Loaded ${_cachedParameters.length} parameters from Firestore');
     } catch (e) {
       print('❌ Error loading parameters: $e');
-      // If permission denied or error, use hardcoded defaults
-      print('📦 Using hardcoded default parameters');
-      _loadHardcodedDefaults();
-      _isLoaded.value = true;
+      _isLoaded.value = false;
+      rethrow;
     }
   }
   
-  // Load hardcoded default parameters (fallback)
-  void _loadHardcodedDefaults() {
-    final defaultParameters = _getDefaultParametersList();
-    _cachedParameters.clear();
-    for (var param in defaultParameters) {
-      _cachedParameters[param.key] = param;
-    }
-    print('✅ Loaded ${_cachedParameters.length} hardcoded parameters');
-  }
 
   // Get parameter by key
   ParameterModel? getParameter(String key) {
@@ -132,6 +130,7 @@ class ParameterService extends GetxService {
 
   // Get default parameters list
   List<ParameterModel> _getDefaultParametersList() {
+    final now = DateTime.now();
     return [
         // NINDRA (To Bed) - Evening time scoring
         ParameterModel(
@@ -151,6 +150,8 @@ class ParameterService extends GetxService {
           },
           description: 'Night sleep time (PM)',
           enabled: true,
+          createdAt: now,
+          updatedAt: now,
         ),
         // WAKE UP - Morning time scoring
         ParameterModel(
@@ -170,6 +171,8 @@ class ParameterService extends GetxService {
           },
           description: 'Morning wake up time',
           enabled: true,
+          createdAt: now,
+          updatedAt: now,
         ),
         // DAY SLEEP - Duration scoring
         ParameterModel(
@@ -189,6 +192,8 @@ class ParameterService extends GetxService {
           },
           description: 'Day sleep in minutes',
           enabled: true,
+          createdAt: now,
+          updatedAt: now,
         ),
         // JAPA - Time when completed
         ParameterModel(
@@ -207,6 +212,8 @@ class ParameterService extends GetxService {
           },
           description: 'Japa completion time',
           enabled: true,
+          createdAt: now,
+          updatedAt: now,
         ),
         // PATHAN (Reading) - Duration
         ParameterModel(
@@ -225,6 +232,8 @@ class ParameterService extends GetxService {
           },
           description: 'Reading in minutes',
           enabled: true,
+          createdAt: now,
+          updatedAt: now,
         ),
         // SRAVAN (Listening) - Duration
         ParameterModel(
@@ -243,6 +252,8 @@ class ParameterService extends GetxService {
           },
           description: 'Listening in minutes',
           enabled: true,
+          createdAt: now,
+          updatedAt: now,
         ),
         // SEVA (Service) - Duration in intervals
         ParameterModel(
@@ -260,28 +271,38 @@ class ParameterService extends GetxService {
           },
           description: 'Service in minutes',
           enabled: true,
+          createdAt: now,
+          updatedAt: now,
         ),
     ];
   }
 
-  // Initialize default parameters (if needed)
+  // Initialize default parameters in Firestore (one-time operation)
   Future<void> initializeDefaultParameters() async {
     try {
       // Check if parameters already exist
       final snapshot = await _parameters.limit(1).get();
       if (snapshot.docs.isNotEmpty) {
-        print('Parameters already exist, skipping initialization');
+        print('✅ Parameters already exist in Firestore, skipping initialization');
         return;
       }
 
+      print('🚀 Initializing default parameters in Firestore...');
       final defaultParameters = _getDefaultParametersList();
+      
+      // Batch write for better performance
+      final batch = _firestore.batch();
       for (var param in defaultParameters) {
-        await saveParameter(param);
+        final docRef = _parameters.doc(param.key);
+        batch.set(docRef, param.toFirestore());
       }
+      await batch.commit();
 
-      print('✅ Initialized ${defaultParameters.length} default parameters');
+      print('✅ Successfully initialized ${defaultParameters.length} parameters in Firestore');
+      print('   Parameters: ${defaultParameters.map((p) => p.key).join(", ")}');
     } catch (e) {
       print('❌ Error initializing default parameters: $e');
+      rethrow;
     }
   }
 }
