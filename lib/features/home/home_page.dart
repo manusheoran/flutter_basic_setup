@@ -62,12 +62,21 @@ class HomePage extends StatelessWidget {
     return Obx(() => Container(
           margin: const EdgeInsets.only(bottom: AppConstants.kSpacingM),
           decoration: BoxDecoration(
-            color: AppColors.lightCardBackground,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+            border: Border.all(
+              color: AppColors.lightBorder.withOpacity(0.6),
+              width: 1.5,
+            ),
             boxShadow: [
               BoxShadow(
+                color: AppColors.shadowMedium,
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+              BoxShadow(
                 color: AppColors.shadowLight,
-                blurRadius: 6,
+                blurRadius: 12,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -99,11 +108,16 @@ class HomePage extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isSelected 
                             ? AppColors.primaryOrange 
-                            : AppColors.accentPeach,
+                            : const Color(0xFFFFF0E0),
                         borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
-                        border: isToday && !isSelected
-                            ? Border.all(color: AppColors.primaryOrange, width: 2)
-                            : null,
+                        border: Border.all(
+                          color: isToday && !isSelected
+                              ? AppColors.primaryOrange
+                              : isSelected
+                                  ? AppColors.primaryOrange.withOpacity(0.3)
+                                  : AppColors.lightBorder.withOpacity(0.5),
+                          width: isToday && !isSelected ? 2 : 1,
+                        ),
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -159,19 +173,29 @@ class HomePage extends StatelessWidget {
     return Obx(() => Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               colors: [
-                AppColors.getScoreColor(controller.percentage.value),
-                AppColors.getScoreColor(controller.percentage.value).withOpacity(0.85),
+                AppColors.primaryOrange,
+                AppColors.lightOrange,
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 2,
+            ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.getScoreColor(controller.percentage.value).withOpacity(0.3),
+                color: AppColors.primaryOrange.withOpacity(0.4),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
+                spreadRadius: 0,
+              ),
+              BoxShadow(
+                color: AppColors.shadowStrong,
+                blurRadius: 12,
+                offset: const Offset(0, 6),
                 spreadRadius: 0,
               ),
             ],

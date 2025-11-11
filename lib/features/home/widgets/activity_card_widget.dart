@@ -27,19 +27,21 @@ class ActivityCardWidget extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
         border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 2,
+          color: AppColors.lightBorder.withOpacity(0.6),
+          width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadowMedium,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+            spreadRadius: 0,
           ),
           BoxShadow(
-            color: color.withOpacity(0.12),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            color: AppColors.shadowStrong,
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+            spreadRadius: -4,
           ),
         ],
       ),
@@ -52,8 +54,8 @@ class ActivityCardWidget extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  color.withOpacity(0.15),
-                  color.withOpacity(0.05),
+                  color.withOpacity(0.12),
+                  color.withOpacity(0.06),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,

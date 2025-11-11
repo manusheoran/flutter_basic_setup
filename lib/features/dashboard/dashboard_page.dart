@@ -271,16 +271,23 @@ class DashboardPage extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color, color.withOpacity(0.85)],
+          colors: [AppColors.primaryOrange, AppColors.lightOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            color: AppColors.primaryOrange.withOpacity(0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: AppColors.shadowMedium,
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+            spreadRadius: 0,
           ),
         ],
       ),
@@ -352,9 +359,16 @@ class DashboardPage extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.shadowMedium,
+              color: AppColors.shadowLight,
               blurRadius: 8,
               offset: const Offset(0, 2),
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: AppColors.shadowMedium,
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+              spreadRadius: -2,
             ),
           ],
         ),
@@ -457,9 +471,16 @@ class DashboardPage extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.shadowMedium,
+              color: AppColors.shadowLight,
               blurRadius: 8,
               offset: const Offset(0, 2),
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: AppColors.shadowMedium,
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+              spreadRadius: -2,
             ),
           ],
         ),
@@ -615,9 +636,16 @@ class DashboardPage extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.shadowMedium,
+              color: AppColors.shadowLight,
               blurRadius: 8,
               offset: const Offset(0, 2),
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: AppColors.shadowMedium,
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+              spreadRadius: -2,
             ),
           ],
         ),

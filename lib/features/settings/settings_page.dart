@@ -543,9 +543,16 @@ class SettingsPage extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowMedium,
+            color: AppColors.shadowLight,
             blurRadius: 8,
             offset: const Offset(0, 2),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: AppColors.shadowMedium,
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+            spreadRadius: -2,
           ),
         ],
       ),
@@ -632,9 +639,16 @@ class SettingsPage extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowMedium,
+            color: AppColors.shadowLight,
             blurRadius: 8,
             offset: const Offset(0, 2),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: AppColors.shadowMedium,
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+            spreadRadius: -2,
           ),
         ],
       ),
@@ -702,9 +716,16 @@ class SettingsPage extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowMedium,
+            color: AppColors.shadowLight,
             blurRadius: 8,
             offset: const Offset(0, 2),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: AppColors.shadowMedium,
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+            spreadRadius: -2,
           ),
         ],
       ),
@@ -772,9 +793,16 @@ class SettingsPage extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowMedium,
+            color: AppColors.shadowLight,
             blurRadius: 8,
             offset: const Offset(0, 2),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: AppColors.shadowMedium,
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+            spreadRadius: -2,
           ),
         ],
       ),

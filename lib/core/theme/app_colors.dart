@@ -1,39 +1,39 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Primary Colors - Bright Orange & Peach (Warm & Vibrant)
-  static const Color primaryOrange = Color(0xFFFF8C42); // Vibrant orange
-  static const Color lightOrange = Color(0xFFFFAA6B); // Light orange
-  static const Color darkOrange = Color(0xFFE67021); // Dark bright orange
-  static const Color accentPeach = Color(0xFFFFE5CC); // Soft peach
+  // Primary Colors - Warm Orange (Analogous Scheme for Harmony)
+  static const Color primaryOrange = Color(0xFFFFA94D); // Warm vibrant orange (like Health App)
+  static const Color lightOrange = Color(0xFFFFBF7A); // Light warm orange
+  static const Color darkOrange = Color(0xFFFF8C33); // Dark warm orange
+  static const Color accentPeach = Color(0xFFFFE5CC); // Soft peach (desaturated)
   static const Color lightPeach = Color(0xFFFFF5ED); // Very light peach
-  static const Color textOrange = Color(0xFFD4631C); // Dark orange for text
+  static const Color textOrange = Color(0xFFD47A1F); // Warm dark orange for text
   
-  // Status Colors - Warm orange progression
-  static const Color orangeSuccess = Color(0xFFFF8C42); // Vibrant orange >80%
-  static const Color lightOrangeWarning = Color(0xFFFFAA6B); // Light orange 60-80%
-  static const Color peachWarning = Color(0xFFFFCC99); // Peach 40-60%
-  static const Color coralDanger = Color(0xFFFF6B6B); // Coral red <40%
+  // Status Colors - Warm progression (Analogous)
+  static const Color orangeSuccess = Color(0xFFFFA94D); // Warm orange >80%
+  static const Color lightOrangeWarning = Color(0xFFFFBF7A); // Light orange 60-80%
+  static const Color peachWarning = Color(0xFFFFD4A3); // Soft peach 40-60%
+  static const Color coralDanger = Color(0xFFFF7A5C); // Warm coral <40%
   
-  // Gradient Colors - Warm orange tones
-  static const Color gradientStart = Color(0xFFFF8C42); // Vibrant orange
-  static const Color gradientMiddle = Color(0xFFFFAA6B); // Light orange
+  // Gradient Colors - Analogous warm tones (creates harmony)
+  static const Color gradientStart = Color(0xFFFFA94D); // Warm orange
+  static const Color gradientMiddle = Color(0xFFFFBF7A); // Light warm orange  
   static const Color gradientEnd = Color(0xFFFFE5CC); // Soft peach
   
-  // Light Theme Colors - Warm peachy tones
-  static const Color lightBackground = Color(0xFFFFF8F0); // Light peach background
+  // Light Theme Colors - Clean white with orange accents
+  static const Color lightBackground = Color(0xFFF5F5F5); // Slightly darker gray for contrast
   static const Color lightSurface = Color(0xFFFFFFFF); // Pure white
-  static const Color lightCardBackground = Color(0xFFFFFBF7); // Light cream card
-  static const Color lightCardAlt = Color(0xFFFFE5CC); // Peach card
-  static const Color lightTextPrimary = Color(0xFF2C2416); // Dark brown
-  static const Color lightTextSecondary = Color(0xFF8B7355); // Warm brown
-  static const Color lightBorder = Color(0xFFFFDDB3); // Peach border
-  static const Color lightDivider = Color(0xFFFFF0E0); // Light peach divider
+  static const Color lightCardBackground = Color(0xFFFFFFFF); // Pure white cards
+  static const Color lightCardAlt = Color(0xFFFFF8F0); // Very subtle peach for variety
+  static const Color lightTextPrimary = Color(0xFF1A1A1A); // Clean dark gray
+  static const Color lightTextSecondary = Color(0xFF666666); // Medium gray
+  static const Color lightBorder = Color(0xFFDDDDDD); // Darker border for visibility
+  static const Color lightDivider = Color(0xFFEEEEEE); // Light gray divider
   
-  // Shadows for depth - subtle and visible
-  static const Color shadowLight = Color(0x14000000); // 8% black shadow
-  static const Color shadowMedium = Color(0x1F000000); // 12% black shadow
-  static const Color shadowStrong = Color(0x29000000); // 16% black shadow
+  // Shadows for depth - modern card shadows
+  static const Color shadowLight = Color(0x0A000000); // 4% black shadow (subtle)
+  static const Color shadowMedium = Color(0x14000000); // 8% black shadow (cards)
+  static const Color shadowStrong = Color(0x1F000000); // 12% black shadow (elevated)
   
   // Alias for text styles
   static const Color textPrimaryLight = lightTextPrimary;
@@ -57,24 +57,24 @@ class AppColors {
   static const Color black = Color(0xFF000000);
   static const Color transparent = Colors.transparent;
   
-  // Activity Colors - Vibrant orange theme
-  static const Color activityNindra = Color(0xFFFF8C42); // Vibrant orange
-  static const Color activityWakeUp = Color(0xFFFF8C42); // Vibrant orange
-  static const Color activityDaySleep = Color(0xFFFF8C42); // Vibrant orange
-  static const Color activityJapa = Color(0xFFFF8C42); // Vibrant orange
-  static const Color activityPathan = Color(0xFFFF8C42); // Vibrant orange
-  static const Color activitySravan = Color(0xFFFF8C42); // Vibrant orange
-  static const Color activitySeva = Color(0xFFFF8C42); // Vibrant orange
+  // Activity Colors - Warm orange (consistent, high saturation for engagement)
+  static const Color activityNindra = Color(0xFFFFA94D); // Warm orange
+  static const Color activityWakeUp = Color(0xFFFFA94D); // Warm orange
+  static const Color activityDaySleep = Color(0xFFFFA94D); // Warm orange
+  static const Color activityJapa = Color(0xFFFFA94D); // Warm orange
+  static const Color activityPathan = Color(0xFFFFA94D); // Warm orange
+  static const Color activitySravan = Color(0xFFFFA94D); // Warm orange
+  static const Color activitySeva = Color(0xFFFFA94D); // Warm orange
   
-  // Chart Colors - Warm orange palette
+  // Chart Colors - Analogous warm palette (harmony + variety)
   static const List<Color> chartColors = [
-    Color(0xFFFF8C42), // Vibrant orange
-    Color(0xFFFFAA6B), // Light orange
-    Color(0xFFFFCC99), // Peach
-    Color(0xFFE67021), // Dark orange
-    Color(0xFFFF6B6B), // Coral
-    Color(0xFFD4631C), // Burnt orange
-    Color(0xFFFFDDB3), // Light peach
+    Color(0xFFFFA94D), // Warm orange
+    Color(0xFFFFBF7A), // Light orange
+    Color(0xFFFFD4A3), // Peach
+    Color(0xFFFF8C33), // Dark orange
+    Color(0xFFFF7A5C), // Coral
+    Color(0xFFFFCC8F), // Light warm
+    Color(0xFFFFE5CC), // Very light peach
   ];
   
   // Surface elevation colors - peach tones
