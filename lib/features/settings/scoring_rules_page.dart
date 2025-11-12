@@ -42,13 +42,13 @@ class ScoringRulesPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppConstants.kSpacingL),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primaryOrange,
-            AppColors.primaryOrange.withOpacity(0.7),
-          ],
-        ),
+        color: AppColors.lightSurface,
         borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+        border: Border.all(color: AppColors.primaryOrange.withOpacity(0.35), width: 1),
+        boxShadow: const [
+          BoxShadow(color: AppColors.shadowMedium, blurRadius: 10, offset: Offset(0, 4)),
+          BoxShadow(color: AppColors.shadowLight, blurRadius: 6, offset: Offset(0, 2)),
+        ],
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +58,7 @@ class ScoringRulesPage extends StatelessWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppColors.primaryOrange,
             ),
           ),
           SizedBox(height: 8),
@@ -66,7 +66,7 @@ class ScoringRulesPage extends StatelessWidget {
             'Track your spiritual progress with our comprehensive point system',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white70,
+              color: AppColors.lightTextSecondary,
             ),
           ),
         ],
@@ -76,6 +76,11 @@ class ScoringRulesPage extends StatelessWidget {
 
   Widget _buildTotalScoreCard() {
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+        side: const BorderSide(color: AppColors.lightBorder, width: 1),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.kSpacingL),
         child: Column(
@@ -298,6 +303,11 @@ class ScoringRulesPage extends StatelessWidget {
     required List<Map<String, dynamic>> rules,
   }) {
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+        side: const BorderSide(color: AppColors.lightBorder, width: 1),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.kSpacingM),
         child: Column(
@@ -336,7 +346,7 @@ class ScoringRulesPage extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryOrange.withOpacity(0.2),
+                    color: AppColors.primaryOrange.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -367,9 +377,9 @@ class ScoringRulesPage extends StatelessWidget {
 
   Widget _buildRuleRow(String range, String points,
       {bool isNegative = false, bool isBonus = false}) {
-    Color pointsColor = Colors.black87;
-    if (isNegative) pointsColor = Colors.red;
-    if (isBonus) pointsColor = Colors.green;
+    Color pointsColor = AppColors.lightTextPrimary;
+    if (isNegative) pointsColor = AppColors.coralDanger;
+    if (isBonus) pointsColor = AppColors.deepTeal;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -386,16 +396,16 @@ class ScoringRulesPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: isNegative
-                  ? Colors.red.withOpacity(0.1)
+                  ? AppColors.coralDanger.withOpacity(0.1)
                   : isBonus
-                      ? Colors.green.withOpacity(0.1)
+                      ? AppColors.sageLight
                       : Colors.grey[100],
               borderRadius: BorderRadius.circular(6),
             ),
             child: Row(
               children: [
                 if (isBonus)
-                  const Icon(Icons.star, size: 14, color: Colors.green),
+                  const Icon(Icons.star, size: 14, color: AppColors.deepTeal),
                 if (isBonus) const SizedBox(width: 4),
                 Text(
                   '$points pts',

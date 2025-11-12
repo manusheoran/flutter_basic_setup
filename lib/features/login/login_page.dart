@@ -7,7 +7,7 @@ import '../../core/constants/app_constants.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
-  
+
   final LoginController controller = Get.put(LoginController());
 
   @override
@@ -18,18 +18,38 @@ class LoginPage extends StatelessWidget {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppConstants.kSpacingL),
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
-              ),
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 400),
-                padding: const EdgeInsets.all(AppConstants.kSpacingXL),
-                child: Obx(() => controller.isSignUpMode.value
-                    ? _buildSignUpForm(context)
-                    : _buildLoginForm(context)),
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildHeroSection(context),
+                const SizedBox(height: AppConstants.kSpacingXL),
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  padding: const EdgeInsets.all(AppConstants.kSpacingXL),
+                  decoration: BoxDecoration(
+                    color: AppColors.lightSurface,
+                    borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
+                    border: Border.all(
+                      color: AppColors.lightBorder,
+                      width: 1,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: AppColors.shadowLight,
+                        blurRadius: 20,
+                        offset: Offset(0, 12),
+                      ),
+                    ],
+                  ),
+                  child: Obx(
+                    () => controller.isSignUpMode.value
+                        ? _buildSignUpForm(context)
+                        : _buildLoginForm(context),
+                  ),
+                ),
+                const SizedBox(height: AppConstants.kSpacingL),
+                _buildModeToggleRow(context),
+              ],
             ),
           ),
         ),
@@ -40,61 +60,40 @@ class LoginPage extends StatelessWidget {
   Widget _buildLoginForm(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children:  [
-        // Sun Icon
-        Container(
-          padding: const EdgeInsets.all(AppConstants.kSpacingL),
-          decoration: BoxDecoration(
-            color: AppColors.primaryOrange.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.wb_sunny,
-            size: 60,
-            color: AppColors.primaryOrange,
-          ),
-        ),
-        const SizedBox(height: AppConstants.kSpacingL),
-        
-        // Welcome Back
-        Text(
-          'Welcome Back',
-          style: AppTextStyles.heading1(context),
-        ),
-        const SizedBox(height: AppConstants.kSpacingXL),
-        
         // Email Field
         TextField(
           controller: controller.emailController,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            hintText: 'Enter your email',
-            prefixIcon: Icon(Icons.email_outlined),
+          decoration: _fieldDecoration(
+            label: 'Email',
+            hint: 'Enter your email',
+            prefixIcon: Icons.email_outlined,
           ),
           keyboardType: TextInputType.emailAddress,
         ),
         const SizedBox(height: AppConstants.kSpacingM),
-        
+
         // Password Field
         Obx(() => TextField(
-          controller: controller.passwordController,
-          decoration: InputDecoration(
-            labelText: 'Password',
-            hintText: 'Enter your password',
-            prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: IconButton(
-              icon: Icon(
-                controller.isPasswordHidden.value
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
+              controller: controller.passwordController,
+              decoration: _fieldDecoration(
+                label: 'Password',
+                hint: 'Enter your password',
+                prefixIcon: Icons.lock_outline,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    controller.isPasswordHidden.value
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                  onPressed: controller.togglePasswordVisibility,
+                ),
               ),
-              onPressed: controller.togglePasswordVisibility,
-            ),
-          ),
-          obscureText: controller.isPasswordHidden.value,
-        )),
+              obscureText: controller.isPasswordHidden.value,
+            )),
         const SizedBox(height: AppConstants.kSpacingS),
-        
+
         // Forgot Password
         Align(
           alignment: Alignment.centerRight,
@@ -102,41 +101,46 @@ class LoginPage extends StatelessWidget {
             onPressed: controller.showForgotPasswordDialog,
             child: Text(
               'Forgot password?',
-              style: AppTextStyles.bodySmall(context),
+              style: AppTextStyles.bodySmall(context).copyWith(
+                color: AppColors.primaryOrange,
+              ),
             ),
           ),
         ),
         const SizedBox(height: AppConstants.kSpacingL),
-        
+
         // Login Button
         Obx(() => SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: controller.isLoading.value ? null : controller.login,
-            child: controller.isLoading.value
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : const Text('Log In'),
-          ),
-        )),
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: controller.isLoading.value ? null : controller.login,
+                style: _primaryButtonStyle(),
+                child: controller.isLoading.value
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text('Log In'),
+              ),
+            )),
         const SizedBox(height: AppConstants.kSpacingM),
-        
+
         // Divider with OR
         Row(
           children: [
             const Expanded(child: Divider()),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppConstants.kSpacingM),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.kSpacingM),
               child: Text(
                 'OR',
                 style: AppTextStyles.bodySmall(context).copyWith(
-                  color: Colors.grey,
+                  color: AppColors.lightTextSecondary,
                 ),
               ),
             ),
@@ -144,155 +148,235 @@ class LoginPage extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppConstants.kSpacingM),
-        
+
         // Google Sign-In Button
         Obx(() => SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: controller.isLoading.value ? null : controller.signInWithGoogle,
-            icon: controller.isLoading.value
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
-                  )
-                : Image.network(
-                    'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
-                    height: 24,
-                    width: 24,
-                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.login),
-                  ),
-            label: const Text('Continue with Google'),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-          ),
-        )),
-        const SizedBox(height: AppConstants.kSpacingM),
-        
-        // Sign Up Link
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Don't have an account? ",
-              style: AppTextStyles.bodyMedium(context),
-            ),
-            TextButton(
-              onPressed: controller.toggleMode,
-              child: const Text('Sign Up'),
-            ),
-          ],
-        ),
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: controller.isLoading.value
+                    ? null
+                    : controller.signInWithGoogle,
+                style: _secondaryButtonStyle(),
+                icon: controller.isLoading.value
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Image.network(
+                        'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                        height: 24,
+                        width: 24,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.login),
+                      ),
+                label: const Text('Continue with Google'),
+              ),
+            )),
       ],
     );
+  }
+
+  Widget _buildHeroSection(BuildContext context) {
+    return Obx(() {
+      final isSignUp = controller.isSignUpMode.value;
+      final iconData = isSignUp ? Icons.person_add : Icons.wb_sunny;
+      final title = isSignUp ? 'Create Account' : 'Welcome Back';
+
+      return Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppConstants.kSpacingL),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.sageLight,
+              border: Border.all(
+                color: AppColors.accentSage.withOpacity(0.6),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accentSage.withOpacity(0.25),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Icon(
+              iconData,
+              size: 56,
+              color: AppColors.primaryOrange,
+            ),
+          ),
+          const SizedBox(height: AppConstants.kSpacingL),
+          Text(
+            title,
+            style: AppTextStyles.heading1(context).copyWith(
+              color: AppColors.textOrange,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildModeToggleRow(BuildContext context) {
+    return Obx(() {
+      final isSignUp = controller.isSignUpMode.value;
+      final prompt = isSignUp ? 'Already have an account? ' : "Don't have an account? ";
+      final actionLabel = isSignUp ? 'Log In' : 'Sign Up';
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            prompt,
+            style: AppTextStyles.bodyMedium(context).copyWith(
+              color: AppColors.lightTextPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          TextButton(
+            onPressed: controller.toggleMode,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primaryOrange,
+              textStyle: AppTextStyles.bodyMedium(context).copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            child: Text(actionLabel),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildSignUpForm(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Icon
-        Container(
-          padding: const EdgeInsets.all(AppConstants.kSpacingL),
-          decoration: BoxDecoration(
-            color: AppColors.primaryOrange.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.person_add,
-            size: 60,
-            color: AppColors.primaryOrange,
-          ),
-        ),
-        const SizedBox(height: AppConstants.kSpacingL),
-        
-        // Create Account
-        Text(
-          'Create Account',
-          style: AppTextStyles.heading1(context),
-        ),
-        const SizedBox(height: AppConstants.kSpacingXL),
-        
         // Name Field
         TextField(
           controller: controller.nameController,
-          decoration: const InputDecoration(
-            labelText: 'Name',
-            hintText: 'Enter your name',
-            prefixIcon: Icon(Icons.person_outline),
+          decoration: _fieldDecoration(
+            label: 'Name',
+            hint: 'Enter your name',
+            prefixIcon: Icons.person_outline,
           ),
         ),
         const SizedBox(height: AppConstants.kSpacingM),
-        
+
         // Email Field
         TextField(
           controller: controller.emailController,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            hintText: 'Enter your email',
-            prefixIcon: Icon(Icons.email_outlined),
+          decoration: _fieldDecoration(
+            label: 'Email',
+            hint: 'Enter your email',
+            prefixIcon: Icons.email_outlined,
           ),
           keyboardType: TextInputType.emailAddress,
         ),
         const SizedBox(height: AppConstants.kSpacingM),
-        
+
         // Password Field
         Obx(() => TextField(
-          controller: controller.passwordController,
-          decoration: InputDecoration(
-            labelText: 'Password',
-            hintText: 'Create a password',
-            prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: IconButton(
-              icon: Icon(
-                controller.isPasswordHidden.value
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
+              controller: controller.passwordController,
+              decoration: _fieldDecoration(
+                label: 'Password',
+                hint: 'Create a password',
+                prefixIcon: Icons.lock_outline,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    controller.isPasswordHidden.value
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                  onPressed: controller.togglePasswordVisibility,
+                ),
               ),
-              onPressed: controller.togglePasswordVisibility,
-            ),
-          ),
-          obscureText: controller.isPasswordHidden.value,
-        )),
-        const SizedBox(height: AppConstants.kSpacingL),
-        
+              obscureText: controller.isPasswordHidden.value,
+            )),
+        const SizedBox(height: AppConstants.kSpacingM),
+
         // Sign Up Button
         Obx(() => SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: controller.isLoading.value ? null : controller.signUp,
-            child: controller.isLoading.value
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : const Text('Sign Up'),
-          ),
-        )),
-        const SizedBox(height: AppConstants.kSpacingM),
-        
-        // Login Link
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Already have an account? ',
-              style: AppTextStyles.bodyMedium(context),
-            ),
-            TextButton(
-              onPressed: controller.toggleMode,
-              child: const Text('Log In'),
-            ),
-          ],
-        ),
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: controller.isLoading.value ? null : controller.signUp,
+                style: _primaryButtonStyle(),
+                child: controller.isLoading.value
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text('Sign Up'),
+              ),
+            )),
       ],
+    );
+  }
+
+  InputDecoration _fieldDecoration({
+    required String label,
+    required String hint,
+    IconData? prefixIcon,
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: AppColors.lightSurface,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+        borderSide: const BorderSide(color: AppColors.lightBorder),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+        borderSide: const BorderSide(color: AppColors.lightBorder),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+        borderSide:
+            const BorderSide(color: AppColors.primaryOrange, width: 1.5),
+      ),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.kSpacingM,
+        vertical: AppConstants.kSpacingS,
+      ),
+    );
+  }
+
+  ButtonStyle _primaryButtonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: AppColors.primaryOrange,
+      foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+      ),
+    );
+  }
+
+  ButtonStyle _secondaryButtonStyle() {
+    return OutlinedButton.styleFrom(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      side: const BorderSide(color: AppColors.lightBorder),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+      ),
+      foregroundColor: AppColors.lightTextPrimary,
     );
   }
 }

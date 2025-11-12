@@ -47,14 +47,19 @@ class ParameterTrackingPage extends StatelessWidget {
 
   Widget _buildInfoCard() {
     return Card(
-      color: AppColors.primaryOrange.withOpacity(0.1),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+        side: const BorderSide(color: AppColors.sageLight, width: 1),
+      ),
+      color: AppColors.sageLight,
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.kSpacingL),
         child: Row(
           children: [
             const Icon(
               Icons.info_outline,
-              color: AppColors.primaryOrange,
+              color: AppColors.deepTeal,
               size: 28,
             ),
             const SizedBox(width: AppConstants.kSpacingM),
@@ -67,7 +72,7 @@ class ParameterTrackingPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.primaryOrange,
+                      color: AppColors.deepTeal,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -89,6 +94,11 @@ class ParameterTrackingPage extends StatelessWidget {
 
   Widget _buildParameterToggles(ParameterTrackingController controller) {
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+        side: const BorderSide(color: AppColors.lightBorder, width: 1),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.kSpacingM),
         child: Column(
