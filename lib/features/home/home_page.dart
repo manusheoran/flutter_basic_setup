@@ -185,7 +185,7 @@ class HomePage extends StatelessWidget {
     }
 
     return Obx(() => Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -200,76 +200,14 @@ class HomePage extends StatelessWidget {
               color: AppColors.lightOrangeWarning.withOpacity(0.5),
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryOrange,
-                      borderRadius:
-                          BorderRadius.circular(AppConstants.kRadiusFull),
-                    ),
-                    child: Row(
-                      children: const [
-                        Icon(
-                          Icons.calendar_today,
-                          color: Colors.white,
-                          size: 14,
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          'Daily overview',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  TextButton.icon(
-                    onPressed: () async {
-                      final currentContext = Get.context;
-                      if (currentContext == null) return;
-
-                      final earliestDate = DateTime.now().subtract(
-                        Duration(days: AppConstants.visibleActivityDays),
-                      );
-
-                      final pickedDate = await showDatePicker(
-                        context: currentContext,
-                        initialDate: controller.selectedDate.value,
-                        firstDate: earliestDate,
-                        lastDate: DateTime.now(),
-                      );
-                      if (pickedDate != null) {
-                        controller.changeDate(pickedDate);
-                      }
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primaryOrange,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    ),
-                    icon: const Icon(Icons.edit_calendar_outlined, size: 16),
-                    label: const Text('Pick date', style: TextStyle(fontSize: 12)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Flexible(
+              Expanded(
                 child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: controller.visibleDates.map((date) {
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: controller.visibleDates.map((date) {
                     final isSelected = DateFormat('yyyy-MM-dd').format(date) ==
                         DateFormat('yyyy-MM-dd')
                             .format(controller.selectedDate.value);
@@ -317,25 +255,25 @@ class HomePage extends StatelessWidget {
                               Text(
                                 DateFormat('EEE').format(date).toUpperCase(),
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: isSelected
                                       ? Colors.white
                                       : AppColors.lightTextPrimary,
                                 ),
                               ),
-                              const SizedBox(height: 1),
+                              const SizedBox(height: 2),
                               Text(
                                 DateFormat('dd').format(date),
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   color: isSelected
                                       ? Colors.white
                                       : AppColors.lightTextPrimary,
                                 ),
                               ),
-                              const SizedBox(height: 1),
+                              const SizedBox(height: 2),
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 10,
@@ -357,7 +295,7 @@ class HomePage extends StatelessWidget {
                                       ? 'Today'
                                       : DateFormat('MMM').format(date),
                                   style: TextStyle(
-                                    fontSize: 9,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                     color: isSelected
                                         ? Colors.white
@@ -370,9 +308,36 @@ class HomePage extends StatelessWidget {
                         ),
                       ),
                     );
-                  }).toList(),
+                    }).toList(),
+                  ),
                 ),
+              ),
+              const SizedBox(width: 8),
+              TextButton.icon(
+                onPressed: () async {
+                  final currentContext = Get.context;
+                  if (currentContext == null) return;
+
+                  final earliestDate = DateTime.now().subtract(
+                    Duration(days: AppConstants.visibleActivityDays),
+                  );
+
+                  final pickedDate = await showDatePicker(
+                    context: currentContext,
+                    initialDate: controller.selectedDate.value,
+                    firstDate: earliestDate,
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null) {
+                    controller.changeDate(pickedDate);
+                  }
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primaryOrange,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
+                icon: const Icon(Icons.edit_calendar_outlined, size: 18),
+                label: const Text('Pick date', style: TextStyle(fontSize: 13)),
               ),
             ],
           ),
