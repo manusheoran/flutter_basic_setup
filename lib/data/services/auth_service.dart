@@ -119,8 +119,14 @@ class AuthService extends GetxService {
 
       await _ensureParametersLoaded();
       if (shouldPromptBiometric && !_biometricValidated) {
-        print('⏳ Awaiting biometric authentication before navigation');
-        return;
+        if (currentRoute == '/login') {
+          print(
+              '🔓 Skipping biometric gate immediately after credential login');
+          _biometricValidated = true;
+        } else {
+          print('⏳ Awaiting biometric authentication before navigation');
+          return;
+        }
       }
       // Check if email is verified (only for email/password users)
       final isEmailProvider =
