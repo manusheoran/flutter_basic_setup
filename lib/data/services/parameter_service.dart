@@ -11,13 +11,38 @@ class ParameterService extends GetxService {
   // Cache parameters
   final RxMap<String, ParameterModel> _cachedParameters = <String, ParameterModel>{}.obs;
   final RxBool _isLoaded = false.obs;
+  Future<void>? _loadingFuture;
 
   // Getters
   bool get isLoaded => _isLoaded.value;
   Map<String, ParameterModel> get parameters => _cachedParameters;
 
   // Load all parameters
-  Future<void> loadParameters() async {
+  Future<void> loadParameters({bool force = false}) async {
+    if (force) {
+      _isLoaded.value = false;
+    }
+
+    if (_isLoaded.value && !force) {
+      return;
+    }
+
+    if (_loadingFuture != null) {
+      return _loadingFuture!;
+    }
+
+    _loadingFuture = _loadParametersFromFirestore();
+
+    try {
+      await _loadingFuture;
+    } finally {
+      _loadingFuture = null;
+    }
+  }
+
+  Future<void> ensureLoaded() => loadParameters();
+
+  Future<void> _loadParametersFromFirestore() async {
     try {
       final querySnapshot = await _parameters
           .where('enabled', isEqualTo: true)

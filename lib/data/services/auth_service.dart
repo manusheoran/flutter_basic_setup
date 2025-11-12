@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
+import 'parameter_service.dart';
 
 class AuthService extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -36,8 +37,11 @@ class AuthService extends GetxService {
       await _checkBiometricAvailability();
       await _loadBiometricPreference();
 
+      // Warm up parameters so first navigation has data ready
+      await _ensureParametersLoaded();
+
       // Fallback: If auth state doesn't fire within 3 seconds, navigate manually
-      Future.delayed(const Duration(seconds: 3), () {
+      Future.delayed(const Duration(seconds: 3), () async {
         if (Get.currentRoute == '/splash') {
           print('⚠️ Auth state timeout - navigating from splash');
           final user = _auth.currentUser;
@@ -50,6 +54,8 @@ class AuthService extends GetxService {
               Get.offAllNamed('/login');
             });
           }
+
+          await _ensureParametersLoaded();
         }
       });
     } catch (e) {
@@ -61,6 +67,21 @@ class AuthService extends GetxService {
           Get.offAllNamed('/login');
         });
       });
+    }
+  }
+
+  Future<void> _ensureParametersLoaded() async {
+    try {
+      final parameterService = Get.isRegistered<ParameterService>()
+          ? Get.find<ParameterService>()
+          : Get.put(ParameterService());
+
+      if (!parameterService.isLoaded) {
+        print('📊 Loading parameters after authentication...');
+        await parameterService.ensureLoaded();
+      }
+    } catch (e) {
+      print('❌ Failed to load parameters after authentication: $e');
     }
   }
 
@@ -86,6 +107,7 @@ class AuthService extends GetxService {
         });
       }
     } else {
+      await _ensureParametersLoaded();
       // Check if email is verified (only for email/password users)
       final isEmailProvider =
           user.providerData.any((p) => p.providerId == 'password');

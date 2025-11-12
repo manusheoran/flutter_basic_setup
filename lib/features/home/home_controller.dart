@@ -43,8 +43,19 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _initializeController();
+  }
+
+  Future<void> _initializeController() async {
+    try {
+      await _parameterService.ensureLoaded();
+      maxTotalScore.value = _parameterService.getTotalMaxPoints();
+    } catch (e) {
+      print('❌ Failed to load parameters before HomeController init: $e');
+    }
+
     _initializeVisibleDates();
-    loadUserActivityConfig();
+    await loadUserActivityConfig();
     setupActivityStream(selectedDate.value);
   }
   
@@ -177,6 +188,11 @@ class HomeController extends GetxController {
   }
   
   void calculateScores() {
+    if (!_parameterService.isLoaded) {
+      print('⚠️ ParameterService not ready, skipping score calculation');
+      return;
+    }
+
     final nindraScore = _parameterService.calculateScore('nindra', nindraTime.value);
     final wakeUpScore = _parameterService.calculateScore('wake_up', wakeUpTime.value);
     final daySleepScore = _parameterService.calculateScore('day_sleep', daySleepMinutes.value);
