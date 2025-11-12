@@ -31,6 +31,9 @@ class AppConstants {
   static const Duration kShortAnimationDuration = Duration(milliseconds: 300);
   static const Duration kMediumAnimationDuration = Duration(milliseconds: 500);
 
+  // Security
+  static const bool requireBiometricAuthentication = true;
+
   // Activity Settings
   static const int visibleActivityDays = 3; // Show today and 2 days before
   

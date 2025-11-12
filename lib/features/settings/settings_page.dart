@@ -304,55 +304,6 @@ class SettingsPage extends StatelessWidget {
                 const Divider(),
               ],
               
-              // Biometric Login
-              ListTile(
-                leading: const Icon(Icons.fingerprint),
-                title: const Text('Biometric Login'),
-                subtitle: Text(
-                  _authService.canCheckBiometrics.value
-                      ? 'Use fingerprint/face ID to login'
-                      : 'Not available on this device',
-                ),
-                trailing: Switch(
-                  value: _authService.isBiometricEnabled.value,
-                  onChanged: _authService.canCheckBiometrics.value
-                      ? (value) async {
-                          if (value) {
-                            // Test biometric auth before enabling
-                            final authenticated = await _authService.authenticateWithBiometrics();
-                            if (authenticated) {
-                              await _authService.setBiometricEnabled(true);
-                              Get.snackbar(
-                                'Success',
-                                'Biometric login enabled',
-                                snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: Colors.green,
-                                colorText: Colors.white,
-                              );
-                            } else {
-                              Get.snackbar(
-                                'Failed',
-                                'Biometric authentication failed',
-                                snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: Colors.red,
-                                colorText: Colors.white,
-                              );
-                            }
-                          } else {
-                            await _authService.setBiometricEnabled(false);
-                            Get.snackbar(
-                              'Success',
-                              'Biometric login disabled',
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Colors.orange,
-                              colorText: Colors.white,
-                            );
-                          }
-                        }
-                      : null,
-                  activeColor: AppColors.primaryOrange,
-                ),
-              ),
             ],
           );
         }),

@@ -17,9 +17,9 @@ class SplashController extends GetxController {
     // Wait a moment for splash screen to show
     await Future.delayed(const Duration(milliseconds: 500));
 
-    // Check if user is logged in and biometric is enabled
-    if (_authService.isLoggedIn && _authService.isBiometricEnabled.value) {
-      print('🔐 Biometric authentication enabled - prompting user');
+    // Check if user is logged in and biometric required
+    if (_authService.isLoggedIn && _authService.shouldPromptBiometric) {
+      print('🔐 Biometric authentication required - prompting user');
       isAuthenticating.value = true;
 
       final authenticated = await _authService.authenticateWithBiometrics();
@@ -29,13 +29,11 @@ class SplashController extends GetxController {
       if (!authenticated) {
         print('❌ Biometric authentication failed');
         authenticationFailed.value = true;
-        
-        // Sign out user and redirect to login
-        await _authService.signOut();
         return;
       }
 
       print('✅ Biometric authentication successful');
+      _authService.markBiometricValidated();
     }
 
     // AuthService will handle navigation based on auth state
@@ -43,10 +41,7 @@ class SplashController extends GetxController {
 
   void retryBiometricAuth() {
     authenticationFailed.value = false;
+    _authService.resetBiometricValidation();
     _checkBiometricAuthentication();
-  }
-
-  void skipBiometricAndLogout() async {
-    await _authService.signOut();
   }
 }

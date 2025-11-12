@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import 'parameter_service.dart';
+import '../../core/constants/app_constants.dart';
 
 class AuthService extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -18,8 +18,14 @@ class AuthService extends GetxService {
   Rx<UserModel?> currentUser = Rx<UserModel?>(null);
 
   // Biometric settings
-  RxBool isBiometricEnabled = false.obs;
   RxBool canCheckBiometrics = false.obs;
+  RxBool canUseDeviceCredentials = false.obs;
+  bool _biometricValidated = false;
+
+  bool get isBiometricRequired => AppConstants.requireBiometricAuthentication;
+  bool get shouldPromptBiometric =>
+      isBiometricRequired &&
+      (canCheckBiometrics.value || canUseDeviceCredentials.value);
 
   // Flag to prevent auth listener interference during signup
   bool _isSigningUp = false;
@@ -30,12 +36,11 @@ class AuthService extends GetxService {
     try {
       print('🔥 AuthService initializing...');
       firebaseUser.bindStream(_auth.authStateChanges());
-      ever(firebaseUser, _setInitialScreen);
+      ever(firebaseUser, (user) => _setInitialScreen(user, fromAuthChange: true));
       print('✅ Auth state listener registered');
 
       // Check biometric availability
       await _checkBiometricAvailability();
-      await _loadBiometricPreference();
 
       // Warm up parameters so first navigation has data ready
       await _ensureParametersLoaded();
@@ -85,7 +90,7 @@ class AuthService extends GetxService {
     }
   }
 
-  void _setInitialScreen(User? user) async {
+  void _setInitialScreen(User? user, {bool fromAuthChange = false}) async {
     print(
         '🔄 Auth state changed: ${user != null ? "Logged in (${user.uid})" : "Logged out"}');
 
@@ -99,6 +104,7 @@ class AuthService extends GetxService {
     print('📍 Current route: $currentRoute');
 
     if (user == null) {
+      _biometricValidated = false;
       // User is logged out - go to login
       if (currentRoute != '/login') {
         print('🔀 Navigating to login page');
@@ -107,7 +113,15 @@ class AuthService extends GetxService {
         });
       }
     } else {
+      if (fromAuthChange) {
+        _biometricValidated = false;
+      }
+
       await _ensureParametersLoaded();
+      if (shouldPromptBiometric && !_biometricValidated) {
+        print('⏳ Awaiting biometric authentication before navigation');
+        return;
+      }
       // Check if email is verified (only for email/password users)
       final isEmailProvider =
           user.providerData.any((p) => p.providerId == 'password');
@@ -325,6 +339,7 @@ class AuthService extends GetxService {
     await _googleSignIn.signOut(); // Sign out from Google too
     await _auth.signOut();
     currentUser.value = null;
+    _biometricValidated = false;
     print('👋 User signed out');
   }
 
@@ -587,52 +602,40 @@ class AuthService extends GetxService {
   // Biometric Authentication
   Future<void> _checkBiometricAvailability() async {
     try {
-      canCheckBiometrics.value = await _localAuth.canCheckBiometrics;
-      print('🔐 Biometrics available: ${canCheckBiometrics.value}');
+      final biometricsAvailable = await _localAuth.canCheckBiometrics;
+      final deviceSupported = await _localAuth.isDeviceSupported();
+
+      canCheckBiometrics.value = biometricsAvailable;
+      canUseDeviceCredentials.value = deviceSupported;
+
+      print(
+          '🔐 Secure auth availability -> biometrics: $biometricsAvailable, device credentials: $deviceSupported');
     } catch (e) {
       print('❌ Error checking biometrics: $e');
       canCheckBiometrics.value = false;
-    }
-  }
-
-  Future<void> _loadBiometricPreference() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      isBiometricEnabled.value = prefs.getBool('biometric_enabled') ?? false;
-      print('🔐 Biometric enabled: ${isBiometricEnabled.value}');
-    } catch (e) {
-      print('❌ Error loading biometric preference: $e');
-    }
-  }
-
-  Future<void> setBiometricEnabled(bool enabled) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('biometric_enabled', enabled);
-      isBiometricEnabled.value = enabled;
-      print('🔐 Biometric ${enabled ? "enabled" : "disabled"}');
-    } catch (e) {
-      print('❌ Error setting biometric preference: $e');
+      canUseDeviceCredentials.value = false;
     }
   }
 
   Future<bool> authenticateWithBiometrics() async {
     try {
-      if (!canCheckBiometrics.value) {
-        print('❌ Biometrics not available');
+      final deviceSupported = await _localAuth.isDeviceSupported();
+      if (!deviceSupported) {
+        print('❌ Secure authentication not supported on this device');
         return false;
       }
 
+      final availableBiometrics = await _localAuth.getAvailableBiometrics();
       final authenticated = await _localAuth.authenticate(
         localizedReason: 'Please authenticate to access the app',
         options: const AuthenticationOptions(
           stickyAuth: true,
-          biometricOnly: false, // Allows PIN/pattern as fallback
+          biometricOnly: false,
         ),
       );
 
       print(
-          '🔐 Biometric authentication: ${authenticated ? "success" : "failed"}');
+          '🔐 Secure auth result: ${authenticated ? "success" : "failed"} (biometrics found: $availableBiometrics)');
       return authenticated;
     } catch (e) {
       print('❌ Biometric authentication error: $e');
@@ -643,6 +646,18 @@ class AuthService extends GetxService {
   bool get isLoggedIn => firebaseUser.value != null;
 
   String? get currentUserId => firebaseUser.value?.uid;
+
+  void markBiometricValidated() {
+    _biometricValidated = true;
+    final user = firebaseUser.value;
+    if (user != null) {
+      _setInitialScreen(user);
+    }
+  }
+
+  void resetBiometricValidation() {
+    _biometricValidated = false;
+  }
 
   // Centralized error message helper
   String getFirebaseErrorMessage(FirebaseAuthException e) {

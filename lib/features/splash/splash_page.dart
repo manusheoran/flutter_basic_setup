@@ -112,14 +112,6 @@ class SplashPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppConstants.kSpacingM),
-                  TextButton(
-                    onPressed: controller.skipBiometricAndLogout,
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primaryOrange,
-                    ),
-                    child: const Text('Sign out instead'),
-                  ),
                 ] else ...[
                   const CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryOrange),
