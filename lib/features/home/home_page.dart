@@ -472,7 +472,7 @@ class HomePage extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _ScoreColumn(
-                        title: 'Total Score',
+                        title: 'Total Points',
                         value: totalScore,
                         subtitle: 'of $maxScore points',
                         valueFontSize: valueFontSize,
@@ -496,7 +496,7 @@ class HomePage extends StatelessWidget {
                       child: _ScoreColumn(
                         title: 'Completion',
                         value: '$percentLabel%',
-                        subtitle: 'today',
+                        subtitle: '',
                         valueFontSize: percentFontSize,
                         compact: showCompact,
                         alignment: TextAlign.end,
@@ -924,16 +924,18 @@ class _ScoreColumn extends StatelessWidget {
           ),
           textAlign: alignment,
         ),
-        const SizedBox(height: 1),
-        Text(
-          subtitle,
-          style: TextStyle(
-            color: AppColors.lightTextSecondary,
-            fontSize: compact ? 10 : 11,
-            fontWeight: FontWeight.w400,
+        if (subtitle.isNotEmpty) ...[
+          const SizedBox(height: 1),
+          Text(
+            subtitle,
+            style: TextStyle(
+              color: AppColors.lightTextSecondary,
+              fontSize: compact ? 10 : 11,
+              fontWeight: FontWeight.w400,
+            ),
+            textAlign: alignment,
           ),
-          textAlign: alignment,
-        ),
+        ],
       ],
     );
   }
