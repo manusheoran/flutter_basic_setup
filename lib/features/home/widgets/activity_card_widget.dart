@@ -25,9 +25,9 @@ class ActivityCardWidget extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
         border: Border.all(
-          color: AppColors.lightBorder,
+          color: AppColors.lightBorder.withOpacity(0.6),
           width: 1,
         ),
         boxShadow: [
@@ -45,58 +45,48 @@ class ActivityCardWidget extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with icon and title
-          Container(
-            padding: const EdgeInsets.all(AppConstants.kSpacingM),
-            decoration: BoxDecoration(
-              color: AppColors.lightSurface,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(AppConstants.kRadiusL),
-                topRight: Radius.circular(AppConstants.kRadiusL),
-              ),
-            ),
-            child: Row(
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.kSpacingL),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header with icon, title and score
+            Row(
               children: [
-                // Icon container
+                // Icon in rounded square
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.08),
+                    color: color.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
-                    border: Border.all(
-                      color: color.withOpacity(0.4),
-                      width: 1.5,
-                    ),
                   ),
                   child: Icon(
                     icon,
                     color: color,
-                    size: 20,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(width: AppConstants.kSpacingS),
+                const SizedBox(width: AppConstants.kSpacingM),
                 // Title
                 Expanded(
                   child: Text(
                     title,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: AppColors.lightTextPrimary,
                       letterSpacing: -0.3,
                     ),
                   ),
                 ),
+                const SizedBox(width: AppConstants.kSpacingS),
                 // Score badge
                 if (score != null && maxScore != null)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
+                      horizontal: 12,
+                      vertical: 6,
                     ),
                     decoration: BoxDecoration(
                       color: score! < 0
@@ -106,9 +96,9 @@ class ActivityCardWidget extends StatelessWidget {
                           BorderRadius.circular(AppConstants.kRadiusFull),
                       boxShadow: [
                         BoxShadow(
-                          color: (score! < 0 ? AppColors.maroonDanger : color)
-                              .withOpacity(0.2),
-                          blurRadius: 6,
+                          color: (score! < 0 ? AppColors.maroonDanger : AppColors.primaryOrange)
+                              .withOpacity(0.3),
+                          blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
                       ],
@@ -126,7 +116,7 @@ class ActivityCardWidget extends StatelessWidget {
                           '${score!.toStringAsFixed(0)}/${maxScore!.toInt()}',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 12,
+                            fontSize: 13,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -135,16 +125,11 @@ class ActivityCardWidget extends StatelessWidget {
                   ),
               ],
             ),
-          ),
-          // Content area
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.kSpacingM,
-              vertical: AppConstants.kSpacingS,
-            ),
-            child: child,
-          ),
-        ],
+            const SizedBox(height: AppConstants.kSpacingM),
+            // Content area
+            child,
+          ],
+        ),
       ),
     );
   }

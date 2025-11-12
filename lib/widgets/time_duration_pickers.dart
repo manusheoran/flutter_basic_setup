@@ -23,37 +23,35 @@ class TimestampPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
-        side: const BorderSide(color: AppColors.lightBorder, width: 1),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
       ),
       child: InkWell(
         onTap: () => _showTimePicker(context),
-        borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryOrange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
-                ),
-                child: const Icon(Icons.access_time, color: AppColors.primaryOrange, size: 24),
-              ),
-              const SizedBox(width: 16),
+              const Icon(Icons.access_time, color: Colors.grey, size: 22),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title.isEmpty ? 'Time' : title,
                   style: TextStyle(
-                    fontSize: title.isEmpty ? 12 : 16,
-                    fontWeight: FontWeight.w600,
-                    color: title.isEmpty ? Colors.grey[600] : null,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.lightTextSecondary,
                   ),
                 ),
+              ),
+              Container(
+                width: 1,
+                height: 20,
+                color: AppColors.lightBorder,
+                margin: const EdgeInsets.symmetric(horizontal: 12),
               ),
               Obx(() => Text(
                 selectedTime.value.isEmpty ? 'Set Time' : _format12Hour(selectedTime.value),
@@ -66,7 +64,7 @@ class TimestampPicker extends StatelessWidget {
                 ),
               )),
               const SizedBox(width: 8),
-              const Icon(Icons.chevron_right, color: Colors.grey),
+              const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
             ],
           ),
         ),
@@ -293,38 +291,31 @@ class DurationPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
-        side: const BorderSide(color: AppColors.lightBorder, width: 1),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
       ),
       child: InkWell(
         onTap: () => _showDurationPicker(context),
-        borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryOrange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
-                ),
-                child: const Icon(Icons.timer, color: AppColors.primaryOrange, size: 24),
-              ),
-              const SizedBox(width: 16),
+              const Icon(Icons.timer, color: Colors.grey, size: 22),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       title.isEmpty ? 'Duration' : title,
                       style: TextStyle(
-                        fontSize: title.isEmpty ? 12 : 16,
-                        fontWeight: FontWeight.w600,
-                        color: title.isEmpty ? Colors.grey[600] : null,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.lightTextSecondary,
                       ),
                     ),
                     if (subtitle.isNotEmpty)
@@ -334,6 +325,12 @@ class DurationPicker extends StatelessWidget {
                       ),
                   ],
                 ),
+              ),
+              Container(
+                width: 1,
+                height: 20,
+                color: AppColors.lightBorder,
+                margin: const EdgeInsets.symmetric(horizontal: 12),
               ),
               Obx(() {
                 int hours = value.value ~/ 60;
@@ -345,12 +342,12 @@ class DurationPicker extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     color: AppColors.primaryOrange,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
                 );
               }),
               const SizedBox(width: 8),
-              const Icon(Icons.chevron_right, color: Colors.grey),
+              const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
             ],
           ),
         ),
@@ -487,48 +484,46 @@ class RoundsPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
-        side: const BorderSide(color: AppColors.lightBorder, width: 1),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
       ),
       child: InkWell(
         onTap: () => _showRoundsPicker(context),
-        borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
+        borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryOrange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppConstants.kRadiusS),
-                ),
-                child: const Icon(Icons.repeat, color: AppColors.primaryOrange, size: 24),
-              ),
-              const SizedBox(width: 16),
+              const Icon(Icons.repeat, color: Colors.grey, size: 22),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title.isEmpty ? 'Rounds' : title,
                   style: TextStyle(
-                    fontSize: title.isEmpty ? 12 : 16,
-                    fontWeight: FontWeight.w600,
-                    color: title.isEmpty ? Colors.grey[600] : null,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.lightTextSecondary,
                   ),
                 ),
+              ),
+              Container(
+                width: 1,
+                height: 20,
+                color: AppColors.lightBorder,
+                margin: const EdgeInsets.symmetric(horizontal: 12),
               ),
               Obx(() => Text(
                 '${value.value} rounds',
                 style: const TextStyle(
                   fontSize: 16,
                   color: AppColors.primaryOrange,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                 ),
               )),
               const SizedBox(width: 8),
-              const Icon(Icons.chevron_right, color: Colors.grey),
+              const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
             ],
           ),
         ),
