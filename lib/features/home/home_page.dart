@@ -44,7 +44,7 @@ class HomePage extends StatelessWidget {
             SliverPersistentHeader(
               pinned: true,
               delegate: _HomeHeaderDelegate(
-                maxExtentHeight: 360,
+                maxExtentHeight: 240,
                 minExtentHeight: 140,
                 dateSelectorBuilder: (context, progress) =>
                     _buildDateSelector(controller, progress),
@@ -56,14 +56,15 @@ class HomePage extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
                   AppConstants.kDefaultPadding,
-                  AppConstants.kSpacingS,
+                  AppConstants.kSpacingXL,
                   AppConstants.kDefaultPadding,
                   AppConstants.kSpacingXS,
                 ),
                 child: Row(
                   children: [
                     const Expanded(
-                      child: Divider(color: AppColors.lightBorder, thickness: 1),
+                      child:
+                          Divider(color: AppColors.lightBorder, thickness: 1),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -78,7 +79,8 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                     const Expanded(
-                      child: Divider(color: AppColors.lightBorder, thickness: 1),
+                      child:
+                          Divider(color: AppColors.lightBorder, thickness: 1),
                     ),
                   ],
                 ),
@@ -204,7 +206,7 @@ class HomePage extends StatelessWidget {
     }
 
     return Obx(() => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: null,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -214,106 +216,107 @@ class HomePage extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: controller.visibleDates.map((date) {
-                    final isSelected = DateFormat('yyyy-MM-dd').format(date) ==
-                        DateFormat('yyyy-MM-dd')
-                            .format(controller.selectedDate.value);
-                    final isToday = DateFormat('yyyy-MM-dd').format(date) ==
-                        DateFormat('yyyy-MM-dd').format(DateTime.now());
+                      final isSelected =
+                          DateFormat('yyyy-MM-dd').format(date) ==
+                              DateFormat('yyyy-MM-dd')
+                                  .format(controller.selectedDate.value);
+                      final isToday = DateFormat('yyyy-MM-dd').format(date) ==
+                          DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: InkWell(
-                        onTap: () => controller.changeDate(date),
-                        borderRadius:
-                            BorderRadius.circular(AppConstants.kRadiusM),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? AppColors.primaryOrange
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(
-                              AppConstants.kRadiusM,
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: InkWell(
+                          onTap: () => controller.changeDate(date),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.kRadiusM),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
                             ),
-                            border: Border.all(
+                            decoration: BoxDecoration(
                               color: isSelected
                                   ? AppColors.primaryOrange
-                                  : AppColors.lightBorder.withOpacity(0.5),
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.kRadiusM,
+                              ),
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppColors.primaryOrange
+                                    : AppColors.lightBorder.withOpacity(0.5),
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: AppColors.primaryOrange
+                                            .withOpacity(0.3),
+                                        blurRadius: 16,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ]
+                                  : [],
                             ),
-                            boxShadow: isSelected
-                                ? [
-                                    BoxShadow(
-                                      color: AppColors.primaryOrange
-                                          .withOpacity(0.3),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 6),
-                                    ),
-                                  ]
-                                : [],
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                DateFormat('EEE').format(date).toUpperCase(),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : AppColors.lightTextPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                DateFormat('dd').format(date),
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : AppColors.lightTextPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: isToday
-                                      ? (isSelected
-                                          ? Colors.white.withOpacity(0.2)
-                                          : AppColors.accentPeach
-                                              .withOpacity(0.6))
-                                      : Colors.white.withOpacity(0.0),
-                                  borderRadius: BorderRadius.circular(
-                                    AppConstants.kRadiusFull,
-                                  ),
-                                ),
-                                child: Text(
-                                  isToday
-                                      ? 'Today'
-                                      : DateFormat('MMM').format(date),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  DateFormat('EEE').format(date).toUpperCase(),
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                     color: isSelected
                                         ? Colors.white
-                                        : AppColors.primaryOrange,
+                                        : AppColors.lightTextPrimary,
                                   ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 2),
+                                Text(
+                                  DateFormat('dd').format(date),
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : AppColors.lightTextPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isToday
+                                        ? (isSelected
+                                            ? Colors.white.withOpacity(0.2)
+                                            : AppColors.accentPeach
+                                                .withOpacity(0.6))
+                                        : Colors.white.withOpacity(0.0),
+                                    borderRadius: BorderRadius.circular(
+                                      AppConstants.kRadiusFull,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    isToday
+                                        ? 'Today'
+                                        : DateFormat('MMM').format(date),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : AppColors.primaryOrange,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    );
+                      );
                     }).toList(),
                   ),
                 ),
@@ -355,7 +358,8 @@ class HomePage extends StatelessWidget {
                     }
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
@@ -394,7 +398,7 @@ class HomePage extends StatelessWidget {
       final maxScore = controller.maxTotalScore.value.toStringAsFixed(0);
       final percentLabel = percentageValue.toStringAsFixed(1);
 
-      final double paddingVertical = showCompact ? 2.0 : AppConstants.kSpacingM;
+      final double paddingVertical = showCompact ? 2.0 : AppConstants.kSpacingS;
       final double valueFontSize = showCompact ? 18 : 28;
       final double percentFontSize = showCompact ? 18 : 28;
       final double dividerHeight = showCompact ? 30 : 60;
@@ -980,14 +984,13 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
 
     final EdgeInsets padding = EdgeInsets.fromLTRB(
       AppConstants.kDefaultPadding,
-      lerpDouble(AppConstants.kSpacingL, AppConstants.kSpacingXS, collapseT)!,
+      lerpDouble(AppConstants.kSpacingS, AppConstants.kSpacingXS, collapseT)!,
       AppConstants.kDefaultPadding,
-      lerpDouble(AppConstants.kSpacingS, 2.0, collapseT)!,
+      lerpDouble(AppConstants.kSpacingXS, 2.0, collapseT)!,
     );
 
-    final double selectorFraction = lerpDouble(0.58, 0.48, collapseT)!;
     final double spacing =
-        lerpDouble(AppConstants.kSpacingL, AppConstants.kSpacingS, collapseT)!;
+        lerpDouble(AppConstants.kSpacingS, AppConstants.kSpacingXS, collapseT)!;
 
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -999,32 +1002,18 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
             padding: padding,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final double height = constraints.maxHeight;
-                final double selectorHeight =
-                    (height - spacing) * selectorFraction;
-                final double scoreHeight = height - spacing - selectorHeight;
 
                 return Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      height: selectorHeight.clamp(40.0, height),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: SizedBox.expand(
-                          child: dateSelectorBuilder(context, collapseT),
-                        ),
-                      ),
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: dateSelectorBuilder(context, collapseT),
                     ),
                     SizedBox(height: spacing),
-                    SizedBox(
-                      height: scoreHeight.clamp(60.0, height),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: SizedBox.expand(
-                          child: scoreCardBuilder(context, collapseT),
-                        ),
-                      ),
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: scoreCardBuilder(context, collapseT),
                     ),
                   ],
                 );
