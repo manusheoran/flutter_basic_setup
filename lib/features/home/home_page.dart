@@ -312,32 +312,65 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              TextButton.icon(
-                onPressed: () async {
-                  final currentContext = Get.context;
-                  if (currentContext == null) return;
-
-                  final earliestDate = DateTime.now().subtract(
-                    Duration(days: AppConstants.visibleActivityDays),
-                  );
-
-                  final pickedDate = await showDatePicker(
-                    context: currentContext,
-                    initialDate: controller.selectedDate.value,
-                    firstDate: earliestDate,
-                    lastDate: DateTime.now(),
-                  );
-                  if (pickedDate != null) {
-                    controller.changeDate(pickedDate);
-                  }
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.primaryOrange,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              const SizedBox(width: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.85),
+                  borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+                  border: Border.all(
+                    color: AppColors.primaryOrange.withOpacity(0.3),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primaryOrange.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-                icon: const Icon(Icons.edit_calendar_outlined, size: 18),
-                label: const Text('Pick date', style: TextStyle(fontSize: 13)),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+                  onTap: () async {
+                    final currentContext = Get.context;
+                    if (currentContext == null) return;
+
+                    final earliestDate = DateTime.now().subtract(
+                      Duration(days: AppConstants.visibleActivityDays),
+                    );
+
+                    final pickedDate = await showDatePicker(
+                      context: currentContext,
+                      initialDate: controller.selectedDate.value,
+                      firstDate: earliestDate,
+                      lastDate: DateTime.now(),
+                    );
+                    if (pickedDate != null) {
+                      controller.changeDate(pickedDate);
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(
+                          Icons.edit_calendar_outlined,
+                          size: 18,
+                          color: AppColors.primaryOrange,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Pick date',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryOrange,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
