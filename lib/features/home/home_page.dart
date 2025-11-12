@@ -79,13 +79,15 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildDateSelector(HomeController controller, double collapseProgress) {
+  Widget _buildDateSelector(
+      HomeController controller, double collapseProgress) {
     final bool isCollapsed = collapseProgress > 0.45;
 
     if (isCollapsed) {
       return Obx(() {
         final visibleDates = controller.visibleDates;
-        final selectedKey = DateFormat('yyyy-MM-dd').format(controller.selectedDate.value);
+        final selectedKey =
+            DateFormat('yyyy-MM-dd').format(controller.selectedDate.value);
 
         return Container(
           width: double.infinity,
@@ -107,11 +109,14 @@ class HomePage extends StatelessWidget {
                     children: visibleDates.map((date) {
                       final key = DateFormat('yyyy-MM-dd').format(date);
                       final bool isSelected = key == selectedKey;
-                      final bool isToday = key == DateFormat('yyyy-MM-dd').format(DateTime.now());
+                      final bool isToday = key ==
+                          DateFormat('yyyy-MM-dd').format(DateTime.now());
                       return Padding(
-                        padding: const EdgeInsets.only(right: AppConstants.kSpacingS),
+                        padding: const EdgeInsets.only(
+                            right: AppConstants.kSpacingS),
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(AppConstants.kRadiusFull),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.kRadiusFull),
                           onTap: () => controller.changeDate(date),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
@@ -123,11 +128,13 @@ class HomePage extends StatelessWidget {
                               color: isSelected
                                   ? AppColors.primaryOrange
                                   : AppColors.lightPeach,
-                              borderRadius:
-                                  BorderRadius.circular(AppConstants.kRadiusFull),
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.kRadiusFull),
                             ),
                             child: Text(
-                              isToday ? 'Today' : DateFormat('EEE, dd').format(date),
+                              isToday
+                                  ? 'Today'
+                                  : DateFormat('EEE, dd').format(date),
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: isSelected
@@ -196,7 +203,8 @@ class HomePage extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.primaryOrange,
-                      borderRadius: BorderRadius.circular(AppConstants.kRadiusFull),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.kRadiusFull),
                     ),
                     child: Row(
                       children: const [
@@ -282,7 +290,8 @@ class HomePage extends StatelessWidget {
                             boxShadow: isSelected
                                 ? [
                                     BoxShadow(
-                                      color: AppColors.primaryOrange.withOpacity(0.3),
+                                      color: AppColors.primaryOrange
+                                          .withOpacity(0.3),
                                       blurRadius: 16,
                                       offset: const Offset(0, 6),
                                     ),
@@ -367,8 +376,7 @@ class HomePage extends StatelessWidget {
       final maxScore = controller.maxTotalScore.value.toStringAsFixed(0);
       final percentLabel = percentageValue.toStringAsFixed(1);
 
-      final double paddingVertical =
-          showCompact ? 2.0 : AppConstants.kSpacingM;
+      final double paddingVertical = showCompact ? 2.0 : AppConstants.kSpacingM;
       final double valueFontSize = showCompact ? 18 : 28;
       final double percentFontSize = showCompact ? 18 : 28;
       final double dividerHeight = showCompact ? 30 : 60;
@@ -376,9 +384,16 @@ class HomePage extends StatelessWidget {
       return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
-          color: AppColors.lightSurface,
+          gradient: LinearGradient(
+            colors: [
+              AppColors.lightPeach,
+              AppColors.lightSurface,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           border: Border.all(
-            color: AppColors.primaryOrange.withOpacity(0.35),
+            color: AppColors.lightOrangeWarning.withOpacity(0.5),
             width: 1,
           ),
           boxShadow: const [
@@ -401,43 +416,82 @@ class HomePage extends StatelessWidget {
             horizontal: AppConstants.kSpacingL,
             vertical: paddingVertical,
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _ScoreColumn(
-                  title: 'Total Score',
-                  value: totalScore,
-                  subtitle: 'of $maxScore points',
-                  valueFontSize: valueFontSize,
-                  compact: showCompact,
-                  alignment: TextAlign.start,
+          child: showCompact
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          totalScore,
+                          style: TextStyle(
+                            color: AppColors.primaryOrange,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        Text(
+                          '/$maxScore',
+                          style: TextStyle(
+                            color: AppColors.lightTextSecondary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '$percentLabel%',
+                      style: TextStyle(
+                        color: AppColors.primaryOrange,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _ScoreColumn(
+                        title: 'Total Score',
+                        value: totalScore,
+                        subtitle: 'of $maxScore points',
+                        valueFontSize: valueFontSize,
+                        compact: showCompact,
+                        alignment: TextAlign.start,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: showCompact
+                            ? AppConstants.kSpacingS
+                            : AppConstants.kSpacingM,
+                      ),
+                      child: Container(
+                        width: 1,
+                        height: dividerHeight,
+                        color: AppColors.lightBorder,
+                      ),
+                    ),
+                    Expanded(
+                      child: _ScoreColumn(
+                        title: 'Completion',
+                        value: '$percentLabel%',
+                        subtitle: 'today',
+                        valueFontSize: percentFontSize,
+                        compact: showCompact,
+                        alignment: TextAlign.end,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: showCompact
-                      ? AppConstants.kSpacingS
-                      : AppConstants.kSpacingM,
-                ),
-                child: Container(
-                  width: 1,
-                  height: dividerHeight,
-                  color: AppColors.lightBorder,
-                ),
-              ),
-              Expanded(
-                child: _ScoreColumn(
-                  title: 'Completion',
-                  value: '$percentLabel%',
-                  subtitle: 'today',
-                  valueFontSize: percentFontSize,
-                  compact: showCompact,
-                  alignment: TextAlign.end,
-                ),
-              ),
-            ],
-          ),
         ),
       );
     });
@@ -515,164 +569,164 @@ class HomePage extends StatelessWidget {
 
   Widget _buildActivityCards(HomeController controller, BuildContext context) {
     return Obx(() => Column(
-      children: [
-        // Timestamp Activities (with 12-hour format + AM/PM)
-        if (controller.shouldShowActivity('nindra')) ...[
-          _buildActivityWithScore(
-            controller,
-            TimestampPicker(
-              title: '',
-              selectedTime: controller.nindraTime,
-              onTimeChanged: (val) {
-                controller.nindraTime.value = val;
-                controller.calculateScores();
-              },
-              minTime: '21:45', // 9:45 PM minimum
-              defaultTime: '21:45',
-            ),
-            'nindra',
-            title: 'Nindra (To Bed)',
-            icon: Icons.bedtime,
-            color: AppColors.activityNindra,
-          ),
-          const SizedBox(height: AppConstants.kSpacingM),
-        ],
-        
-        if (controller.shouldShowActivity('wake_up')) ...[
-          _buildActivityWithScore(
-            controller,
-            TimestampPicker(
-              title: '',
-              selectedTime: controller.wakeUpTime,
-              onTimeChanged: (val) {
-                controller.wakeUpTime.value = val;
-                controller.calculateScores();
-              },
-              minTime: '03:45', // 3:45 AM minimum
-              defaultTime: '03:45',
-            ),
-            'wake_up',
-            title: 'Wake Up Time',
-            icon: Icons.wb_sunny,
-            color: AppColors.activityWakeUp,
-          ),
-          const SizedBox(height: AppConstants.kSpacingM),
-        ],
+          children: [
+            // Timestamp Activities (with 12-hour format + AM/PM)
+            if (controller.shouldShowActivity('nindra')) ...[
+              _buildActivityWithScore(
+                controller,
+                TimestampPicker(
+                  title: '',
+                  selectedTime: controller.nindraTime,
+                  onTimeChanged: (val) {
+                    controller.nindraTime.value = val;
+                    controller.calculateScores();
+                  },
+                  minTime: '21:45', // 9:45 PM minimum
+                  defaultTime: '21:45',
+                ),
+                'nindra',
+                title: 'Nindra (To Bed)',
+                icon: Icons.bedtime,
+                color: AppColors.activityNindra,
+              ),
+              const SizedBox(height: AppConstants.kSpacingM),
+            ],
 
-        // Duration Activities (Hours + Minutes, no AM/PM)
-        if (controller.shouldShowActivity('day_sleep')) ...[
-          _buildActivityWithScore(
-            controller,
-            DurationPicker(
-              title: '',
-              subtitle: 'Total sleep during the day',
-              value: controller.daySleepMinutes,
-              onChanged: (val) {
-                controller.daySleepMinutes.value = val;
-                controller.calculateScores();
-              },
-              maxHours: 4, // Max 4 hours
-            ),
-            'day_sleep',
-            title: 'Day Sleep',
-            icon: Icons.hotel,
-            color: AppColors.activityDaySleep,
-          ),
-          const SizedBox(height: AppConstants.kSpacingM),
-        ],
+            if (controller.shouldShowActivity('wake_up')) ...[
+              _buildActivityWithScore(
+                controller,
+                TimestampPicker(
+                  title: '',
+                  selectedTime: controller.wakeUpTime,
+                  onTimeChanged: (val) {
+                    controller.wakeUpTime.value = val;
+                    controller.calculateScores();
+                  },
+                  minTime: '03:45', // 3:45 AM minimum
+                  defaultTime: '03:45',
+                ),
+                'wake_up',
+                title: 'Wake Up Time',
+                icon: Icons.wb_sunny,
+                color: AppColors.activityWakeUp,
+              ),
+              const SizedBox(height: AppConstants.kSpacingM),
+            ],
 
-        // Japa with both rounds and completion time
-        if (controller.shouldShowActivity('japa')) ...[
-          _buildActivityWithScore(
-            controller,
-            TimestampPicker(
-              title: '',
-              selectedTime: controller.japaTime,
-              onTimeChanged: (val) {
-                controller.japaTime.value = val;
-                controller.calculateScores();
-              },
-              defaultTime: '07:00',
-            ),
-            'japa',
-            title: 'Japa (Chanting)',
-            icon: Icons.self_improvement,
-            color: AppColors.activityJapa,
-          ),
-          const SizedBox(height: AppConstants.kSpacingS),
-          RoundsPicker(
-            title: '📿 Japa Rounds (optional)',
-            value: controller.japaRounds,
-            onChanged: (val) {
-              controller.japaRounds.value = val;
-            },
-          ),
-          const SizedBox(height: AppConstants.kSpacingM),
-        ],
+            // Duration Activities (Hours + Minutes, no AM/PM)
+            if (controller.shouldShowActivity('day_sleep')) ...[
+              _buildActivityWithScore(
+                controller,
+                DurationPicker(
+                  title: '',
+                  subtitle: 'Total sleep during the day',
+                  value: controller.daySleepMinutes,
+                  onChanged: (val) {
+                    controller.daySleepMinutes.value = val;
+                    controller.calculateScores();
+                  },
+                  maxHours: 4, // Max 4 hours
+                ),
+                'day_sleep',
+                title: 'Day Sleep',
+                icon: Icons.hotel,
+                color: AppColors.activityDaySleep,
+              ),
+              const SizedBox(height: AppConstants.kSpacingM),
+            ],
 
-        if (controller.shouldShowActivity('pathan')) ...[
-          _buildActivityWithScore(
-            controller,
-            DurationPicker(
-              title: '',
-              subtitle: 'Scripture reading time',
-              value: controller.pathanMinutes,
-              onChanged: (val) {
-                controller.pathanMinutes.value = val;
-                controller.calculateScores();
-              },
-              maxHours: 2, // Max 2 hours
-            ),
-            'pathan',
-            title: 'Pathan (Reading)',
-            icon: Icons.menu_book,
-            color: AppColors.activityPathan,
-          ),
-          const SizedBox(height: AppConstants.kSpacingM),
-        ],
-        
-        if (controller.shouldShowActivity('sravan')) ...[
-          _buildActivityWithScore(
-            controller,
-            DurationPicker(
-              title: '',
-              subtitle: 'Spiritual audio/lecture time',
-              value: controller.sravanMinutes,
-              onChanged: (val) {
-                controller.sravanMinutes.value = val;
-                controller.calculateScores();
-              },
-              maxHours: 3, // Max 3 hours
-            ),
-            'sravan',
-            title: 'Sravan (Listening)',
-            icon: Icons.headset,
-            color: AppColors.activitySravan,
-          ),
-          const SizedBox(height: AppConstants.kSpacingM),
-        ],
-        
-        if (controller.shouldShowActivity('seva')) ...[
-          _buildActivityWithScore(
-            controller,
-            DurationPicker(
-              title: '',
-              subtitle: 'Service hours',
-              value: controller.sevaMinutes,
-              onChanged: (val) {
-                controller.sevaMinutes.value = val;
-                controller.calculateScores();
-              },
-              maxHours: 12, // Max 12 hours
-            ),
-            'seva',
-            title: 'Seva (Service)',
-            icon: Icons.volunteer_activism,
-            color: AppColors.activitySeva,
-          ),
-        ],
-      ],
-    ));
+            // Japa with both rounds and completion time
+            if (controller.shouldShowActivity('japa')) ...[
+              _buildActivityWithScore(
+                controller,
+                TimestampPicker(
+                  title: '',
+                  selectedTime: controller.japaTime,
+                  onTimeChanged: (val) {
+                    controller.japaTime.value = val;
+                    controller.calculateScores();
+                  },
+                  defaultTime: '07:00',
+                ),
+                'japa',
+                title: 'Japa (Chanting)',
+                icon: Icons.self_improvement,
+                color: AppColors.activityJapa,
+              ),
+              const SizedBox(height: AppConstants.kSpacingS),
+              RoundsPicker(
+                title: '📿 Japa Rounds (optional)',
+                value: controller.japaRounds,
+                onChanged: (val) {
+                  controller.japaRounds.value = val;
+                },
+              ),
+              const SizedBox(height: AppConstants.kSpacingM),
+            ],
+
+            if (controller.shouldShowActivity('pathan')) ...[
+              _buildActivityWithScore(
+                controller,
+                DurationPicker(
+                  title: '',
+                  subtitle: 'Scripture reading time',
+                  value: controller.pathanMinutes,
+                  onChanged: (val) {
+                    controller.pathanMinutes.value = val;
+                    controller.calculateScores();
+                  },
+                  maxHours: 2, // Max 2 hours
+                ),
+                'pathan',
+                title: 'Pathan (Reading)',
+                icon: Icons.menu_book,
+                color: AppColors.activityPathan,
+              ),
+              const SizedBox(height: AppConstants.kSpacingM),
+            ],
+
+            if (controller.shouldShowActivity('sravan')) ...[
+              _buildActivityWithScore(
+                controller,
+                DurationPicker(
+                  title: '',
+                  subtitle: 'Spiritual audio/lecture time',
+                  value: controller.sravanMinutes,
+                  onChanged: (val) {
+                    controller.sravanMinutes.value = val;
+                    controller.calculateScores();
+                  },
+                  maxHours: 3, // Max 3 hours
+                ),
+                'sravan',
+                title: 'Sravan (Listening)',
+                icon: Icons.headset,
+                color: AppColors.activitySravan,
+              ),
+              const SizedBox(height: AppConstants.kSpacingM),
+            ],
+
+            if (controller.shouldShowActivity('seva')) ...[
+              _buildActivityWithScore(
+                controller,
+                DurationPicker(
+                  title: '',
+                  subtitle: 'Service hours',
+                  value: controller.sevaMinutes,
+                  onChanged: (val) {
+                    controller.sevaMinutes.value = val;
+                    controller.calculateScores();
+                  },
+                  maxHours: 12, // Max 12 hours
+                ),
+                'seva',
+                title: 'Seva (Service)',
+                icon: Icons.volunteer_activism,
+                color: AppColors.activitySeva,
+              ),
+            ],
+          ],
+        ));
   }
 
   Widget _buildUnsavedChangesBar(HomeController controller) {
@@ -698,7 +752,8 @@ class HomePage extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.sageLight,
-                      borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.kRadiusXL),
                       boxShadow: const [
                         BoxShadow(
                           color: AppColors.shadowMedium,
@@ -832,8 +887,9 @@ class _ScoreColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment:
-          alignment == TextAlign.end ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: alignment == TextAlign.end
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: [
         Text(
           title,
@@ -891,9 +947,10 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => minExtentHeight;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final double availableExtent =
-        (maxExtentHeight - shrinkOffset).clamp(minExtentHeight, maxExtentHeight);
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final double availableExtent = (maxExtentHeight - shrinkOffset)
+        .clamp(minExtentHeight, maxExtentHeight);
     final double normalized = ((availableExtent - minExtentHeight) /
             (maxExtentHeight - minExtentHeight))
         .clamp(0.0, 1.0);
@@ -907,7 +964,7 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
 
     final double selectorFraction = lerpDouble(0.58, 0.48, collapseT)!;
-    final double spacing = lerpDouble(AppConstants.kSpacingL, 2.0, collapseT)!;
+    final double spacing = lerpDouble(AppConstants.kSpacingL, AppConstants.kSpacingS, collapseT)!;
 
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -920,7 +977,8 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final double height = constraints.maxHeight;
-                final double selectorHeight = (height - spacing) * selectorFraction;
+                final double selectorHeight =
+                    (height - spacing) * selectorFraction;
                 final double scoreHeight = height - spacing - selectorHeight;
 
                 return Column(
