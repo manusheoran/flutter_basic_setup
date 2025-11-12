@@ -9,7 +9,7 @@ import '../reports/report_page.dart';
 
 class DashboardPage extends StatelessWidget {
   DashboardPage({super.key});
-  
+
   final DashboardController controller = Get.put(DashboardController());
 
   @override
@@ -26,7 +26,7 @@ class DashboardPage extends StatelessWidget {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(AppConstants.kDefaultPadding),
           child: Column(
@@ -80,24 +80,24 @@ class DashboardPage extends StatelessWidget {
 
   Widget _buildTabSelector(DashboardController controller) {
     return Obx(() => Row(
-      children: [
-        Expanded(
-          child: _buildTabButton(
-            label: 'My Progress',
-            isSelected: controller.selectedTab.value == 0,
-            onTap: () => controller.changeTab(0),
-          ),
-        ),
-        const SizedBox(width: AppConstants.kSpacingM),
-        Expanded(
-          child: _buildTabButton(
-            label: 'Mentor View',
-            isSelected: controller.selectedTab.value == 1,
-            onTap: () => controller.changeTab(1),
-          ),
-        ),
-      ],
-    ));
+          children: [
+            Expanded(
+              child: _buildTabButton(
+                label: 'My Progress',
+                isSelected: controller.selectedTab.value == 0,
+                onTap: () => controller.changeTab(0),
+              ),
+            ),
+            const SizedBox(width: AppConstants.kSpacingM),
+            Expanded(
+              child: _buildTabButton(
+                label: 'Mentor View',
+                isSelected: controller.selectedTab.value == 1,
+                onTap: () => controller.changeTab(1),
+              ),
+            ),
+          ],
+        ));
   }
 
   Widget _buildTabButton({
@@ -129,7 +129,8 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDateRangeSelector(DashboardController controller, BuildContext context) {
+  Widget _buildDateRangeSelector(
+      DashboardController controller, BuildContext context) {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -181,47 +182,49 @@ class DashboardPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Obx(() => Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.sageLight,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.date_range, color: AppColors.deepTeal, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          controller.selectedRangeLabel.value,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.deepTeal,
-                          ),
-                        ),
-                        if (controller.actualDaysCount.value > 0)
-                          Text(
-                            'Data for ${controller.actualDaysCount.value} days',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                      ],
-                    ),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.sageLight,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ],
-              ),
-            )),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.date_range,
+                          color: AppColors.deepTeal, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              controller.selectedRangeLabel.value,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.deepTeal,
+                              ),
+                            ),
+                            if (controller.actualDaysCount.value > 0)
+                              Text(
+                                'Data for ${controller.actualDaysCount.value} days',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildRangeChip(String label, DashboardController controller, VoidCallback onTap) {
+  Widget _buildRangeChip(
+      String label, DashboardController controller, VoidCallback onTap) {
     return Obx(() {
       final isSelected = controller.selectedRangeLabel.value == label;
       return GestureDetector(
@@ -229,10 +232,12 @@ class DashboardPage extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryOrange : AppColors.lightSurface,
+            color:
+                isSelected ? AppColors.primaryOrange : AppColors.lightSurface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? AppColors.primaryOrange : AppColors.lightBorder,
+              color:
+                  isSelected ? AppColors.primaryOrange : AppColors.lightBorder,
               width: 1.5,
             ),
           ),
@@ -251,26 +256,28 @@ class DashboardPage extends StatelessWidget {
 
   Widget _buildAverageCards(DashboardController controller) {
     return Obx(() => Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            title: 'Avg. Score',
-            value: controller.avgScore.value.toStringAsFixed(1),
-            subtitle: '/ ${AppConstants.maxTotalScore}',
-            color: AppColors.getScoreColor(controller.avgPercentage.value),
-          ),
-        ),
-        const SizedBox(width: AppConstants.kSpacingM),
-        Expanded(
-          child: Obx(() => _buildStatCard(
-            title: 'Avg. %',
-            value: '${controller.avgPercentage.value.toStringAsFixed(1)}%',
-            subtitle: controller.selectedRangeLabel.value,
-            color: AppColors.getScoreColor(controller.avgPercentage.value),
-          )),
-        ),
-      ],
-    ));
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                title: 'Avg. Score',
+                value: controller.avgScore.value.toStringAsFixed(1),
+                subtitle: '/ ${AppConstants.maxTotalScore}',
+                color: AppColors.getScoreColor(controller.avgPercentage.value),
+              ),
+            ),
+            const SizedBox(width: AppConstants.kSpacingM),
+            Expanded(
+              child: Obx(() => _buildStatCard(
+                    title: 'Avg. %',
+                    value:
+                        '${controller.avgPercentage.value.toStringAsFixed(1)}%',
+                    subtitle: controller.selectedRangeLabel.value,
+                    color:
+                        AppColors.getScoreColor(controller.avgPercentage.value),
+                  )),
+            ),
+          ],
+        ));
   }
 
   Widget _buildStatCard({
@@ -282,7 +289,8 @@ class DashboardPage extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.lightSurface,
-        border: Border.all(color: AppColors.primaryOrange.withOpacity(0.35), width: 1),
+        border: Border.all(
+            color: AppColors.primaryOrange.withOpacity(0.35), width: 1),
         borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
         boxShadow: const [
           BoxShadow(
@@ -386,14 +394,14 @@ class DashboardPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Obx(() => Text(
-                'Score Trend (${controller.selectedRangeLabel.value})',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.lightTextPrimary,
-                  letterSpacing: -0.5,
-                ),
-              )),
+                    'Score Trend (${controller.selectedRangeLabel.value})',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.lightTextPrimary,
+                      letterSpacing: -0.5,
+                    ),
+                  )),
               const SizedBox(height: AppConstants.kSpacingXL),
               SizedBox(
                 height: 200,
@@ -413,15 +421,19 @@ class DashboardPage extends StatelessWidget {
                           },
                         ),
                       ),
-                      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles:
+                          AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles:
+                          AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 30,
                           getTitlesWidget: (value, meta) {
-                            if (value.toInt() >= 0 && value.toInt() < controller.activities.length) {
-                              final date = DateTime.parse(controller.activities[value.toInt()].date);
+                            if (value.toInt() >= 0 &&
+                                value.toInt() < controller.activities.length) {
+                              final date = DateTime.parse(
+                                  controller.activities[value.toInt()].date);
                               return Padding(
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: Text(
@@ -438,8 +450,10 @@ class DashboardPage extends StatelessWidget {
                     borderData: FlBorderData(show: false),
                     lineBarsData: [
                       LineChartBarData(
-                        spots: controller.activities.asMap().entries.map((entry) {
-                          return FlSpot(entry.key.toDouble(), entry.value.totalPoints);
+                        spots:
+                            controller.activities.asMap().entries.map((entry) {
+                          return FlSpot(
+                              entry.key.toDouble(), entry.value.totalPoints);
                         }).toList(),
                         isCurved: true,
                         color: AppColors.primaryOrange,
@@ -536,10 +550,20 @@ class DashboardPage extends StatelessWidget {
                       enabled: true,
                       touchTooltipData: BarTouchTooltipData(
                         getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                          final activities = ['Nindra', 'Wake', 'Sleep', 'Japa', 'Pathan', 'Sravan', 'Seva'];
+                          final activities = [
+                            'Nindra',
+                            'Wake',
+                            'Sleep',
+                            'Japa',
+                            'Pathan',
+                            'Sravan',
+                            'Seva'
+                          ];
                           return BarTooltipItem(
                             '${activities[group.x.toInt()]}\n${rod.toY.toStringAsFixed(1)} pts',
-                            const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
                           );
                         },
                       ),
@@ -550,8 +574,17 @@ class DashboardPage extends StatelessWidget {
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
-                            const activities = ['Nindra', 'Wake', 'Sleep', 'Japa', 'Pathan', 'Sravan', 'Seva'];
-                            if (value.toInt() >= 0 && value.toInt() < activities.length) {
+                            const activities = [
+                              'Nindra',
+                              'Wake',
+                              'Sleep',
+                              'Japa',
+                              'Pathan',
+                              'Sravan',
+                              'Seva'
+                            ];
+                            if (value.toInt() >= 0 &&
+                                value.toInt() < activities.length) {
                               return Padding(
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: Text(
@@ -576,47 +609,70 @@ class DashboardPage extends StatelessWidget {
                           },
                         ),
                       ),
-                      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles:
+                          AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles:
+                          AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     ),
                     gridData: FlGridData(show: true, drawVerticalLine: false),
                     borderData: FlBorderData(show: false),
                     barGroups: [
-                      BarChartGroupData(x: 0, barRods: [BarChartRodData(
-                        toY: controller.avgNindra.value, 
-                        color: controller.avgNindra.value < 0 ? Colors.red : AppColors.primaryOrange, 
-                        width: 16
-                      )]),
-                      BarChartGroupData(x: 1, barRods: [BarChartRodData(
-                        toY: controller.avgWakeUp.value, 
-                        color: controller.avgWakeUp.value < 0 ? Colors.red : Colors.blue, 
-                        width: 16
-                      )]),
-                      BarChartGroupData(x: 2, barRods: [BarChartRodData(
-                        toY: controller.avgDaySleep.value, 
-                        color: controller.avgDaySleep.value < 0 ? Colors.red : Colors.purple, 
-                        width: 16
-                      )]),
-                      BarChartGroupData(x: 3, barRods: [BarChartRodData(
-                        toY: controller.avgJapa.value, 
-                        color: controller.avgJapa.value < 0 ? Colors.red : Colors.green, 
-                        width: 16
-                      )]),
-                      BarChartGroupData(x: 4, barRods: [BarChartRodData(
-                        toY: controller.avgPathan.value, 
-                        color: controller.avgPathan.value < 0 ? Colors.red : Colors.teal, 
-                        width: 16
-                      )]),
-                      BarChartGroupData(x: 5, barRods: [BarChartRodData(
-                        toY: controller.avgSravan.value, 
-                        color: controller.avgSravan.value < 0 ? Colors.red : Colors.indigo, 
-                        width: 16
-                      )]),
-                      BarChartGroupData(x: 6, barRods: [BarChartRodData(
-                        toY: controller.avgSeva.value, 
-                        color: controller.avgSeva.value < 0 ? Colors.red : Colors.red.shade400, 
-                        width: 16
-                      )]),
+                      BarChartGroupData(x: 0, barRods: [
+                        BarChartRodData(
+                            toY: controller.avgNindra.value,
+                            color: controller.avgNindra.value < 0
+                                ? Colors.red
+                                : AppColors.primaryOrange,
+                            width: 16)
+                      ]),
+                      BarChartGroupData(x: 1, barRods: [
+                        BarChartRodData(
+                            toY: controller.avgWakeUp.value,
+                            color: controller.avgWakeUp.value < 0
+                                ? Colors.red
+                                : Colors.blue,
+                            width: 16)
+                      ]),
+                      BarChartGroupData(x: 2, barRods: [
+                        BarChartRodData(
+                            toY: controller.avgDaySleep.value,
+                            color: controller.avgDaySleep.value < 0
+                                ? Colors.red
+                                : Colors.purple,
+                            width: 16)
+                      ]),
+                      BarChartGroupData(x: 3, barRods: [
+                        BarChartRodData(
+                            toY: controller.avgJapa.value,
+                            color: controller.avgJapa.value < 0
+                                ? Colors.red
+                                : Colors.green,
+                            width: 16)
+                      ]),
+                      BarChartGroupData(x: 4, barRods: [
+                        BarChartRodData(
+                            toY: controller.avgPathan.value,
+                            color: controller.avgPathan.value < 0
+                                ? Colors.red
+                                : Colors.teal,
+                            width: 16)
+                      ]),
+                      BarChartGroupData(x: 5, barRods: [
+                        BarChartRodData(
+                            toY: controller.avgSravan.value,
+                            color: controller.avgSravan.value < 0
+                                ? Colors.red
+                                : Colors.indigo,
+                            width: 16)
+                      ]),
+                      BarChartGroupData(x: 6, barRods: [
+                        BarChartRodData(
+                            toY: controller.avgSeva.value,
+                            color: controller.avgSeva.value < 0
+                                ? Colors.red
+                                : Colors.red.shade400,
+                            width: 16)
+                      ]),
                     ],
                   ),
                 ),
@@ -688,21 +744,52 @@ class DashboardPage extends StatelessWidget {
                         entryRadius: 3,
                         dataEntries: [
                           // Normalize to 0-5 scale, treating negative as 0 for radar visualization
-                          RadarEntry(value: ((controller.avgNindra.value.clamp(-5, 25) + 5) / 30) * 5),
-                          RadarEntry(value: ((controller.avgWakeUp.value.clamp(-5, 25) + 5) / 30) * 5),
-                          RadarEntry(value: ((controller.avgDaySleep.value.clamp(-5, 25) + 5) / 30) * 5),
-                          RadarEntry(value: ((controller.avgJapa.value.clamp(0, 25)) / 25) * 5),
-                          RadarEntry(value: ((controller.avgPathan.value.clamp(0, 30)) / 30) * 5),
-                          RadarEntry(value: ((controller.avgSravan.value.clamp(0, 30)) / 30) * 5),
-                          RadarEntry(value: ((controller.avgSeva.value.clamp(0, 100)) / 100) * 5),
+                          RadarEntry(
+                              value:
+                                  ((controller.avgNindra.value.clamp(-5, 25) +
+                                              5) /
+                                          30) *
+                                      5),
+                          RadarEntry(
+                              value:
+                                  ((controller.avgWakeUp.value.clamp(-5, 25) +
+                                              5) /
+                                          30) *
+                                      5),
+                          RadarEntry(
+                              value:
+                                  ((controller.avgDaySleep.value.clamp(-5, 25) +
+                                              5) /
+                                          30) *
+                                      5),
+                          RadarEntry(
+                              value: ((controller.avgJapa.value.clamp(0, 25)) /
+                                      25) *
+                                  5),
+                          RadarEntry(
+                              value:
+                                  ((controller.avgPathan.value.clamp(0, 30)) /
+                                          30) *
+                                      5),
+                          RadarEntry(
+                              value:
+                                  ((controller.avgSravan.value.clamp(0, 30)) /
+                                          30) *
+                                      5),
+                          RadarEntry(
+                              value: ((controller.avgSeva.value.clamp(0, 100)) /
+                                      100) *
+                                  5),
                         ],
                       ),
                     ],
                     radarBackgroundColor: Colors.transparent,
                     borderData: FlBorderData(show: false),
-                    radarBorderData: const BorderSide(color: Colors.transparent),
+                    radarBorderData:
+                        const BorderSide(color: Colors.transparent),
                     titlePositionPercentageOffset: 0.2,
-                    titleTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                    titleTextStyle: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.w500),
                     getTitle: (index, angle) {
                       switch (index) {
                         case 0:
@@ -724,9 +811,12 @@ class DashboardPage extends StatelessWidget {
                       }
                     },
                     tickCount: 5,
-                    ticksTextStyle: const TextStyle(fontSize: 10, color: Colors.transparent),
-                    tickBorderData: const BorderSide(color: Colors.grey, width: 1),
-                    gridBorderData: const BorderSide(color: Colors.grey, width: 1),
+                    ticksTextStyle: const TextStyle(
+                        fontSize: 10, color: Colors.transparent),
+                    tickBorderData:
+                        const BorderSide(color: Colors.grey, width: 1),
+                    gridBorderData:
+                        const BorderSide(color: Colors.grey, width: 1),
                   ),
                 ),
               ),
@@ -742,7 +832,7 @@ class DashboardPage extends StatelessWidget {
       if (controller.activities.isEmpty) {
         return const SizedBox.shrink();
       }
-      
+
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(AppConstants.kSpacingM),
@@ -757,7 +847,8 @@ class DashboardPage extends StatelessWidget {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.primaryOrange.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -774,12 +865,15 @@ class DashboardPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppConstants.kSpacingM),
-              _buildActivityRow('🌙 Nindra (Sleep)', controller.avgNindra.value),
+              _buildActivityRow(
+                  '🌙 Nindra (Sleep)', controller.avgNindra.value),
               _buildActivityRow('🌅 Wake Up Time', controller.avgWakeUp.value),
               _buildActivityRow('😴 Day Sleep', controller.avgDaySleep.value),
               _buildActivityRow('📿 Japa Rounds', controller.avgJapa.value),
-              _buildActivityRow('📖 Pathan Reading', controller.avgPathan.value),
-              _buildActivityRow('👂 Sravan Listening', controller.avgSravan.value),
+              _buildActivityRow(
+                  '📖 Pathan Reading', controller.avgPathan.value),
+              _buildActivityRow(
+                  '👂 Sravan Listening', controller.avgSravan.value),
               _buildActivityRow('🙏 Seva Service', controller.avgSeva.value),
             ],
           ),
@@ -790,7 +884,7 @@ class DashboardPage extends StatelessWidget {
 
   Widget _buildActivityRow(String label, double score) {
     final percentage = (score / AppConstants.maxActivityScore) * 100;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -803,7 +897,8 @@ class DashboardPage extends StatelessWidget {
             child: LinearProgressIndicator(
               value: percentage / 100,
               backgroundColor: Colors.grey[200],
-              valueColor: AlwaysStoppedAnimation(AppColors.getScoreColor(percentage)),
+              valueColor:
+                  AlwaysStoppedAnimation(AppColors.getScoreColor(percentage)),
               minHeight: 8,
             ),
           ),
@@ -827,7 +922,8 @@ class DashboardPage extends StatelessWidget {
       selectedItemColor: AppColors.primaryOrange,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard), label: 'Dashboard'),
         BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
       ],
       onTap: (index) {

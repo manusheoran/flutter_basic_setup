@@ -10,7 +10,7 @@ import 'parameter_tracking_page.dart';
 
 class SettingsPage extends StatelessWidget {
   SettingsPage({super.key});
-  
+
   final SettingsController controller = Get.put(SettingsController());
   final AuthService _authService = Get.find<AuthService>();
 
@@ -18,7 +18,7 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Load user if not already loaded
     _ensureUserLoaded();
-    
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -56,7 +56,7 @@ class SettingsPage extends StatelessWidget {
   Widget _buildProfileCard(BuildContext context) {
     return Obx(() {
       final user = Get.find<AuthService>().currentUser.value;
-      
+
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -75,96 +75,103 @@ class SettingsPage extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.all(AppConstants.kSpacingL),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 35,
-                  backgroundColor: AppColors.primaryOrange,
-                  child: Text(
-                    user?.name?.substring(0, 1).toUpperCase() ?? 'U',
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundColor: AppColors.primaryOrange,
+                    child: Text(
+                      user?.name?.substring(0, 1).toUpperCase() ?? 'U',
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: AppConstants.kSpacingM),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user?.name ?? 'User',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        user?.email ?? '',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryOrange.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          user?.role?.toUpperCase() ?? 'USER',
+                  const SizedBox(width: AppConstants.kSpacingM),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user?.name ?? 'User',
                           style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryOrange,
+                              fontSize: 18, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          user?.email ?? '',
+                          style:
+                              TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryOrange.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            user?.role?.toUpperCase() ?? 'USER',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryOrange,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () async {
-                    print('🔧 Edit button clicked');
-                    if (user == null) {
-                      print('❌ User is null');
-                      Get.snackbar(
-                        'Error',
-                        'User profile not loaded',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.red,
-                        colorText: Colors.white,
+                  IconButton(
+                    onPressed: () async {
+                      print('🔧 Edit button clicked');
+                      if (user == null) {
+                        print('❌ User is null');
+                        Get.snackbar(
+                          'Error',
+                          'User profile not loaded',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                        );
+                        return;
+                      }
+
+                      print('✅ Opening profile edit dialog for: ${user.name}');
+                      await showDialog(
+                        context: context,
+                        builder: (ctx) => ProfileEditDialog(user: user),
                       );
-                      return;
-                    }
-                    
-                    print('✅ Opening profile edit dialog for: ${user.name}');
-                    await showDialog(
-                      context: context,
-                      builder: (ctx) => ProfileEditDialog(user: user),
-                    );
-                  },
-                  icon: const Icon(Icons.edit, color: AppColors.primaryOrange),
-                  tooltip: 'Edit Profile',
-                ),
-              ],
-            ),
-            if (user?.phoneNumber != null || user?.occupation != null || user?.gender != null) ...[
-              const Divider(height: 24),
-              Column(
-                children: [
-                  if (user?.phoneNumber != null)
-                    _buildInfoRow(Icons.phone, 'Phone', user!.phoneNumber!),
-                  if (user?.occupation != null)
-                    _buildInfoRow(Icons.work, 'Occupation', user!.occupation!),
-                  if (user?.gender != null)
-                    _buildInfoRow(Icons.wc, 'Gender', user!.gender!),
+                    },
+                    icon:
+                        const Icon(Icons.edit, color: AppColors.primaryOrange),
+                    tooltip: 'Edit Profile',
+                  ),
                 ],
               ),
+              if (user?.phoneNumber != null ||
+                  user?.occupation != null ||
+                  user?.gender != null) ...[
+                const Divider(height: 24),
+                Column(
+                  children: [
+                    if (user?.phoneNumber != null)
+                      _buildInfoRow(Icons.phone, 'Phone', user!.phoneNumber!),
+                    if (user?.occupation != null)
+                      _buildInfoRow(
+                          Icons.work, 'Occupation', user!.occupation!),
+                    if (user?.gender != null)
+                      _buildInfoRow(Icons.wc, 'Gender', user!.gender!),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
-      ),
       );
     });
   }
@@ -202,9 +209,11 @@ class SettingsPage extends StatelessWidget {
         padding: const EdgeInsets.all(AppConstants.kSpacingM),
         child: Obx(() {
           final user = _authService.firebaseUser.value;
-          final isEmailProvider = user?.providerData.any((p) => p.providerId == 'password') ?? false;
+          final isEmailProvider =
+              user?.providerData.any((p) => p.providerId == 'password') ??
+                  false;
           final isEmailVerified = user?.emailVerified ?? true;
-          
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -213,7 +222,7 @@ class SettingsPage extends StatelessWidget {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: AppConstants.kSpacingM),
-              
+
               // Email Verification Status (only for email/password users)
               if (isEmailProvider && !isEmailVerified) ...[
                 Container(
@@ -264,7 +273,8 @@ class SettingsPage extends StatelessWidget {
                             side: const BorderSide(color: Colors.orange),
                           ),
                           onPressed: () async {
-                            final error = await _authService.resendVerificationEmail();
+                            final error =
+                                await _authService.resendVerificationEmail();
                             if (error != null) {
                               Get.snackbar(
                                 'Error',
@@ -291,7 +301,7 @@ class SettingsPage extends StatelessWidget {
                 const SizedBox(height: 12),
                 const Divider(),
               ],
-              
+
               // Reset Password (only for email/password users)
               if (isEmailProvider) ...[
                 ListTile(
@@ -303,7 +313,6 @@ class SettingsPage extends StatelessWidget {
                 ),
                 const Divider(),
               ],
-              
             ],
           );
         }),
@@ -312,9 +321,11 @@ class SettingsPage extends StatelessWidget {
   }
 
   void _showResetPasswordDialog(BuildContext context) {
-    final TextEditingController currentPasswordController = TextEditingController();
+    final TextEditingController currentPasswordController =
+        TextEditingController();
     final TextEditingController newPasswordController = TextEditingController();
-    final TextEditingController confirmPasswordController = TextEditingController();
+    final TextEditingController confirmPasswordController =
+        TextEditingController();
     final RxBool isLoading = false.obs;
     final RxBool showCurrentPassword = false.obs;
     final RxBool showNewPassword = false.obs;
@@ -328,58 +339,61 @@ class SettingsPage extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Obx(() => TextField(
-                controller: currentPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Current Password',
-                  hintText: 'Enter current password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      showCurrentPassword.value
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                    controller: currentPasswordController,
+                    decoration: InputDecoration(
+                      labelText: 'Current Password',
+                      hintText: 'Enter current password',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          showCurrentPassword.value
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () => showCurrentPassword.value =
+                            !showCurrentPassword.value,
+                      ),
                     ),
-                    onPressed: () => showCurrentPassword.value = !showCurrentPassword.value,
-                  ),
-                ),
-                obscureText: !showCurrentPassword.value,
-              )),
+                    obscureText: !showCurrentPassword.value,
+                  )),
               const SizedBox(height: 16),
               Obx(() => TextField(
-                controller: newPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'New Password',
-                  hintText: 'Enter new password',
-                  prefixIcon: const Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      showNewPassword.value
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                    controller: newPasswordController,
+                    decoration: InputDecoration(
+                      labelText: 'New Password',
+                      hintText: 'Enter new password',
+                      prefixIcon: const Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          showNewPassword.value
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () =>
+                            showNewPassword.value = !showNewPassword.value,
+                      ),
                     ),
-                    onPressed: () => showNewPassword.value = !showNewPassword.value,
-                  ),
-                ),
-                obscureText: !showNewPassword.value,
-              )),
+                    obscureText: !showNewPassword.value,
+                  )),
               const SizedBox(height: 16),
               Obx(() => TextField(
-                controller: confirmPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Confirm New Password',
-                  hintText: 'Confirm new password',
-                  prefixIcon: const Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      showConfirmPassword.value
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                    controller: confirmPasswordController,
+                    decoration: InputDecoration(
+                      labelText: 'Confirm New Password',
+                      hintText: 'Confirm new password',
+                      prefixIcon: const Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          showConfirmPassword.value
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () => showConfirmPassword.value =
+                            !showConfirmPassword.value,
+                      ),
                     ),
-                    onPressed: () => showConfirmPassword.value = !showConfirmPassword.value,
-                  ),
-                ),
-                obscureText: !showConfirmPassword.value,
-              )),
+                    obscureText: !showConfirmPassword.value,
+                  )),
             ],
           ),
         ),
@@ -394,90 +408,92 @@ class SettingsPage extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           Obx(() => ElevatedButton(
-            onPressed: isLoading.value
-                ? null
-                : () async {
-                    final currentPassword = currentPasswordController.text;
-                    final newPassword = newPasswordController.text;
-                    final confirmPassword = confirmPasswordController.text;
+                onPressed: isLoading.value
+                    ? null
+                    : () async {
+                        final currentPassword = currentPasswordController.text;
+                        final newPassword = newPasswordController.text;
+                        final confirmPassword = confirmPasswordController.text;
 
-                    if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
-                      Get.snackbar(
-                        'Error',
-                        'Please fill in all fields',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.red,
-                        colorText: Colors.white,
-                      );
-                      return;
-                    }
+                        if (currentPassword.isEmpty ||
+                            newPassword.isEmpty ||
+                            confirmPassword.isEmpty) {
+                          Get.snackbar(
+                            'Error',
+                            'Please fill in all fields',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                          );
+                          return;
+                        }
 
-                    if (newPassword != confirmPassword) {
-                      Get.snackbar(
-                        'Error',
-                        'New passwords do not match',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.red,
-                        colorText: Colors.white,
-                      );
-                      return;
-                    }
+                        if (newPassword != confirmPassword) {
+                          Get.snackbar(
+                            'Error',
+                            'New passwords do not match',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                          );
+                          return;
+                        }
 
-                    if (newPassword.length < 6) {
-                      Get.snackbar(
-                        'Error',
-                        'Password must be at least 6 characters',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.red,
-                        colorText: Colors.white,
-                      );
-                      return;
-                    }
+                        if (newPassword.length < 6) {
+                          Get.snackbar(
+                            'Error',
+                            'Password must be at least 6 characters',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                          );
+                          return;
+                        }
 
-                    isLoading.value = true;
+                        isLoading.value = true;
 
-                    final error = await _authService.resetPassword(
-                      currentPassword: currentPassword,
-                      newPassword: newPassword,
-                    );
+                        final error = await _authService.resetPassword(
+                          currentPassword: currentPassword,
+                          newPassword: newPassword,
+                        );
 
-                    isLoading.value = false;
+                        isLoading.value = false;
 
-                    Get.back(); // Close dialog
+                        Get.back(); // Close dialog
 
-                    if (error != null) {
-                      Get.snackbar(
-                        'Error',
-                        error,
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.red,
-                        colorText: Colors.white,
-                      );
-                    } else {
-                      Get.snackbar(
-                        'Success',
-                        'Password updated successfully',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.green,
-                        colorText: Colors.white,
-                      );
-                    }
+                        if (error != null) {
+                          Get.snackbar(
+                            'Error',
+                            error,
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                          );
+                        } else {
+                          Get.snackbar(
+                            'Success',
+                            'Password updated successfully',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.green,
+                            colorText: Colors.white,
+                          );
+                        }
 
-                    currentPasswordController.dispose();
-                    newPasswordController.dispose();
-                    confirmPasswordController.dispose();
-                  },
-            child: isLoading.value
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text('Update Password'),
-          )),
+                        currentPasswordController.dispose();
+                        newPasswordController.dispose();
+                        confirmPasswordController.dispose();
+                      },
+                child: isLoading.value
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Update Password'),
+              )),
         ],
       ),
     );
@@ -521,10 +537,10 @@ class SettingsPage extends StatelessWidget {
               leading: const Icon(Icons.dark_mode),
               title: const Text('Dark Mode'),
               trailing: Obx(() => Switch(
-                value: controller.isDarkMode.value,
-                onChanged: (value) => controller.toggleTheme(),
-                activeColor: AppColors.primaryOrange,
-              )),
+                    value: controller.isDarkMode.value,
+                    onChanged: (value) => controller.toggleTheme(),
+                    activeColor: AppColors.primaryOrange,
+                  )),
             ),
             const Divider(),
             ListTile(
@@ -548,25 +564,25 @@ class SettingsPage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Obx(() => RadioListTile<String>(
-              title: const Text('English'),
-              value: 'en',
-              groupValue: controller.selectedLocale.value,
-              onChanged: (value) async {
-                await controller.changeLanguage('English', 'en');
-                Get.back();
-              },
-              activeColor: AppColors.primaryOrange,
-            )),
+                  title: const Text('English'),
+                  value: 'en',
+                  groupValue: controller.selectedLocale.value,
+                  onChanged: (value) async {
+                    await controller.changeLanguage('English', 'en');
+                    Get.back();
+                  },
+                  activeColor: AppColors.primaryOrange,
+                )),
             Obx(() => RadioListTile<String>(
-              title: const Text('हिंदी (Hindi)'),
-              value: 'hi',
-              groupValue: controller.selectedLocale.value,
-              onChanged: (value) async {
-                await controller.changeLanguage('हिंदी', 'hi');
-                Get.back();
-              },
-              activeColor: AppColors.primaryOrange,
-            )),
+                  title: const Text('हिंदी (Hindi)'),
+                  value: 'hi',
+                  groupValue: controller.selectedLocale.value,
+                  onChanged: (value) async {
+                    await controller.changeLanguage('हिंदी', 'hi');
+                    Get.back();
+                  },
+                  activeColor: AppColors.primaryOrange,
+                )),
           ],
         ),
         actions: [
@@ -780,28 +796,28 @@ class SettingsPage extends StatelessWidget {
             ),
             const SizedBox(height: AppConstants.kSpacingM),
             Obx(() => SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: controller.isRequestingMentor.value
-                    ? null
-                    : () => controller.requestMentor(),
-                icon: controller.isRequestingMentor.value
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.send),
-                label: const Text('Request Mentor'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryOrange,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            )),
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: controller.isRequestingMentor.value
+                        ? null
+                        : () => controller.requestMentor(),
+                    icon: controller.isRequestingMentor.value
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.send),
+                    label: const Text('Request Mentor'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryOrange,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                )),
           ],
         ),
       ),
@@ -831,7 +847,8 @@ class SettingsPage extends StatelessWidget {
       selectedItemColor: AppColors.primaryOrange,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard), label: 'Dashboard'),
         BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
       ],
       onTap: (index) {
@@ -842,7 +859,8 @@ class SettingsPage extends StatelessWidget {
   }
 
   void _ensureUserLoaded() {
-    if (_authService.currentUser.value == null && _authService.currentUserId != null) {
+    if (_authService.currentUser.value == null &&
+        _authService.currentUserId != null) {
       print('⚠️ Settings: User not loaded, loading now...');
       _authService.loadCurrentUser(_authService.currentUserId!);
     }

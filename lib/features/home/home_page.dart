@@ -42,129 +42,241 @@ class HomePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildDateSelector(controller),
+              _buildHeaderSection(controller),
               const SizedBox(height: AppConstants.kSpacingL),
               _buildScoreCard(controller),
               const SizedBox(height: AppConstants.kSpacingL),
               _buildActivityCards(controller, context),
-              const SizedBox(height: AppConstants.kSpacingXL),
-              _buildSaveButton(controller),
-              const SizedBox(height: 80),
+              const SizedBox(height: AppConstants.kSpacing3XL),
             ],
           ),
         );
       }),
-      bottomNavigationBar: _buildBottomNav(),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildUnsavedChangesBar(controller),
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: _buildBottomNav(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderSection(HomeController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Track your Sadhana',
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.4,
+          ),
+        ),
+        const SizedBox(height: AppConstants.kSpacingS),
+        Text(
+          'Choose a day and capture today’s practices',
+          style: TextStyle(
+            color: AppColors.lightTextSecondary,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: AppConstants.kSpacingL),
+        _buildDateSelector(controller),
+      ],
     );
   }
 
   Widget _buildDateSelector(HomeController controller) {
     return Obx(() => Container(
-          margin: const EdgeInsets.only(bottom: AppConstants.kSpacingM),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+            gradient: LinearGradient(
+              colors: [
+                AppColors.primaryOrange.withOpacity(0.15),
+                AppColors.lightSurface,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
             border: Border.all(
-              color: AppColors.lightBorder.withOpacity(0.6),
-              width: 1.5,
+              color: AppColors.primaryOrange.withOpacity(0.2),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.shadowMedium,
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-              BoxShadow(
-                color: AppColors.shadowLight,
-                blurRadius: 12,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.kSpacingM,
-              vertical: 6,
-            ),
-            child: Row(
-              children: controller.visibleDates.map((date) {
-                final isSelected = DateFormat('yyyy-MM-dd').format(date) ==
-                    DateFormat('yyyy-MM-dd').format(controller.selectedDate.value);
-                final isToday = DateFormat('yyyy-MM-dd').format(date) ==
-                    DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: InkWell(
-                    onTap: () {
-                      controller.selectedDate.value = date;
-                      controller.setupActivityStream(date);
-                    },
-                    borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
-                    child: Container(
-                      width: 70,
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isSelected 
-                            ? AppColors.primaryOrange 
-                            : AppColors.lightSurface,
-                        borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
-                        border: Border.all(
-                          color: isToday && !isSelected
-                              ? AppColors.primaryOrange
-                              : isSelected
-                                  ? AppColors.primaryOrange.withOpacity(0.3)
-                                  : AppColors.lightBorder,
-                          width: isToday && !isSelected ? 2 : 1.5,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryOrange,
+                      borderRadius: BorderRadius.circular(AppConstants.kRadiusFull),
+                    ),
+                    child: Row(
+                      children: const [
+                        Icon(
+                          Icons.calendar_today,
+                          color: Colors.white,
+                          size: 16,
                         ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            DateFormat('EEE').format(date),
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: isSelected ? Colors.white : AppColors.lightTextSecondary,
-                              fontWeight: FontWeight.w500,
-                            ),
+                        SizedBox(width: 6),
+                        Text(
+                          'Daily overview',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            DateFormat('dd').format(date),
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: isSelected ? Colors.white : AppColors.lightTextPrimary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          if (isToday)
-                            Container(
-                              margin: const EdgeInsets.only(top: 2),
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Colors.white.withOpacity(0.25)
-                                    : AppColors.sageLight,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'Today',
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  color: isSelected ? Colors.white : AppColors.deepTeal,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                );
-              }).toList(),
-            ),
+                  const Spacer(),
+                  TextButton.icon(
+                    onPressed: () async {
+                      final currentContext = Get.context;
+                      if (currentContext == null) return;
+
+                      final earliestDate = DateTime.now().subtract(
+                        Duration(days: AppConstants.visibleActivityDays),
+                      );
+
+                      final pickedDate = await showDatePicker(
+                        context: currentContext,
+                        initialDate: controller.selectedDate.value,
+                        firstDate: earliestDate,
+                        lastDate: DateTime.now(),
+                      );
+                      if (pickedDate != null) {
+                        controller.changeDate(pickedDate);
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primaryOrange,
+                    ),
+                    icon: const Icon(Icons.edit_calendar_outlined),
+                    label: const Text('Pick date'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppConstants.kSpacingM),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: controller.visibleDates.map((date) {
+                    final isSelected = DateFormat('yyyy-MM-dd').format(date) ==
+                        DateFormat('yyyy-MM-dd')
+                            .format(controller.selectedDate.value);
+                    final isToday = DateFormat('yyyy-MM-dd').format(date) ==
+                        DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: InkWell(
+                        onTap: () => controller.changeDate(date),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.kRadiusM),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.primaryOrange
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.kRadiusM,
+                            ),
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.primaryOrange
+                                  : AppColors.lightBorder.withOpacity(0.3),
+                            ),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color:
+                                          AppColors.primaryOrange.withOpacity(0.35),
+                                      blurRadius: 16,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ]
+                                : [],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                DateFormat('EEE').format(date).toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : AppColors.lightTextSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                DateFormat('dd').format(date),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : AppColors.lightTextPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isToday
+                                      ? (isSelected
+                                          ? Colors.white.withOpacity(0.2)
+                                          : AppColors.primaryOrange
+                                              .withOpacity(0.1))
+                                      : Colors.white.withOpacity(0.0),
+                                  borderRadius: BorderRadius.circular(
+                                    AppConstants.kRadiusFull,
+                                  ),
+                                ),
+                                child: Text(
+                                  isToday
+                                      ? 'Today'
+                                      : DateFormat('MMM').format(date),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : AppColors.primaryOrange,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
           ),
         ));
   }
@@ -346,8 +458,8 @@ class HomePage extends StatelessWidget {
         title: title,
         icon: icon,
         color: color,
-        score: score != 0 ? score : null,
-        maxScore: score != 0 ? maxScore : null,
+        score: score,
+        maxScore: maxScore,
         child: activityWidget,
       );
     });
@@ -515,35 +627,115 @@ class HomePage extends StatelessWidget {
     ));
   }
 
-  Widget _buildSaveButton(HomeController controller) {
-    return Obx(() => SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: controller.isSaving.value
-                ? null
-                : () => controller.saveActivity(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryOrange,
-              elevation: 8,
-              shadowColor: AppColors.primaryOrange.withOpacity(0.4),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
-              ),
-            ),
-            child: controller.isSaving.value
-                ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 3)
-                : const Text(
-                    'Save Activity',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                      color: Colors.white,
+  Widget _buildUnsavedChangesBar(HomeController controller) {
+    return Obx(() {
+      final showBar = controller.hasUnsavedChanges.value;
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        height: showBar ? null : 0,
+        child: showBar
+            ? SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: AppConstants.kDefaultPadding,
+                    right: AppConstants.kDefaultPadding,
+                    bottom: AppConstants.kSpacingXS,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppConstants.kSpacingM,
+                      vertical: AppConstants.kSpacingS,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.sageLight,
+                      borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: AppColors.shadowMedium,
+                          blurRadius: 14,
+                          offset: Offset(0, 8),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: AppColors.accentSage.withOpacity(0.4),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.coralDanger.withOpacity(0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.pending_actions,
+                            color: AppColors.coralDanger,
+                          ),
+                        ),
+                        const SizedBox(width: AppConstants.kSpacingM),
+                        Expanded(
+                          child: Text(
+                            'Progress updated',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.deepTeal,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: controller.isSaving.value
+                              ? null
+                              : controller.discardChanges,
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.coralDanger,
+                          ),
+                          child: const Text('Discard'),
+                        ),
+                        const SizedBox(width: AppConstants.kSpacingS),
+                        ElevatedButton(
+                          onPressed: controller.isSaving.value
+                              ? null
+                              : controller.saveActivity,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.accentSage,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppConstants.kSpacingL,
+                              vertical: AppConstants.kSpacingS,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppConstants.kRadiusL),
+                            ),
+                          ),
+                          child: controller.isSaving.value
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Save',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ],
                     ),
                   ),
-          ),
-        ));
+                ),
+              )
+            : const SizedBox.shrink(),
+      );
+    });
   }
 
   Widget _buildBottomNav() {

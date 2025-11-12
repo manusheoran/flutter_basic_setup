@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../data/models/activity_model.dart';
 import '../../data/services/firestore_service.dart';
@@ -19,6 +20,7 @@ class HomeController extends GetxController {
   RxBool isLoading = false.obs;
   RxBool isSaving = false.obs;
   RxBool documentNotFound = false.obs; // Track if document doesn't exist
+  RxBool hasUnsavedChanges = false.obs;
   
   // User's activity tracking configuration
   RxMap<String, bool> userActivityTracking = <String, bool>{}.obs;
@@ -39,10 +41,14 @@ class HomeController extends GetxController {
   
   // Stream subscription
   StreamSubscription<DailyActivity?>? _activitySubscription;
+  late final Worker _fieldChangeWorker;
+  final Map<String, Map<String, dynamic>> _baselineSnapshots = {};
+  bool _suppressDirtyCheck = false;
   
   @override
   void onInit() {
     super.onInit();
+    _setupFieldListeners();
     _initializeController();
   }
 
@@ -62,6 +68,7 @@ class HomeController extends GetxController {
   @override
   void onClose() {
     _activitySubscription?.cancel();
+    _fieldChangeWorker.dispose();
     super.onClose();
   }
   
@@ -142,6 +149,7 @@ class HomeController extends GetxController {
       (activity) {
         isLoading.value = false;
         
+        _suppressDirtyCheck = true;
         if (activity == null) {
           documentNotFound.value = true;
           currentActivity.value = null;
@@ -166,6 +174,10 @@ class HomeController extends GetxController {
           
           print('🔄 Activity updated from stream for $dateStr');
         }
+        final snapshot = _snapshotCurrentValues();
+        _storeBaseline(dateStr, snapshot);
+        _suppressDirtyCheck = false;
+        hasUnsavedChanges.value = false;
       },
       onError: (error) {
         isLoading.value = false;
@@ -390,6 +402,80 @@ class HomeController extends GetxController {
     selectedDate.value = date;
     setupActivityStream(date);
   }
+  
+  void discardChanges() {
+    final dateKey = _dateKey(selectedDate.value);
+    final baseline = _baselineSnapshots[dateKey];
+
+    _suppressDirtyCheck = true;
+    if (baseline == null) {
+      clearFields();
+    } else {
+      nindraTime.value = (baseline['nindraTime'] as String?) ?? '';
+      wakeUpTime.value = (baseline['wakeUpTime'] as String?) ?? '';
+      daySleepMinutes.value = (baseline['daySleepMinutes'] as int?) ?? 0;
+      japaRounds.value = (baseline['japaRounds'] as int?) ?? 0;
+      japaTime.value = (baseline['japaTime'] as String?) ?? '';
+      pathanMinutes.value = (baseline['pathanMinutes'] as int?) ?? 0;
+      sravanMinutes.value = (baseline['sravanMinutes'] as int?) ?? 0;
+      sevaMinutes.value = (baseline['sevaMinutes'] as int?) ?? 0;
+    }
+    calculateScores();
+    _suppressDirtyCheck = false;
+    hasUnsavedChanges.value = false;
+  }
+
+  void _setupFieldListeners() {
+    _fieldChangeWorker = everAll([
+      nindraTime,
+      wakeUpTime,
+      daySleepMinutes,
+      japaRounds,
+      japaTime,
+      pathanMinutes,
+      sravanMinutes,
+      sevaMinutes,
+    ], (_) => _evaluateDirtyState());
+  }
+
+  void _evaluateDirtyState() {
+    if (_suppressDirtyCheck) {
+      return;
+    }
+
+    final dateKey = _dateKey(selectedDate.value);
+    final baseline = _baselineSnapshots[dateKey];
+    final currentSnapshot = _snapshotCurrentValues();
+
+    if (baseline == null) {
+      hasUnsavedChanges.value = currentSnapshot.values.any((element) {
+        if (element is String) return element.isNotEmpty;
+        if (element is num) return element != 0;
+        return element != null;
+      });
+    } else {
+      hasUnsavedChanges.value = !mapEquals(baseline, currentSnapshot);
+    }
+  }
+
+  Map<String, dynamic> _snapshotCurrentValues() {
+    return {
+      'nindraTime': nindraTime.value,
+      'wakeUpTime': wakeUpTime.value,
+      'daySleepMinutes': daySleepMinutes.value,
+      'japaRounds': japaRounds.value,
+      'japaTime': japaTime.value,
+      'pathanMinutes': pathanMinutes.value,
+      'sravanMinutes': sravanMinutes.value,
+      'sevaMinutes': sevaMinutes.value,
+    };
+  }
+
+  void _storeBaseline(String dateKey, Map<String, dynamic> snapshot) {
+    _baselineSnapshots[dateKey] = Map<String, dynamic>.from(snapshot);
+  }
+
+  String _dateKey(DateTime date) => DateFormat('yyyy-MM-dd').format(date);
   
   // Helper to parse time string (HH:mm) to DateTime
   DateTime? _parseTime(String timeStr) {
