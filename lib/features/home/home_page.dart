@@ -96,9 +96,18 @@ class HomePage extends StatelessWidget {
             vertical: AppConstants.kSpacingXS,
           ),
           decoration: BoxDecoration(
-            color: AppColors.lightSurface,
+            gradient: LinearGradient(
+              colors: [
+                AppColors.lightPeach,
+                AppColors.lightSurface,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
-            border: Border.all(color: AppColors.primaryOrange.withOpacity(0.2)),
+            border: Border.all(
+              color: AppColors.lightOrangeWarning.withOpacity(0.5),
+            ),
           ),
           child: Row(
             children: [
@@ -964,7 +973,8 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
 
     final double selectorFraction = lerpDouble(0.58, 0.48, collapseT)!;
-    final double spacing = lerpDouble(AppConstants.kSpacingL, AppConstants.kSpacingS, collapseT)!;
+    final double spacing =
+        lerpDouble(AppConstants.kSpacingL, AppConstants.kSpacingS, collapseT)!;
 
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
