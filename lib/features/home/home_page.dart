@@ -52,6 +52,38 @@ class HomePage extends StatelessWidget {
                     _buildScoreCard(controller, progress),
               ),
             ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppConstants.kDefaultPadding,
+                  AppConstants.kSpacingS,
+                  AppConstants.kDefaultPadding,
+                  AppConstants.kSpacingXS,
+                ),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Divider(color: AppColors.lightBorder, thickness: 1),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppConstants.kSpacingS,
+                      ),
+                      child: const Text(
+                        'Activity',
+                        style: TextStyle(
+                          color: AppColors.lightTextSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const Expanded(
+                      child: Divider(color: AppColors.lightBorder, thickness: 1),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             SliverPadding(
               padding: EdgeInsets.fromLTRB(
                 AppConstants.kDefaultPadding,
@@ -95,20 +127,7 @@ class HomePage extends StatelessWidget {
             horizontal: AppConstants.kSpacingS,
             vertical: AppConstants.kSpacingXS,
           ),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                AppColors.lightPeach,
-                AppColors.lightSurface,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
-            border: Border.all(
-              color: AppColors.lightOrangeWarning.withOpacity(0.5),
-            ),
-          ),
+          decoration: null,
           child: Row(
             children: [
               Expanded(
@@ -186,20 +205,7 @@ class HomePage extends StatelessWidget {
 
     return Obx(() => Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                AppColors.lightPeach,
-                AppColors.lightSurface,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
-            border: Border.all(
-              color: AppColors.lightOrangeWarning.withOpacity(0.5),
-            ),
-          ),
+          decoration: null,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -468,7 +474,7 @@ class HomePage extends StatelessWidget {
                   ],
                 )
               : Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: _ScoreColumn(
@@ -477,7 +483,7 @@ class HomePage extends StatelessWidget {
                         subtitle: 'of $maxScore points',
                         valueFontSize: valueFontSize,
                         compact: showCompact,
-                        alignment: TextAlign.start,
+                        alignment: TextAlign.center,
                       ),
                     ),
                     Padding(
@@ -499,7 +505,7 @@ class HomePage extends StatelessWidget {
                         subtitle: '',
                         valueFontSize: percentFontSize,
                         compact: showCompact,
-                        alignment: TextAlign.end,
+                        alignment: TextAlign.center,
                       ),
                     ),
                   ],
@@ -901,7 +907,9 @@ class _ScoreColumn extends StatelessWidget {
     return Column(
       crossAxisAlignment: alignment == TextAlign.end
           ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
+          : (alignment == TextAlign.center
+              ? CrossAxisAlignment.center
+              : CrossAxisAlignment.start),
       children: [
         Text(
           title,
