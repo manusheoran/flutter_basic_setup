@@ -45,7 +45,7 @@ class HomePage extends StatelessWidget {
               pinned: true,
               delegate: _HomeHeaderDelegate(
                 maxExtentHeight: 360,
-                minExtentHeight: 220,
+                minExtentHeight: 140,
                 dateSelectorBuilder: (context, progress) =>
                     _buildDateSelector(controller, progress),
                 scoreCardBuilder: (context, progress) =>
@@ -80,7 +80,7 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildDateSelector(HomeController controller, double collapseProgress) {
-    final bool isCollapsed = collapseProgress > 0.65;
+    final bool isCollapsed = collapseProgress > 0.45;
 
     if (isCollapsed) {
       return Obx(() {
@@ -89,7 +89,10 @@ class HomePage extends StatelessWidget {
 
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(AppConstants.kSpacingS),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.kSpacingS,
+            vertical: AppConstants.kSpacingXS,
+          ),
           decoration: BoxDecoration(
             color: AppColors.lightSurface,
             borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
@@ -358,17 +361,17 @@ class HomePage extends StatelessWidget {
       final double percentageValue = controller.percentage.value.isNaN
           ? 0.0
           : controller.percentage.value.clamp(0.0, 100.0);
-      final bool showCompact = collapseProgress > 0.55;
+      final bool showCompact = collapseProgress > 0.35;
 
       final totalScore = controller.totalScore.value.toStringAsFixed(1);
       final maxScore = controller.maxTotalScore.value.toStringAsFixed(0);
       final percentLabel = percentageValue.toStringAsFixed(1);
 
       final double paddingVertical =
-          showCompact ? AppConstants.kSpacingXS : AppConstants.kSpacingM;
-      final double valueFontSize = showCompact ? 21 : 28;
-      final double percentFontSize = showCompact ? 21 : 28;
-      final double dividerHeight = showCompact ? 36 : 60;
+          showCompact ? 2.0 : AppConstants.kSpacingM;
+      final double valueFontSize = showCompact ? 18 : 28;
+      final double percentFontSize = showCompact ? 18 : 28;
+      final double dividerHeight = showCompact ? 30 : 60;
 
       return Container(
         decoration: BoxDecoration(
@@ -898,13 +901,13 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
 
     final EdgeInsets padding = EdgeInsets.fromLTRB(
       AppConstants.kDefaultPadding,
-      lerpDouble(AppConstants.kSpacingL, AppConstants.kSpacingS, collapseT)!,
+      lerpDouble(AppConstants.kSpacingL, AppConstants.kSpacingXS, collapseT)!,
       AppConstants.kDefaultPadding,
-      lerpDouble(AppConstants.kSpacingS, AppConstants.kSpacingXS, collapseT)!,
+      lerpDouble(AppConstants.kSpacingS, 2.0, collapseT)!,
     );
 
-    final double selectorFraction = lerpDouble(0.62, 0.45, collapseT)!;
-    final double spacing = lerpDouble(AppConstants.kSpacingL, AppConstants.kSpacingXS, collapseT)!;
+    final double selectorFraction = lerpDouble(0.58, 0.48, collapseT)!;
+    final double spacing = lerpDouble(AppConstants.kSpacingL, 2.0, collapseT)!;
 
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -924,7 +927,7 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     SizedBox(
-                      height: selectorHeight.clamp(80.0, height),
+                      height: selectorHeight.clamp(40.0, height),
                       child: Align(
                         alignment: Alignment.topCenter,
                         child: SizedBox.expand(
@@ -934,7 +937,7 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
                     ),
                     SizedBox(height: spacing),
                     SizedBox(
-                      height: scoreHeight.clamp(80.0, height),
+                      height: scoreHeight.clamp(60.0, height),
                       child: Align(
                         alignment: Alignment.topCenter,
                         child: SizedBox.expand(
