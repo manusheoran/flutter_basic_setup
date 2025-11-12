@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -37,19 +39,31 @@ class HomePage extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(AppConstants.kDefaultPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeaderSection(controller),
-              const SizedBox(height: AppConstants.kSpacingL),
-              _buildScoreCard(controller),
-              const SizedBox(height: AppConstants.kSpacingL),
-              _buildActivityCards(controller, context),
-              const SizedBox(height: AppConstants.kSpacing3XL),
-            ],
-          ),
+        return CustomScrollView(
+          slivers: [
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _HomeHeaderDelegate(
+                maxExtentHeight: 360,
+                minExtentHeight: 220,
+                dateSelectorBuilder: (context, progress) =>
+                    _buildDateSelector(controller, progress),
+                scoreCardBuilder: (context, progress) =>
+                    _buildScoreCard(controller, progress),
+              ),
+            ),
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                AppConstants.kDefaultPadding,
+                AppConstants.kSpacingL,
+                AppConstants.kDefaultPadding,
+                AppConstants.kSpacing3XL + 72,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: _buildActivityCards(controller, context),
+              ),
+            ),
+          ],
         );
       }),
       bottomNavigationBar: Column(
@@ -65,39 +79,98 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderSection(HomeController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Track your Sadhana',
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            letterSpacing: -0.4,
-          ),
-        ),
-        const SizedBox(height: AppConstants.kSpacingS),
-        Text(
-          'Choose a day and capture today’s practices',
-          style: TextStyle(
-            color: AppColors.lightTextSecondary,
-            fontSize: 14,
-          ),
-        ),
-        const SizedBox(height: AppConstants.kSpacingL),
-        _buildDateSelector(controller),
-      ],
-    );
-  }
+  Widget _buildDateSelector(HomeController controller, double collapseProgress) {
+    final bool isCollapsed = collapseProgress > 0.65;
 
-  Widget _buildDateSelector(HomeController controller) {
+    if (isCollapsed) {
+      return Obx(() {
+        final visibleDates = controller.visibleDates;
+        final selectedKey = DateFormat('yyyy-MM-dd').format(controller.selectedDate.value);
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppConstants.kSpacingS),
+          decoration: BoxDecoration(
+            color: AppColors.lightSurface,
+            borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
+            border: Border.all(color: AppColors.primaryOrange.withOpacity(0.2)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: visibleDates.map((date) {
+                      final key = DateFormat('yyyy-MM-dd').format(date);
+                      final bool isSelected = key == selectedKey;
+                      final bool isToday = key == DateFormat('yyyy-MM-dd').format(DateTime.now());
+                      return Padding(
+                        padding: const EdgeInsets.only(right: AppConstants.kSpacingS),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(AppConstants.kRadiusFull),
+                          onTap: () => controller.changeDate(date),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppConstants.kSpacingM,
+                              vertical: AppConstants.kSpacingXS,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.primaryOrange
+                                  : AppColors.lightPeach,
+                              borderRadius:
+                                  BorderRadius.circular(AppConstants.kRadiusFull),
+                            ),
+                            child: Text(
+                              isToday ? 'Today' : DateFormat('EEE, dd').format(date),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.lightTextPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit_calendar_outlined, size: 20),
+                color: AppColors.primaryOrange,
+                onPressed: () async {
+                  final context = Get.context;
+                  if (context == null) return;
+                  final earliestDate = DateTime.now().subtract(
+                    Duration(days: AppConstants.visibleActivityDays),
+                  );
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: controller.selectedDate.value,
+                    firstDate: earliestDate,
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null) {
+                    controller.changeDate(pickedDate);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      });
+    }
+
     return Obx(() => Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                AppColors.primaryOrange.withOpacity(0.15),
+                AppColors.lightPeach,
                 AppColors.lightSurface,
               ],
               begin: Alignment.topLeft,
@@ -105,7 +178,7 @@ class HomePage extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
             border: Border.all(
-              color: AppColors.primaryOrange.withOpacity(0.2),
+              color: AppColors.lightOrangeWarning.withOpacity(0.5),
             ),
           ),
           child: Column(
@@ -168,7 +241,7 @@ class HomePage extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppConstants.kSpacingM),
+              const SizedBox(height: 6),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -189,7 +262,7 @@ class HomePage extends StatelessWidget {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 14,
-                            vertical: 14,
+                            vertical: 8,
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
@@ -201,13 +274,12 @@ class HomePage extends StatelessWidget {
                             border: Border.all(
                               color: isSelected
                                   ? AppColors.primaryOrange
-                                  : AppColors.lightBorder.withOpacity(0.3),
+                                  : AppColors.lightBorder.withOpacity(0.5),
                             ),
                             boxShadow: isSelected
                                 ? [
                                     BoxShadow(
-                                      color:
-                                          AppColors.primaryOrange.withOpacity(0.35),
+                                      color: AppColors.primaryOrange.withOpacity(0.3),
                                       blurRadius: 16,
                                       offset: const Offset(0, 6),
                                     ),
@@ -224,32 +296,32 @@ class HomePage extends StatelessWidget {
                                   fontWeight: FontWeight.w600,
                                   color: isSelected
                                       ? Colors.white
-                                      : AppColors.lightTextSecondary,
+                                      : AppColors.lightTextPrimary,
                                 ),
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 2),
                               Text(
                                 DateFormat('dd').format(date),
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: isSelected
                                       ? Colors.white
                                       : AppColors.lightTextPrimary,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 1),
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 10,
-                                  vertical: 3,
+                                  vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
                                   color: isToday
                                       ? (isSelected
                                           ? Colors.white.withOpacity(0.2)
-                                          : AppColors.primaryOrange
-                                              .withOpacity(0.1))
+                                          : AppColors.accentPeach
+                                              .withOpacity(0.6))
                                       : Colors.white.withOpacity(0.0),
                                   borderRadius: BorderRadius.circular(
                                     AppConstants.kRadiusFull,
@@ -281,118 +353,91 @@ class HomePage extends StatelessWidget {
         ));
   }
 
-  Widget _buildScoreCard(HomeController controller) {
-    return Obx(() => Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
-            color: AppColors.lightSurface,
-            border: Border.all(
-              color: AppColors.primaryOrange.withOpacity(0.35),
-              width: 1,
+  Widget _buildScoreCard(HomeController controller, double collapseProgress) {
+    return Obx(() {
+      final double percentageValue = controller.percentage.value.isNaN
+          ? 0.0
+          : controller.percentage.value.clamp(0.0, 100.0);
+      final bool showCompact = collapseProgress > 0.55;
+
+      final totalScore = controller.totalScore.value.toStringAsFixed(1);
+      final maxScore = controller.maxTotalScore.value.toStringAsFixed(0);
+      final percentLabel = percentageValue.toStringAsFixed(1);
+
+      final double paddingVertical =
+          showCompact ? AppConstants.kSpacingXS : AppConstants.kSpacingM;
+      final double valueFontSize = showCompact ? 21 : 28;
+      final double percentFontSize = showCompact ? 21 : 28;
+      final double dividerHeight = showCompact ? 36 : 60;
+
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppConstants.kRadiusXL),
+          color: AppColors.lightSurface,
+          border: Border.all(
+            color: AppColors.primaryOrange.withOpacity(0.35),
+            width: 1,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: AppColors.shadowMedium,
+              blurRadius: 10,
+              offset: Offset(0, 4),
+              spreadRadius: 0,
             ),
-            boxShadow: [
-              const BoxShadow(
-                color: AppColors.shadowMedium,
-                blurRadius: 10,
-                offset: Offset(0, 4),
-                spreadRadius: 0,
+            BoxShadow(
+              color: AppColors.shadowLight,
+              blurRadius: 6,
+              offset: Offset(0, 2),
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppConstants.kSpacingL,
+            vertical: paddingVertical,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _ScoreColumn(
+                  title: 'Total Score',
+                  value: totalScore,
+                  subtitle: 'of $maxScore points',
+                  valueFontSize: valueFontSize,
+                  compact: showCompact,
+                  alignment: TextAlign.start,
+                ),
               ),
-              const BoxShadow(
-                color: AppColors.shadowLight,
-                blurRadius: 6,
-                offset: Offset(0, 2),
-                spreadRadius: 0,
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: showCompact
+                      ? AppConstants.kSpacingS
+                      : AppConstants.kSpacingM,
+                ),
+                child: Container(
+                  width: 1,
+                  height: dividerHeight,
+                  color: AppColors.lightBorder,
+                ),
+              ),
+              Expanded(
+                child: _ScoreColumn(
+                  title: 'Completion',
+                  value: '$percentLabel%',
+                  subtitle: 'today',
+                  valueFontSize: percentFontSize,
+                  compact: showCompact,
+                  alignment: TextAlign.end,
+                ),
               ),
             ],
           ),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.kSpacingL,
-              vertical: AppConstants.kSpacingM,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Total Score',
-                        style: TextStyle(
-                          color: AppColors.textOrange,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${controller.totalScore.value.toStringAsFixed(1)}',
-                        style: const TextStyle(
-                          color: AppColors.primaryOrange,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'of ${controller.maxTotalScore.value.toStringAsFixed(0)} points',
-                        style: TextStyle(
-                          color: AppColors.lightTextSecondary,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: 1,
-                  height: 60,
-                  color: AppColors.lightBorder,
-                  margin: const EdgeInsets.symmetric(horizontal: AppConstants.kSpacingM),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Completion',
-                        style: TextStyle(
-                          color: AppColors.textOrange,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${controller.percentage.value.toStringAsFixed(1)}%',
-                        style: const TextStyle(
-                          color: AppColors.primaryOrange,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'today',
-                        style: TextStyle(
-                          color: AppColors.lightTextSecondary,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ));
+        ),
+      );
+    });
   }
 
   Widget _buildActivityWithScore(
@@ -761,5 +806,157 @@ class HomePage extends StatelessWidget {
         if (index == 2) Get.toNamed('/settings');
       },
     );
+  }
+}
+
+class _ScoreColumn extends StatelessWidget {
+  const _ScoreColumn({
+    required this.title,
+    required this.value,
+    required this.subtitle,
+    required this.valueFontSize,
+    required this.compact,
+    required this.alignment,
+  });
+
+  final String title;
+  final String value;
+  final String subtitle;
+  final double valueFontSize;
+  final bool compact;
+  final TextAlign alignment;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment:
+          alignment == TextAlign.end ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            color: AppColors.textOrange,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.8,
+          ),
+          textAlign: alignment,
+        ),
+        SizedBox(height: compact ? 1 : 6),
+        Text(
+          value,
+          style: TextStyle(
+            color: AppColors.primaryOrange,
+            fontSize: valueFontSize,
+            fontWeight: FontWeight.bold,
+            letterSpacing: -1,
+          ),
+          textAlign: alignment,
+        ),
+        const SizedBox(height: 1),
+        Text(
+          subtitle,
+          style: TextStyle(
+            color: AppColors.lightTextSecondary,
+            fontSize: compact ? 10 : 11,
+            fontWeight: FontWeight.w400,
+          ),
+          textAlign: alignment,
+        ),
+      ],
+    );
+  }
+}
+
+class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _HomeHeaderDelegate({
+    required this.maxExtentHeight,
+    required this.minExtentHeight,
+    required this.dateSelectorBuilder,
+    required this.scoreCardBuilder,
+  });
+
+  final double maxExtentHeight;
+  final double minExtentHeight;
+  final Widget Function(BuildContext, double) dateSelectorBuilder;
+  final Widget Function(BuildContext, double) scoreCardBuilder;
+
+  @override
+  double get maxExtent => maxExtentHeight;
+
+  @override
+  double get minExtent => minExtentHeight;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final double availableExtent =
+        (maxExtentHeight - shrinkOffset).clamp(minExtentHeight, maxExtentHeight);
+    final double normalized = ((availableExtent - minExtentHeight) /
+            (maxExtentHeight - minExtentHeight))
+        .clamp(0.0, 1.0);
+    final double collapseT = 1 - normalized;
+
+    final EdgeInsets padding = EdgeInsets.fromLTRB(
+      AppConstants.kDefaultPadding,
+      lerpDouble(AppConstants.kSpacingL, AppConstants.kSpacingS, collapseT)!,
+      AppConstants.kDefaultPadding,
+      lerpDouble(AppConstants.kSpacingS, AppConstants.kSpacingXS, collapseT)!,
+    );
+
+    final double selectorFraction = lerpDouble(0.62, 0.45, collapseT)!;
+    final double spacing = lerpDouble(AppConstants.kSpacingL, AppConstants.kSpacingXS, collapseT)!;
+
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: SafeArea(
+        bottom: false,
+        child: SizedBox(
+          height: availableExtent,
+          child: Padding(
+            padding: padding,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final double height = constraints.maxHeight;
+                final double selectorHeight = (height - spacing) * selectorFraction;
+                final double scoreHeight = height - spacing - selectorHeight;
+
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      height: selectorHeight.clamp(80.0, height),
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: SizedBox.expand(
+                          child: dateSelectorBuilder(context, collapseT),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: spacing),
+                    SizedBox(
+                      height: scoreHeight.clamp(80.0, height),
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: SizedBox.expand(
+                          child: scoreCardBuilder(context, collapseT),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _HomeHeaderDelegate oldDelegate) {
+    return maxExtentHeight != oldDelegate.maxExtentHeight ||
+        minExtentHeight != oldDelegate.minExtentHeight ||
+        dateSelectorBuilder != oldDelegate.dateSelectorBuilder ||
+        scoreCardBuilder != oldDelegate.scoreCardBuilder;
   }
 }

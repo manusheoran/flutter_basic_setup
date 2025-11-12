@@ -99,8 +99,11 @@ class ActivityCardWidget extends StatelessWidget {
                       vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: score! < 0 ? AppColors.coralDanger : AppColors.primaryOrange,
-                      borderRadius: BorderRadius.circular(AppConstants.kRadiusFull),
+                      color: score! < 0
+                          ? AppColors.coralDanger
+                          : AppColors.primaryOrange,
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.kRadiusFull),
                       boxShadow: [
                         BoxShadow(
                           color: (score! < 0 ? AppColors.maroonDanger : color)
