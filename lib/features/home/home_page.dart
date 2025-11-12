@@ -202,13 +202,14 @@ class HomePage extends StatelessWidget {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
+                      horizontal: 8,
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.primaryOrange,
@@ -220,14 +221,15 @@ class HomePage extends StatelessWidget {
                         Icon(
                           Icons.calendar_today,
                           color: Colors.white,
-                          size: 16,
+                          size: 14,
                         ),
-                        SizedBox(width: 6),
+                        SizedBox(width: 4),
                         Text(
                           'Daily overview',
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -255,14 +257,16 @@ class HomePage extends StatelessWidget {
                     },
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.primaryOrange,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     ),
-                    icon: const Icon(Icons.edit_calendar_outlined),
-                    label: const Text('Pick date'),
+                    icon: const Icon(Icons.edit_calendar_outlined, size: 16),
+                    label: const Text('Pick date', style: TextStyle(fontSize: 12)),
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
-              SingleChildScrollView(
+              const SizedBox(height: 4),
+              Flexible(
+                child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: controller.visibleDates.map((date) {
@@ -281,8 +285,8 @@ class HomePage extends StatelessWidget {
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
+                            horizontal: 10,
+                            vertical: 6,
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
@@ -313,18 +317,18 @@ class HomePage extends StatelessWidget {
                               Text(
                                 DateFormat('EEE').format(date).toUpperCase(),
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w600,
                                   color: isSelected
                                       ? Colors.white
                                       : AppColors.lightTextPrimary,
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 1),
                               Text(
                                 DateFormat('dd').format(date),
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   color: isSelected
                                       ? Colors.white
@@ -353,7 +357,7 @@ class HomePage extends StatelessWidget {
                                       ? 'Today'
                                       : DateFormat('MMM').format(date),
                                   style: TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9,
                                     fontWeight: FontWeight.w600,
                                     color: isSelected
                                         ? Colors.white
@@ -367,6 +371,7 @@ class HomePage extends StatelessWidget {
                       ),
                     );
                   }).toList(),
+                ),
                 ),
               ),
             ],
