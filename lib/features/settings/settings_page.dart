@@ -40,8 +40,6 @@ class SettingsPage extends StatelessWidget {
             const SizedBox(height: AppConstants.kSpacingL),
             _buildSecurityCard(context),
             const SizedBox(height: AppConstants.kSpacingL),
-            _buildThemeCard(),
-            const SizedBox(height: AppConstants.kSpacingL),
             _buildMentorCard(),
             const SizedBox(height: AppConstants.kSpacingL),
             _buildLogoutButton(),

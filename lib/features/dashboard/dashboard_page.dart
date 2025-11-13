@@ -77,6 +77,46 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
+  Widget _scoreLegendItem(Color color, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.35)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.12),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppColors.lightTextPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTabSelector(DashboardController controller) {
     return Obx(() => Row(
           children: [
@@ -545,16 +585,24 @@ class DashboardPage extends StatelessWidget {
         return const SizedBox.shrink();
       }
 
-      final dynamicMaxY = [
-            controller.getMaxPoints('nindra'),
-            controller.getMaxPoints('wake_up'),
-            controller.getMaxPoints('day_sleep'),
-            controller.getMaxPoints('japa'),
-            controller.getMaxPoints('pathan'),
-            controller.getMaxPoints('sravan'),
-            controller.getMaxPoints('seva'),
-          ].reduce((a, b) => a > b ? a : b) +
-          5;
+      final averages = [
+        controller.avgNindra.value,
+        controller.avgWakeUp.value,
+        controller.avgDaySleep.value,
+        controller.avgJapa.value,
+        controller.avgPathan.value,
+        controller.avgSravan.value,
+        controller.avgSeva.value,
+      ];
+
+      double minAvg = averages.reduce((a, b) => a < b ? a : b);
+      double maxAvg = averages.reduce((a, b) => a > b ? a : b);
+
+      minAvg = minAvg > 0 ? 0 : minAvg;
+      maxAvg = maxAvg < 0 ? 0 : maxAvg;
+
+      final minY = (minAvg - 10).floorToDouble();
+      final maxY = (maxAvg + 10).ceilToDouble();
 
       return Container(
         decoration: BoxDecoration(
@@ -593,32 +641,14 @@ class DashboardPage extends StatelessWidget {
                   letterSpacing: -0.5,
                 ),
               ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Red = Negative score',
-                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-                  ),
-                ],
-              ),
               const SizedBox(height: AppConstants.kSpacingL),
               SizedBox(
                 height: 250,
                 child: BarChart(
                   BarChartData(
                     alignment: BarChartAlignment.spaceAround,
-                    minY: -10, // Allow negative scores
-                    maxY: dynamicMaxY, // dynamic max + padding
+                    minY: minY,
+                    maxY: maxY,
                     barTouchData: BarTouchData(
                       enabled: true,
                       touchTooltipData: BarTouchTooltipData(
@@ -791,6 +821,18 @@ class DashboardPage extends StatelessWidget {
                     ],
                   ),
                 ),
+              ),
+              const SizedBox(height: AppConstants.kSpacingM),
+              Wrap(
+                spacing: 20,
+                runSpacing: 8,
+                children: [
+                  _scoreLegendItem(AppColors.greenSuccess, '≥ 90%'),
+                  _scoreLegendItem(AppColors.primaryOrange, '70–89%'),
+                  _scoreLegendItem(AppColors.yellowWarning, '40–69%'),
+                  _scoreLegendItem(AppColors.maroonScore, '< 40%'),
+                  _scoreLegendItem(AppColors.maroonDanger, '< 0'),
+                ],
               ),
             ],
           ),
@@ -1138,7 +1180,7 @@ class DashboardPage extends StatelessWidget {
               ),
               const SizedBox(height: AppConstants.kSpacingM),
               Text(
-                '(Negative scores normalized to 0 for visual bar.)',
+                '(Negative scores normalized to 0 for visual bar)',
                 style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
               const SizedBox(height: AppConstants.kSpacingM),
@@ -1197,6 +1239,17 @@ class DashboardPage extends StatelessWidget {
                 icon: Icons.volunteer_activism,
                 color: AppColors.activitySeva,
                 score: controller.avgSeva.value,
+              ),
+              const SizedBox(height: AppConstants.kSpacingM),
+              Wrap(
+                spacing: 6,
+                runSpacing: 8,
+                children: [
+                  _scoreLegendItem(AppColors.greenSuccess, '≥ 90%'),
+                  _scoreLegendItem(AppColors.primaryOrange, '70–89%'),
+                  _scoreLegendItem(AppColors.yellowWarning, '40–69%'),
+                  _scoreLegendItem(AppColors.maroonScore, '< 40%'),
+                ],
               ),
             ],
           ),
