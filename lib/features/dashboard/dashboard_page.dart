@@ -235,8 +235,8 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildRangeChip(String type, String label, DashboardController controller,
-      VoidCallback onTap) {
+  Widget _buildRangeChip(String type, String label,
+      DashboardController controller, VoidCallback onTap) {
     return Obx(() {
       final isSelected = controller.selectedRangeType.value == type;
       return GestureDetector(
@@ -424,8 +424,13 @@ class DashboardPage extends StatelessWidget {
                       leftTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
-                          reservedSize: 40,
+                          reservedSize: 44,
+                          interval: 50,
                           getTitlesWidget: (value, meta) {
+                            // Clamp to configured bounds to avoid stray labels
+                            if (value < -20 || value > 280) {
+                              return const SizedBox.shrink();
+                            }
                             return Text(
                               value.toInt().toString(),
                               style: const TextStyle(fontSize: 10),
@@ -441,25 +446,31 @@ class DashboardPage extends StatelessWidget {
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 30,
+                          interval: 1,
                           getTitlesWidget: (value, meta) {
-                            if (value.toInt() >= 0 &&
-                                value.toInt() < controller.activities.length) {
-                              final date = DateTime.parse(
-                                  controller.activities[value.toInt()].date);
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  DateFormat('MM/dd').format(date),
-                                  style: const TextStyle(fontSize: 10),
-                                ),
-                              );
+                            if (value < 0 ||
+                                value > controller.activities.length - 1 ||
+                                value != value.toInt().toDouble()) {
+                              return const SizedBox.shrink();
                             }
-                            return const Text('');
+
+                            final index = value.toInt();
+                            final date = DateTime.parse(
+                                controller.activities[index].date);
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                DateFormat('MM/dd').format(date),
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                            );
                           },
                         ),
                       ),
                     ),
                     borderData: FlBorderData(show: false),
+                    minX: 0,
+                    maxX: (controller.activities.length - 1).toDouble(),
                     lineBarsData: [
                       LineChartBarData(
                         spots:
@@ -473,12 +484,14 @@ class DashboardPage extends StatelessWidget {
                         dotData: FlDotData(show: true),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: AppColors.primaryOrange.withOpacity(0.2),
+                          applyCutOffY: true,
+                          cutOffY: 0,
+                          color: AppColors.primaryOrange.withOpacity(0.18),
                         ),
                       ),
                     ],
-                    minY: -20, // Allow negative scores
-                    maxY: controller.maxTotalScore.value,
+                    minY: -20,
+                    maxY: 280,
                   ),
                 ),
               ),
@@ -496,14 +509,15 @@ class DashboardPage extends StatelessWidget {
       }
 
       final dynamicMaxY = [
-        controller.getMaxPoints('nindra'),
-        controller.getMaxPoints('wake_up'),
-        controller.getMaxPoints('day_sleep'),
-        controller.getMaxPoints('japa'),
-        controller.getMaxPoints('pathan'),
-        controller.getMaxPoints('sravan'),
-        controller.getMaxPoints('seva'),
-      ].reduce((a, b) => a > b ? a : b) + 5;
+            controller.getMaxPoints('nindra'),
+            controller.getMaxPoints('wake_up'),
+            controller.getMaxPoints('day_sleep'),
+            controller.getMaxPoints('japa'),
+            controller.getMaxPoints('pathan'),
+            controller.getMaxPoints('sravan'),
+            controller.getMaxPoints('seva'),
+          ].reduce((a, b) => a > b ? a : b) +
+          5;
 
       return Container(
         decoration: BoxDecoration(
@@ -555,7 +569,7 @@ class DashboardPage extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    'Red = Negative score (below target)',
+                    'Red = Negative score',
                     style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                   ),
                 ],
@@ -647,7 +661,8 @@ class DashboardPage extends StatelessWidget {
                                 : AppColors.getScoreColor(
                                     controller.getMaxPoints('nindra') > 0
                                         ? (controller.avgNindra.value /
-                                                controller.getMaxPoints('nindra')) *
+                                                controller
+                                                    .getMaxPoints('nindra')) *
                                             100
                                         : 0),
                             width: 16)
@@ -660,7 +675,8 @@ class DashboardPage extends StatelessWidget {
                                 : AppColors.getScoreColor(
                                     controller.getMaxPoints('wake_up') > 0
                                         ? (controller.avgWakeUp.value /
-                                                controller.getMaxPoints('wake_up')) *
+                                                controller
+                                                    .getMaxPoints('wake_up')) *
                                             100
                                         : 0),
                             width: 16)
@@ -673,7 +689,8 @@ class DashboardPage extends StatelessWidget {
                                 : AppColors.getScoreColor(
                                     controller.getMaxPoints('day_sleep') > 0
                                         ? (controller.avgDaySleep.value /
-                                                controller.getMaxPoints('day_sleep')) *
+                                                controller.getMaxPoints(
+                                                    'day_sleep')) *
                                             100
                                         : 0),
                             width: 16)
@@ -686,7 +703,8 @@ class DashboardPage extends StatelessWidget {
                                 : AppColors.getScoreColor(
                                     controller.getMaxPoints('japa') > 0
                                         ? (controller.avgJapa.value /
-                                                controller.getMaxPoints('japa')) *
+                                                controller
+                                                    .getMaxPoints('japa')) *
                                             100
                                         : 0),
                             width: 16)
@@ -699,7 +717,8 @@ class DashboardPage extends StatelessWidget {
                                 : AppColors.getScoreColor(
                                     controller.getMaxPoints('pathan') > 0
                                         ? (controller.avgPathan.value /
-                                                controller.getMaxPoints('pathan')) *
+                                                controller
+                                                    .getMaxPoints('pathan')) *
                                             100
                                         : 0),
                             width: 16)
@@ -712,7 +731,8 @@ class DashboardPage extends StatelessWidget {
                                 : AppColors.getScoreColor(
                                     controller.getMaxPoints('sravan') > 0
                                         ? (controller.avgSravan.value /
-                                                controller.getMaxPoints('sravan')) *
+                                                controller
+                                                    .getMaxPoints('sravan')) *
                                             100
                                         : 0),
                             width: 16)
@@ -725,7 +745,8 @@ class DashboardPage extends StatelessWidget {
                                 : AppColors.getScoreColor(
                                     controller.getMaxPoints('seva') > 0
                                         ? (controller.avgSeva.value /
-                                                controller.getMaxPoints('seva')) *
+                                                controller
+                                                    .getMaxPoints('seva')) *
                                             100
                                         : 0),
                             width: 16)
@@ -812,11 +833,11 @@ class DashboardPage extends StatelessWidget {
                         ],
                       ),
                       RadarDataSet(
-                        fillColor: AppColors
-                            .getScoreColor(controller.avgPercentage.value)
+                        fillColor: AppColors.getScoreColor(
+                                controller.avgPercentage.value)
                             .withOpacity(0.3),
-                        borderColor: AppColors
-                            .getScoreColor(controller.avgPercentage.value),
+                        borderColor: AppColors.getScoreColor(
+                            controller.avgPercentage.value),
                         entryRadius: 3,
                         dataEntries: [
                           // Normalize to 0-5 scale using activity max; negatives shown as 0
@@ -825,49 +846,56 @@ class DashboardPage extends StatelessWidget {
                             final v = controller.avgNindra.value;
                             final val = v < 0 ? 0 : v;
                             final ratio = max > 0 ? (val / max) : 0.0;
-                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                            return RadarEntry(
+                                value: (ratio.clamp(0.0, 1.0)) * 5);
                           }()),
                           (() {
                             final max = controller.getMaxPoints('wake_up');
                             final v = controller.avgWakeUp.value;
                             final val = v < 0 ? 0 : v;
                             final ratio = max > 0 ? (val / max) : 0.0;
-                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                            return RadarEntry(
+                                value: (ratio.clamp(0.0, 1.0)) * 5);
                           }()),
                           (() {
                             final max = controller.getMaxPoints('day_sleep');
                             final v = controller.avgDaySleep.value;
                             final val = v < 0 ? 0 : v;
                             final ratio = max > 0 ? (val / max) : 0.0;
-                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                            return RadarEntry(
+                                value: (ratio.clamp(0.0, 1.0)) * 5);
                           }()),
                           (() {
                             final max = controller.getMaxPoints('japa');
                             final v = controller.avgJapa.value;
                             final val = v < 0 ? 0 : v;
                             final ratio = max > 0 ? (val / max) : 0.0;
-                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                            return RadarEntry(
+                                value: (ratio.clamp(0.0, 1.0)) * 5);
                           }()),
                           (() {
                             final max = controller.getMaxPoints('pathan');
                             final v = controller.avgPathan.value;
                             final val = v < 0 ? 0 : v;
                             final ratio = max > 0 ? (val / max) : 0.0;
-                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                            return RadarEntry(
+                                value: (ratio.clamp(0.0, 1.0)) * 5);
                           }()),
                           (() {
                             final max = controller.getMaxPoints('sravan');
                             final v = controller.avgSravan.value;
                             final val = v < 0 ? 0 : v;
                             final ratio = max > 0 ? (val / max) : 0.0;
-                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                            return RadarEntry(
+                                value: (ratio.clamp(0.0, 1.0)) * 5);
                           }()),
                           (() {
                             final max = controller.getMaxPoints('seva');
                             final v = controller.avgSeva.value;
                             final val = v < 0 ? 0 : v;
                             final ratio = max > 0 ? (val / max) : 0.0;
-                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                            return RadarEntry(
+                                value: (ratio.clamp(0.0, 1.0)) * 5);
                           }()),
                         ],
                       ),
@@ -886,7 +914,9 @@ class DashboardPage extends StatelessWidget {
                         case 0:
                           label = 'Nindra';
                           pct = controller.getMaxPoints('nindra') > 0
-                              ? ((controller.avgNindra.value < 0 ? 0 : controller.avgNindra.value) /
+                              ? ((controller.avgNindra.value < 0
+                                          ? 0
+                                          : controller.avgNindra.value) /
                                       controller.getMaxPoints('nindra')) *
                                   100
                               : 0;
@@ -894,7 +924,9 @@ class DashboardPage extends StatelessWidget {
                         case 1:
                           label = 'Wake Up';
                           pct = controller.getMaxPoints('wake_up') > 0
-                              ? ((controller.avgWakeUp.value < 0 ? 0 : controller.avgWakeUp.value) /
+                              ? ((controller.avgWakeUp.value < 0
+                                          ? 0
+                                          : controller.avgWakeUp.value) /
                                       controller.getMaxPoints('wake_up')) *
                                   100
                               : 0;
@@ -902,7 +934,9 @@ class DashboardPage extends StatelessWidget {
                         case 2:
                           label = 'Day Sleep';
                           pct = controller.getMaxPoints('day_sleep') > 0
-                              ? ((controller.avgDaySleep.value < 0 ? 0 : controller.avgDaySleep.value) /
+                              ? ((controller.avgDaySleep.value < 0
+                                          ? 0
+                                          : controller.avgDaySleep.value) /
                                       controller.getMaxPoints('day_sleep')) *
                                   100
                               : 0;
@@ -910,7 +944,9 @@ class DashboardPage extends StatelessWidget {
                         case 3:
                           label = 'Japa';
                           pct = controller.getMaxPoints('japa') > 0
-                              ? ((controller.avgJapa.value < 0 ? 0 : controller.avgJapa.value) /
+                              ? ((controller.avgJapa.value < 0
+                                          ? 0
+                                          : controller.avgJapa.value) /
                                       controller.getMaxPoints('japa')) *
                                   100
                               : 0;
@@ -918,7 +954,9 @@ class DashboardPage extends StatelessWidget {
                         case 4:
                           label = 'Pathan';
                           pct = controller.getMaxPoints('pathan') > 0
-                              ? ((controller.avgPathan.value < 0 ? 0 : controller.avgPathan.value) /
+                              ? ((controller.avgPathan.value < 0
+                                          ? 0
+                                          : controller.avgPathan.value) /
                                       controller.getMaxPoints('pathan')) *
                                   100
                               : 0;
@@ -926,7 +964,9 @@ class DashboardPage extends StatelessWidget {
                         case 5:
                           label = 'Sravan';
                           pct = controller.getMaxPoints('sravan') > 0
-                              ? ((controller.avgSravan.value < 0 ? 0 : controller.avgSravan.value) /
+                              ? ((controller.avgSravan.value < 0
+                                          ? 0
+                                          : controller.avgSravan.value) /
                                       controller.getMaxPoints('sravan')) *
                                   100
                               : 0;
@@ -934,7 +974,9 @@ class DashboardPage extends StatelessWidget {
                         case 6:
                           label = 'Seva';
                           pct = controller.getMaxPoints('seva') > 0
-                              ? ((controller.avgSeva.value < 0 ? 0 : controller.avgSeva.value) /
+                              ? ((controller.avgSeva.value < 0
+                                          ? 0
+                                          : controller.avgSeva.value) /
                                       controller.getMaxPoints('seva')) *
                                   100
                               : 0;
@@ -958,12 +1000,12 @@ class DashboardPage extends StatelessWidget {
                       return RadarChartTitle(text: display);
                     },
                     tickCount: 5,
-                    ticksTextStyle:
-                        const TextStyle(fontSize: 10, color: Colors.transparent),
-                    tickBorderData:
-                        BorderSide(color: Colors.grey.withOpacity(0.3), width: 1),
-                    gridBorderData:
-                        BorderSide(color: Colors.grey.withOpacity(0.3), width: 1),
+                    ticksTextStyle: const TextStyle(
+                        fontSize: 10, color: Colors.transparent),
+                    tickBorderData: BorderSide(
+                        color: Colors.grey.withOpacity(0.3), width: 1),
+                    gridBorderData: BorderSide(
+                        color: Colors.grey.withOpacity(0.3), width: 1),
                   ),
                 ),
               ),
@@ -979,8 +1021,16 @@ class DashboardPage extends StatelessWidget {
   Widget _buildRadarLegend(DashboardController controller) {
     final items = [
       ['Nindra', controller.avgNindra.value, controller.getMaxPoints('nindra')],
-      ['Wake Up', controller.avgWakeUp.value, controller.getMaxPoints('wake_up')],
-      ['Day Sleep', controller.avgDaySleep.value, controller.getMaxPoints('day_sleep')],
+      [
+        'Wake Up',
+        controller.avgWakeUp.value,
+        controller.getMaxPoints('wake_up')
+      ],
+      [
+        'Day Sleep',
+        controller.avgDaySleep.value,
+        controller.getMaxPoints('day_sleep')
+      ],
       ['Japa', controller.avgJapa.value, controller.getMaxPoints('japa')],
       ['Pathan', controller.avgPathan.value, controller.getMaxPoints('pathan')],
       ['Sravan', controller.avgSravan.value, controller.getMaxPoints('sravan')],
@@ -1050,14 +1100,67 @@ class DashboardPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppConstants.kSpacingM),
+              Text(
+                '(Negative scores normalized to 0 for visual bar.)',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: AppConstants.kSpacingM),
               _buildActivityRow(
-                  controller, 'nindra', '🌙 Nindra (Sleep)', controller.avgNindra.value),
-              _buildActivityRow(controller, 'wake_up', '🌅 Wake Up Time', controller.avgWakeUp.value),
-              _buildActivityRow(controller, 'day_sleep', '😴 Day Sleep', controller.avgDaySleep.value),
-              _buildActivityRow(controller, 'japa', '📿 Japa Rounds', controller.avgJapa.value),
-              _buildActivityRow(controller, 'pathan', '📖 Pathan Reading', controller.avgPathan.value),
-              _buildActivityRow(controller, 'sravan', '👂 Sravan Listening', controller.avgSravan.value),
-              _buildActivityRow(controller, 'seva', '🙏 Seva Service', controller.avgSeva.value),
+                controller,
+                key: 'nindra',
+                label: 'Nindra',
+                icon: Icons.bedtime,
+                color: AppColors.activityNindra,
+                score: controller.avgNindra.value,
+              ),
+              _buildActivityRow(
+                controller,
+                key: 'wake_up',
+                label: 'Wake Up',
+                icon: Icons.wb_sunny,
+                color: AppColors.activityWakeUp,
+                score: controller.avgWakeUp.value,
+              ),
+              _buildActivityRow(
+                controller,
+                key: 'day_sleep',
+                label: 'Day Sleep',
+                icon: Icons.hotel,
+                color: AppColors.activityDaySleep,
+                score: controller.avgDaySleep.value,
+              ),
+              _buildActivityRow(
+                controller,
+                key: 'japa',
+                label: 'Japa',
+                icon: Icons.self_improvement,
+                color: AppColors.activityJapa,
+                score: controller.avgJapa.value,
+              ),
+              _buildActivityRow(
+                controller,
+                key: 'pathan',
+                label: 'Pathan',
+                icon: Icons.menu_book,
+                color: AppColors.activityPathan,
+                score: controller.avgPathan.value,
+              ),
+              _buildActivityRow(
+                controller,
+                key: 'sravan',
+                label: 'Sravan',
+                icon: Icons.headset,
+                color: AppColors.activitySravan,
+                score: controller.avgSravan.value,
+              ),
+              _buildActivityRow(
+                controller,
+                key: 'seva',
+                label: 'Seva',
+                icon: Icons.volunteer_activism,
+                color: AppColors.activitySeva,
+                score: controller.avgSeva.value,
+              ),
             ],
           ),
         ),
@@ -1065,8 +1168,12 @@ class DashboardPage extends StatelessWidget {
     });
   }
 
-  Widget _buildActivityRow(
-      DashboardController controller, String key, String label, double score) {
+  Widget _buildActivityRow(DashboardController controller,
+      {required String key,
+      required String label,
+      required IconData icon,
+      required Color color,
+      required double score}) {
     final max = controller.getMaxPoints(key);
     double ratio;
     if (max <= 0) {
@@ -1083,8 +1190,29 @@ class DashboardPage extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-            width: 120,
-            child: Text(label, style: const TextStyle(fontSize: 14)),
+            width: 160,
+            child: Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: color, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: const TextStyle(fontSize: 14),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: LinearProgressIndicator(
