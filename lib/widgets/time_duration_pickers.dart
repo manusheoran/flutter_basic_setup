@@ -11,6 +11,8 @@ class TimestampPicker extends StatelessWidget {
   final Function(String) onTimeChanged;
   final String? minTime; // Optional minimum time in 24-hour format (e.g., "21:45")
   final String? defaultTime; // Default time to show initially
+  final bool enabled;
+  final VoidCallback? onDisabledTap;
 
   const TimestampPicker({
     super.key,
@@ -19,6 +21,8 @@ class TimestampPicker extends StatelessWidget {
     required this.onTimeChanged,
     this.minTime,
     this.defaultTime,
+    this.enabled = true,
+    this.onDisabledTap,
   });
 
   @override
@@ -29,7 +33,11 @@ class TimestampPicker extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
       ),
       child: InkWell(
-        onTap: () => _showTimePicker(context),
+        onTap: enabled
+            ? () => _showTimePicker(context)
+            : () {
+                if (onDisabledTap != null) onDisabledTap!();
+              },
         borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -43,7 +51,9 @@ class TimestampPicker extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.lightTextSecondary,
+                    color: enabled
+                        ? AppColors.lightTextSecondary
+                        : AppColors.lightTextSecondary.withOpacity(0.6),
                   ),
                 ),
               ),
@@ -53,16 +63,25 @@ class TimestampPicker extends StatelessWidget {
                 color: AppColors.lightBorder,
                 margin: const EdgeInsets.symmetric(horizontal: 12),
               ),
-              Obx(() => Text(
-                selectedTime.value.isEmpty ? 'Set Time' : _format12Hour(selectedTime.value),
-                style: TextStyle(
-                  fontSize: 16,
-                  color: selectedTime.value.isEmpty 
-                      ? Colors.grey 
-                      : AppColors.primaryOrange,
-                  fontWeight: FontWeight.w600,
-                ),
-              )),
+              Obx(() {
+                final bool hasValue = selectedTime.value.isNotEmpty;
+                Color valueColor;
+                if (!enabled) {
+                  valueColor = AppColors.lightTextSecondary.withOpacity(0.6);
+                } else if (hasValue) {
+                  valueColor = AppColors.primaryOrange;
+                } else {
+                  valueColor = Colors.grey;
+                }
+                return Text(
+                  hasValue ? _format12Hour(selectedTime.value) : 'Set Time',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: valueColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                );
+              }),
               const SizedBox(width: 8),
               const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
             ],
@@ -89,6 +108,7 @@ class TimestampPicker extends StatelessWidget {
   }
 
   void _showTimePicker(BuildContext context) {
+    if (!enabled) return;
     // Parse current or default time
     int initialHour = 10;
     int initialMinute = 0;
@@ -329,6 +349,8 @@ class DurationPicker extends StatelessWidget {
   final RxInt value; // Total minutes
   final Function(int) onChanged;
   final int maxHours;
+  final bool enabled;
+  final VoidCallback? onDisabledTap;
 
   const DurationPicker({
     super.key,
@@ -337,6 +359,8 @@ class DurationPicker extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.maxHours = 12,
+    this.enabled = true,
+    this.onDisabledTap,
   });
 
   @override
@@ -347,7 +371,11 @@ class DurationPicker extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
       ),
       child: InkWell(
-        onTap: () => _showDurationPicker(context),
+        onTap: enabled
+            ? () => _showDurationPicker(context)
+            : () {
+                if (onDisabledTap != null) onDisabledTap!();
+              },
         borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -365,7 +393,9 @@ class DurationPicker extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.lightTextSecondary,
+                        color: enabled
+                            ? AppColors.lightTextSecondary
+                            : AppColors.lightTextSecondary.withOpacity(0.6),
                       ),
                     ),
                     if (subtitle.isNotEmpty)
@@ -385,13 +415,19 @@ class DurationPicker extends StatelessWidget {
               Obx(() {
                 int hours = value.value ~/ 60;
                 int minutes = value.value % 60;
+                Color valueColor;
+                if (!enabled) {
+                  valueColor = AppColors.lightTextSecondary.withOpacity(0.6);
+                } else {
+                  valueColor = AppColors.primaryOrange;
+                }
                 return Text(
                   hours > 0 
                       ? '${hours}h ${minutes}m'
                       : '${minutes}m',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
-                    color: AppColors.primaryOrange,
+                    color: valueColor,
                     fontWeight: FontWeight.w600,
                   ),
                 );
@@ -406,6 +442,7 @@ class DurationPicker extends StatelessWidget {
   }
 
   void _showDurationPicker(BuildContext context) {
+    if (!enabled) return;
     int selectedHours = value.value ~/ 60;
     int selectedMinutes = value.value % 60;
 
@@ -599,12 +636,16 @@ class RoundsPicker extends StatelessWidget {
   final String title;
   final RxInt value;
   final Function(int) onChanged;
+  final bool enabled;
+  final VoidCallback? onDisabledTap;
 
   const RoundsPicker({
     super.key,
     required this.title,
     required this.value,
     required this.onChanged,
+    this.enabled = true,
+    this.onDisabledTap,
   });
 
   @override
@@ -615,7 +656,11 @@ class RoundsPicker extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
       ),
       child: InkWell(
-        onTap: () => _showRoundsPicker(context),
+        onTap: enabled
+            ? () => _showRoundsPicker(context)
+            : () {
+                if (onDisabledTap != null) onDisabledTap!();
+              },
         borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -629,7 +674,9 @@ class RoundsPicker extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.lightTextSecondary,
+                    color: enabled
+                        ? AppColors.lightTextSecondary
+                        : AppColors.lightTextSecondary.withOpacity(0.6),
                   ),
                 ),
               ),
@@ -639,14 +686,19 @@ class RoundsPicker extends StatelessWidget {
                 color: AppColors.lightBorder,
                 margin: const EdgeInsets.symmetric(horizontal: 12),
               ),
-              Obx(() => Text(
-                '${value.value} rounds',
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: AppColors.primaryOrange,
-                  fontWeight: FontWeight.w600,
-                ),
-              )),
+              Obx(() {
+                Color valueColor = enabled
+                    ? AppColors.primaryOrange
+                    : AppColors.lightTextSecondary.withOpacity(0.6);
+                return Text(
+                  '${value.value} rounds',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: valueColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                );
+              }),
               const SizedBox(width: 8),
               const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
             ],
@@ -657,6 +709,7 @@ class RoundsPicker extends StatelessWidget {
   }
 
   void _showRoundsPicker(BuildContext context) {
+    if (!enabled) return;
     int selectedRounds = value.value;
     if (selectedRounds < 0) selectedRounds = 0;
     if (selectedRounds > 1000) selectedRounds = 1000;

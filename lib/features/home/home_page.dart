@@ -130,74 +130,79 @@ class HomePage extends StatelessWidget {
             vertical: AppConstants.kSpacingXS,
           ),
           decoration: null,
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: visibleDates.map((date) {
-                      final key = DateFormat('yyyy-MM-dd').format(date);
-                      final bool isSelected = key == selectedKey;
-                      final bool isToday = key ==
-                          DateFormat('yyyy-MM-dd').format(DateTime.now());
-                      return Padding(
-                        padding: const EdgeInsets.only(
-                            right: AppConstants.kSpacingS),
-                        child: InkWell(
-                          borderRadius:
-                              BorderRadius.circular(AppConstants.kRadiusFull),
-                          onTap: () => controller.changeDate(date),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppConstants.kSpacingM,
-                              vertical: AppConstants.kSpacingXS,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.primaryOrange
-                                  : AppColors.lightPeach,
+              Row(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: visibleDates.map((date) {
+                          final key = DateFormat('yyyy-MM-dd').format(date);
+                          final bool isSelected = key == selectedKey;
+                          final bool isToday = key ==
+                              DateFormat('yyyy-MM-dd').format(DateTime.now());
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                                right: AppConstants.kSpacingS),
+                            child: InkWell(
                               borderRadius: BorderRadius.circular(
                                   AppConstants.kRadiusFull),
-                            ),
-                            child: Text(
-                              isToday
-                                  ? 'Today'
-                                  : DateFormat('EEE, dd').format(date),
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: isSelected
-                                    ? Colors.white
-                                    : AppColors.lightTextPrimary,
+                              onTap: () => controller.changeDate(date),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppConstants.kSpacingM,
+                                  vertical: AppConstants.kSpacingXS,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.primaryOrange
+                                      : AppColors.lightPeach,
+                                  borderRadius: BorderRadius.circular(
+                                      AppConstants.kRadiusFull),
+                                ),
+                                child: Text(
+                                  isToday
+                                      ? 'Today'
+                                      : DateFormat('EEE, dd').format(date),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : AppColors.lightTextPrimary,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                          );
+                        }).toList(),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.edit_calendar_outlined, size: 20),
-                color: AppColors.primaryOrange,
-                onPressed: () async {
-                  final context = Get.context;
-                  if (context == null) return;
-                  final earliestDate = DateTime.now().subtract(
-                    Duration(days: AppConstants.visibleActivityDays),
-                  );
-                  final pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: controller.selectedDate.value,
-                    firstDate: earliestDate,
-                    lastDate: DateTime.now(),
-                  );
-                  if (pickedDate != null) {
-                    controller.changeDate(pickedDate);
-                  }
-                },
+                  IconButton(
+                    icon: const Icon(Icons.edit_calendar_outlined, size: 20),
+                    color: AppColors.primaryOrange,
+                    onPressed: () async {
+                      final context = Get.context;
+                      if (context == null) return;
+                      final earliestDate = DateTime.now().subtract(
+                        Duration(days: AppConstants.visibleActivityDays),
+                      );
+                      final pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: controller.selectedDate.value,
+                        firstDate: earliestDate,
+                        lastDate: DateTime.now(),
+                      );
+                      if (pickedDate != null) {
+                        controller.changeDate(pickedDate);
+                      }
+                    },
+                  ),
+                ],
               ),
             ],
           ),
@@ -205,204 +210,215 @@ class HomePage extends StatelessWidget {
       });
     }
 
-    return Obx(() => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: null,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: controller.visibleDates.map((date) {
-                      final isSelected =
-                          DateFormat('yyyy-MM-dd').format(date) ==
-                              DateFormat('yyyy-MM-dd')
-                                  .format(controller.selectedDate.value);
-                      final isToday = DateFormat('yyyy-MM-dd').format(date) ==
-                          DateFormat('yyyy-MM-dd').format(DateTime.now());
+    return Obx(() {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        decoration: null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: controller.visibleDates.map((date) {
+                        final isSelected =
+                            DateFormat('yyyy-MM-dd').format(date) ==
+                                DateFormat('yyyy-MM-dd')
+                                    .format(controller.selectedDate.value);
+                        final isToday = DateFormat('yyyy-MM-dd').format(date) ==
+                            DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: InkWell(
-                          onTap: () => controller.changeDate(date),
-                          borderRadius:
-                              BorderRadius.circular(AppConstants.kRadiusM),
-                          child: AnimatedContainer(
-                            width: 80,
-                            alignment: Alignment.center,
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.primaryOrange
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(
-                                AppConstants.kRadiusM,
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: InkWell(
+                            onTap: () => controller.changeDate(date),
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.kRadiusM),
+                            child: AnimatedContainer(
+                              width: 80,
+                              alignment: Alignment.center,
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 6,
                               ),
-                              border: Border.all(
+                              decoration: BoxDecoration(
                                 color: isSelected
                                     ? AppColors.primaryOrange
-                                    : AppColors.lightBorder.withOpacity(0.5),
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.kRadiusM,
+                                ),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppColors.primaryOrange
+                                      :
+                                          AppColors.lightBorder.withOpacity(0.5),
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: AppColors.primaryOrange
+                                              .withOpacity(0.3),
+                                          blurRadius: 16,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ]
+                                    : [],
                               ),
-                              boxShadow: isSelected
-                                  ? [
-                                      BoxShadow(
-                                        color: AppColors.primaryOrange
-                                            .withOpacity(0.3),
-                                        blurRadius: 16,
-                                        offset: const Offset(0, 6),
-                                      ),
-                                    ]
-                                  : [],
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  DateFormat('EEE').format(date).toUpperCase(),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : AppColors.lightTextPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  DateFormat('dd').format(date),
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : AppColors.lightTextPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isToday
-                                        ? (isSelected
-                                            ? Colors.white.withOpacity(0.2)
-                                            : AppColors.accentPeach
-                                                .withOpacity(0.6))
-                                        : Colors.white.withOpacity(0.0),
-                                    borderRadius: BorderRadius.circular(
-                                      AppConstants.kRadiusFull,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    isToday
-                                        ? 'Today'
-                                        : DateFormat('MMM').format(date),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    softWrap: false,
-                                    textAlign: TextAlign.center,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    DateFormat('EEE')
+                                        .format(date)
+                                        .toUpperCase(),
                                     style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w400,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
                                       color: isSelected
                                           ? Colors.white
-                                          : AppColors.primaryOrange,
+                                          : AppColors.lightTextPrimary,
                                     ),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    DateFormat('dd').format(date),
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : AppColors.lightTextPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: isToday
+                                          ? (isSelected
+                                              ? Colors.white.withOpacity(0.2)
+                                              : AppColors.accentPeach
+                                                  .withOpacity(0.6))
+                                          : Colors.white.withOpacity(0.0),
+                                      borderRadius: BorderRadius.circular(
+                                        AppConstants.kRadiusFull,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      isToday
+                                          ? 'Today'
+                                          : DateFormat('MMM').format(date),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      softWrap: false,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w400,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : AppColors.primaryOrange,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              InkWell(
-                borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
-                onTap: () async {
-                  final currentContext = Get.context;
-                  if (currentContext == null) return;
-
-                  final earliestDate = DateTime.now().subtract(
-                    Duration(days: AppConstants.visibleActivityDays),
-                  );
-
-                  final pickedDate = await showDatePicker(
-                    context: currentContext,
-                    initialDate: controller.selectedDate.value,
-                    firstDate: earliestDate,
-                    lastDate: DateTime.now(),
-                  );
-                  if (pickedDate != null) {
-                    controller.changeDate(pickedDate);
-                  }
-                },
-                child: AnimatedContainer(
-                  width: 68,
-                  duration: const Duration(milliseconds: 200),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
-                    border: Border.all(
-                      color: AppColors.lightBorder.withOpacity(0.5),
+                        );
+                      }).toList(),
                     ),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.edit_calendar_outlined,
-                        size: 18,
-                        color: AppColors.primaryOrange,
+                ),
+                const SizedBox(width: 12),
+                InkWell(
+                  borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+                  onTap: () async {
+                    final currentContext = Get.context;
+                    if (currentContext == null) return;
+
+                    final earliestDate = DateTime.now().subtract(
+                      Duration(days: AppConstants.visibleActivityDays),
+                    );
+
+                    final pickedDate = await showDatePicker(
+                      context: currentContext,
+                      initialDate: controller.selectedDate.value,
+                      firstDate: earliestDate,
+                      lastDate: DateTime.now(),
+                    );
+                    if (pickedDate != null) {
+                      controller.changeDate(pickedDate);
+                    }
+                  },
+                  child: AnimatedContainer(
+                    width: 68,
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.kRadiusM),
+                      border: Border.all(
+                        color: AppColors.lightBorder.withOpacity(0.5),
                       ),
-                      const SizedBox(height: 2),
-                      const Text(
-                        'Pick',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.edit_calendar_outlined,
+                          size: 18,
                           color: AppColors.primaryOrange,
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      if (!controller.visibleDates.any((d) =>
-                          DateFormat('yyyy-MM-dd').format(d) ==
-                          DateFormat('yyyy-MM-dd')
-                              .format(controller.selectedDate.value)))
-                        Text(
-                          DateFormat('dd MMM')
-                              .format(controller.selectedDate.value),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.lightTextSecondary,
+                        const SizedBox(height: 2),
+                        const Text(
+                          'Pick',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryOrange,
                           ),
                         ),
-                    ],
+                        const SizedBox(height: 2),
+                        if (!controller.visibleDates.any((d) =>
+                            DateFormat('yyyy-MM-dd').format(d) ==
+                            DateFormat('yyyy-MM-dd')
+                                .format(controller.selectedDate.value)))
+                          Text(
+                            DateFormat('dd MMM')
+                                .format(controller.selectedDate.value),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: false,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.lightTextSecondary,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ));
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildScoreCard(HomeController controller, double collapseProgress) {
@@ -541,6 +557,7 @@ class HomePage extends StatelessWidget {
       HomeController controller, Widget activityWidget, String activityKey,
       {required String title, required IconData icon, required Color color}) {
     return Obx(() {
+      final bool canEdit = controller.canEditSelectedDate;
       double score = 0;
       double maxScore = 0;
 
@@ -602,9 +619,52 @@ class HomePage extends StatelessWidget {
         color: color,
         score: score,
         maxScore: maxScore,
-        child: activityWidget,
+        child: _wrapActivityChild(activityWidget, canEdit, controller),
       );
     });
+  }
+
+  Widget _wrapActivityChild(
+      Widget child, bool canEdit, HomeController controller) {
+    if (child is TimestampPicker) {
+      return TimestampPicker(
+        title: child.title,
+        selectedTime: child.selectedTime,
+        onTimeChanged: child.onTimeChanged,
+        minTime: child.minTime,
+        defaultTime: child.defaultTime,
+        enabled: canEdit,
+        onDisabledTap: controller.notifyEditNotAllowed,
+      );
+    } else if (child is DurationPicker) {
+      return DurationPicker(
+        title: child.title,
+        subtitle: child.subtitle,
+        value: child.value,
+        onChanged: child.onChanged,
+        maxHours: child.maxHours,
+        enabled: canEdit,
+        onDisabledTap: controller.notifyEditNotAllowed,
+      );
+    } else if (child is RoundsPicker) {
+      return RoundsPicker(
+        title: child.title,
+        value: child.value,
+        onChanged: child.onChanged,
+        enabled: canEdit,
+        onDisabledTap: controller.notifyEditNotAllowed,
+      );
+    } else if (child is Column) {
+      return Column(
+        mainAxisSize: child.mainAxisSize,
+        mainAxisAlignment: child.mainAxisAlignment,
+        crossAxisAlignment: child.crossAxisAlignment,
+        children: child.children
+            .map((widget) => _wrapActivityChild(widget, canEdit, controller))
+            .toList(),
+      );
+    }
+    return child;
   }
 
   Widget _buildActivityCards(HomeController controller, BuildContext context) {

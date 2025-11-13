@@ -21,6 +21,7 @@ class HomeController extends GetxController {
   RxBool isSaving = false.obs;
   RxBool documentNotFound = false.obs; // Track if document doesn't exist
   RxBool hasUnsavedChanges = false.obs;
+  RxBool canEdit = true.obs;
   
   // User's activity tracking configuration
   RxMap<String, bool> userActivityTracking = <String, bool>{}.obs;
@@ -62,6 +63,7 @@ class HomeController extends GetxController {
 
     _initializeVisibleDates();
     await loadUserActivityConfig();
+    _updateCanEdit(selectedDate.value, null);
     setupActivityStream(selectedDate.value);
   }
   
@@ -155,6 +157,7 @@ class HomeController extends GetxController {
           currentActivity.value = null;
           clearFields();
           print('📭 No document found for $dateStr');
+          _updateCanEdit(date, null);
         } else {
           documentNotFound.value = false;
           currentActivity.value = activity;
@@ -171,8 +174,9 @@ class HomeController extends GetxController {
           
           // Always recalculate scores
           calculateScores();
-          
+
           print('🔄 Activity updated from stream for $dateStr');
+          _updateCanEdit(date, activity);
         }
         final snapshot = _snapshotCurrentValues();
         _storeBaseline(dateStr, snapshot);
@@ -234,6 +238,11 @@ class HomeController extends GetxController {
   }
   
   Future<void> saveActivity() async {
+    if (!canEdit.value) {
+      _showEditRestrictionMessage();
+      return;
+    }
+
     final userId = _authService.currentUserId;
     if (userId == null) {
       Get.snackbar('Error', 'User not logged in');
@@ -400,6 +409,7 @@ class HomeController extends GetxController {
   
   void changeDate(DateTime date) {
     selectedDate.value = date;
+    _updateCanEdit(date, null);
     setupActivityStream(date);
   }
   
@@ -476,7 +486,40 @@ class HomeController extends GetxController {
   }
 
   String _dateKey(DateTime date) => DateFormat('yyyy-MM-dd').format(date);
-  
+
+  void _updateCanEdit(DateTime date, DailyActivity? activity) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final selected = DateTime(date.year, date.month, date.day);
+
+    final int dayDifference = today.difference(selected).inDays;
+    final bool isWithinEditableWindow = dayDifference >= 0 && dayDifference <= 2;
+
+    final String? status = activity?.status;
+    final bool isUnblocked = status != null &&
+        status.toLowerCase().contains('unblock');
+
+    canEdit.value = isWithinEditableWindow || isUnblocked;
+  }
+
+  void notifyEditNotAllowed() {
+    _showEditRestrictionMessage();
+  }
+
+  void _showEditRestrictionMessage() {
+    Get.snackbar(
+      'Not Allowed',
+      editRestrictionMessage,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: AppColors.maroonDanger,
+      colorText: AppColors.white,
+    );
+  }
+
+  bool get canEditSelectedDate => canEdit.value;
+
+  String get editRestrictionMessage => "Can't edit for this date";
+
   // Helper to parse time string (HH:mm) to DateTime
   DateTime? _parseTime(String timeStr) {
     if (timeStr.isEmpty) return null;
