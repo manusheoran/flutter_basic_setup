@@ -154,17 +154,27 @@ class DashboardPage extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _buildRangeChip('Last 7 Days', controller, () {
+                _buildRangeChip('last7', 'Last 7 Days', controller, () {
                   final end = DateTime.now();
                   final start = end.subtract(const Duration(days: 6));
-                  controller.selectDateRange('Last 7 Days', start, end);
+                  controller.selectDateRange(
+                    type: 'last7',
+                    label: 'Last 7 Days',
+                    start: start,
+                    end: end,
+                  );
                 }),
-                _buildRangeChip('Last 30 Days', controller, () {
+                _buildRangeChip('last30', 'Last 30 Days', controller, () {
                   final end = DateTime.now();
                   final start = end.subtract(const Duration(days: 29));
-                  controller.selectDateRange('Last 30 Days', start, end);
+                  controller.selectDateRange(
+                    type: 'last30',
+                    label: 'Last 30 Days',
+                    start: start,
+                    end: end,
+                  );
                 }),
-                _buildRangeChip('Custom', controller, () async {
+                _buildRangeChip('custom', 'Custom', controller, () async {
                   final DateTimeRange? picked = await showDateRangePicker(
                     context: context,
                     firstDate: DateTime(2024),
@@ -181,52 +191,55 @@ class DashboardPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Obx(() => Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.sageLight,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.date_range,
-                          color: AppColors.deepTeal, size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              controller.selectedRangeLabel.value,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.deepTeal,
-                              ),
+            Obx(() {
+              final summaryTitle = controller.selectedRangeLabel.value;
+
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.sageLight,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.date_range,
+                        color: AppColors.deepTeal, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            summaryTitle,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.deepTeal,
                             ),
-                            if (controller.actualDaysCount.value > 0)
-                              Text(
-                                'Data for ${controller.actualDaysCount.value} days',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                          ],
-                        ),
+                          ),
+                          Text(
+                            'Data for ${controller.actualDaysCount.value} days',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                )),
+                    ),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildRangeChip(
-      String label, DashboardController controller, VoidCallback onTap) {
+  Widget _buildRangeChip(String type, String label, DashboardController controller,
+      VoidCallback onTap) {
     return Obx(() {
-      final isSelected = controller.selectedRangeLabel.value == label;
+      final isSelected = controller.selectedRangeType.value == type;
       return GestureDetector(
         onTap: onTap,
         child: Container(
@@ -393,15 +406,15 @@ class DashboardPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Obx(() => Text(
-                    'Score Trend (${controller.selectedRangeLabel.value})',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.lightTextPrimary,
-                      letterSpacing: -0.5,
-                    ),
-                  )),
+              const Text(
+                'Score Trend',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.lightTextPrimary,
+                  letterSpacing: -0.5,
+                ),
+              ),
               const SizedBox(height: AppConstants.kSpacingXL),
               SizedBox(
                 height: 200,

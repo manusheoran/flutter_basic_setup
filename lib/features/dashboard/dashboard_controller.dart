@@ -31,6 +31,7 @@ class DashboardController extends GetxController {
   Rx<DateTime> startDate = DateTime.now().subtract(const Duration(days: 29)).obs;
   Rx<DateTime> endDate = DateTime.now().obs;
   RxString selectedRangeLabel = 'Last 30 Days'.obs;
+  RxString selectedRangeType = 'last30'.obs;
   
   @override
   void onInit() {
@@ -68,39 +69,46 @@ class DashboardController extends GetxController {
     }
   }
   
-  void selectDateRange(String label, DateTime start, DateTime end) {
-    // Smart date range based on first activity
-    if (firstActivityDate.value != null && label.contains('Last')) {
-      // Adjust start date to not go before first activity
-      final adjustedStart = start.isBefore(firstActivityDate.value!)
-          ? firstActivityDate.value!
-          : start;
-      
-      final daysSinceFirst = DateTime.now().difference(firstActivityDate.value!).inDays + 1;
-      
-      // Update label to reflect actual range
-      if (adjustedStart != start) {
-        selectedRangeLabel.value = 'Last $daysSinceFirst days (since start)';
-      } else {
-        selectedRangeLabel.value = label;
+  void selectDateRange({
+    required String type,
+    required String label,
+    required DateTime start,
+    required DateTime end,
+    bool adjustToFirstActivity = true,
+  }) {
+    selectedRangeType.value = type;
+
+    DateTime adjustedStart = start;
+
+    if (adjustToFirstActivity && firstActivityDate.value != null) {
+      final firstDate = firstActivityDate.value!;
+      if (adjustedStart.isBefore(firstDate)) {
+        adjustedStart = firstDate;
       }
-      
-      startDate.value = adjustedStart;
-    } else {
-      selectedRangeLabel.value = label;
-      startDate.value = start;
     }
-    
+
+    if (adjustedStart.isAfter(end)) {
+      adjustedStart = end;
+    }
+
+    startDate.value = adjustedStart;
     endDate.value = end;
+    selectedRangeLabel.value = label;
     loadActivitiesForDateRange();
   }
   
   void selectCustomDateRange(DateTime start, DateTime end) {
-    final formatter = DateFormat('MMM dd');
-    selectedRangeLabel.value = '${formatter.format(start)} - ${formatter.format(end)}';
-    startDate.value = start;
-    endDate.value = end;
-    loadActivitiesForDateRange();
+    final sameYear = start.year == end.year;
+    final startFormatter = DateFormat(sameYear ? 'MMM dd' : 'MMM dd, yyyy');
+    final endFormatter = DateFormat('MMM dd, yyyy');
+    final label = '${startFormatter.format(start)} - ${endFormatter.format(end)}';
+    selectDateRange(
+      type: 'custom',
+      label: label,
+      start: start,
+      end: end,
+      adjustToFirstActivity: false,
+    );
   }
   
   Future<void> loadActivitiesForDateRange() async {
