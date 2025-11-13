@@ -688,7 +688,16 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildActivityCards(HomeController controller, BuildContext context) {
-    return Obx(() => Column(
+    return Obx(() {
+      final bool canEdit = controller.canEditSelectedDate;
+      final bool showPlaceholder =
+          !canEdit && controller.documentNotFound.value;
+
+      if (showPlaceholder) {
+        return _buildNoActivityPlaceholder();
+      }
+
+      return Column(
           children: [
             // Timestamp Activities (with 12-hour format + AM/PM)
             if (controller.shouldShowActivity('nindra')) ...[
@@ -851,7 +860,54 @@ class HomePage extends StatelessWidget {
               ),
             ],
           ],
-        ));
+        );
+    });
+  }
+
+  Widget _buildNoActivityPlaceholder() {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppConstants.kDefaultPadding,
+        vertical: AppConstants.kSpacingL,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppConstants.kSpacingL),
+            decoration: BoxDecoration(
+              color: AppColors.lightPeach,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.event_busy,
+              size: 40,
+              color: AppColors.primaryOrange,
+            ),
+          ),
+          const SizedBox(height: AppConstants.kSpacingL),
+          const Text(
+            'No activity recorded for this day',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: AppConstants.kSpacingS),
+          const Text(
+            'This date is locked for editing. Activity tracking resumes on allowed dates.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.lightTextSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildUnsavedChangesBar(HomeController controller) {
