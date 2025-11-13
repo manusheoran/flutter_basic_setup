@@ -116,51 +116,65 @@ class ParameterTrackingPage extends StatelessWidget {
             const SizedBox(height: AppConstants.kSpacingL),
             _buildParameterToggle(
               controller,
-              '🌙 Nindra (To Bed)',
-              'nindra',
-              'Track your night sleep time',
+              icon: Icons.bedtime,
+              iconColor: AppColors.activityNindra,
+              label: 'Nindra',
+              parameterKey: 'nindra',
+              description: 'Track your night sleep time',
             ),
             const Divider(),
             _buildParameterToggle(
               controller,
-              '🌅 Wake Up Time',
-              'wake_up',
-              'Track your morning wake up time',
+              icon: Icons.wb_sunny,
+              iconColor: AppColors.activityWakeUp,
+              label: 'Wake Up',
+              parameterKey: 'wake_up',
+              description: 'Track your morning wake up time',
             ),
             const Divider(),
             _buildParameterToggle(
               controller,
-              '😴 Day Sleep',
-              'day_sleep',
-              'Track daytime sleep duration',
+              icon: Icons.hotel,
+              iconColor: AppColors.activityDaySleep,
+              label: 'Day Sleep',
+              parameterKey: 'day_sleep',
+              description: 'Track daytime sleep duration',
             ),
             const Divider(),
             _buildParameterToggle(
               controller,
-              '📿 Japa (Chanting)',
-              'japa',
-              'Track japa rounds and completion time',
+              icon: Icons.self_improvement,
+              iconColor: AppColors.activityJapa,
+              label: 'Japa',
+              parameterKey: 'japa',
+              description: 'Track chanting time and rounds',
             ),
             const Divider(),
             _buildParameterToggle(
               controller,
-              '📖 Pathan (Reading)',
-              'pathan',
-              'Track spiritual reading duration',
+              icon: Icons.menu_book,
+              iconColor: AppColors.activityPathan,
+              label: 'Pathan',
+              parameterKey: 'pathan',
+              description: 'Track spiritual reading duration',
             ),
             const Divider(),
             _buildParameterToggle(
               controller,
-              '👂 Sravan (Listening)',
-              'sravan',
-              'Track spiritual listening duration',
+              icon: Icons.headset,
+              iconColor: AppColors.activitySravan,
+              label: 'Sravan',
+              parameterKey: 'sravan',
+              description: 'Track spiritual listening duration',
             ),
             const Divider(),
             _buildParameterToggle(
               controller,
-              '🙏 Seva (Service)',
-              'seva',
-              'Track service/volunteer time',
+              icon: Icons.volunteer_activism,
+              iconColor: AppColors.activitySeva,
+              label: 'Seva',
+              parameterKey: 'seva',
+              description: 'Track service or volunteer time',
             ),
           ],
         ),
@@ -170,10 +184,13 @@ class ParameterTrackingPage extends StatelessWidget {
 
   Widget _buildParameterToggle(
     ParameterTrackingController controller,
-    String label,
-    String parameterKey,
-    String description,
-  ) {
+    {
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required String parameterKey,
+    required String description,
+  }) {
     return Obx(() {
       final isEnabled = controller.trackedParameters[parameterKey] ?? true;
 
@@ -183,6 +200,19 @@ class ParameterTrackingPage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 12.0),
           child: Row(
             children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppConstants.kSpacingM),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,6 +239,13 @@ class ParameterTrackingPage extends StatelessWidget {
                 value: isEnabled,
                 onChanged: (_) => controller.toggleParameter(parameterKey),
                 activeColor: AppColors.primaryOrange,
+                inactiveThumbColor: Colors.grey[300],
+                inactiveTrackColor: Colors.grey[200],
+                trackOutlineColor: MaterialStateProperty.resolveWith(
+                  (states) => states.contains(MaterialState.selected)
+                      ? AppColors.primaryOrange.withOpacity(0.3)
+                      : Colors.grey.withOpacity(0.2),
+                ),
               ),
             ],
           ),
