@@ -202,39 +202,100 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _buildSecurityCard(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.kSpacingM),
-        child: Obx(() {
-          final user = _authService.firebaseUser.value;
-          final isEmailProvider =
-              user?.providerData.any((p) => p.providerId == 'password') ??
-                  false;
-          final isEmailVerified = user?.emailVerified ?? true;
+    return Obx(() {
+      final user = _authService.firebaseUser.value;
+      final isEmailProvider =
+          user?.providerData.any((p) => p.providerId == 'password') ?? false;
+      final isEmailVerified = user?.emailVerified ?? true;
 
-          return Column(
+      final showEmailWarning = isEmailProvider && !isEmailVerified;
+      final showPasswordReset = isEmailProvider;
+
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+          border: Border.all(
+            color: AppColors.lightBorder,
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadowLight,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: AppColors.shadowMedium,
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+              spreadRadius: -2,
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.kSpacingL),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Security',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryOrange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.shield_outlined,
+                      color: AppColors.primaryOrange,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: AppConstants.kSpacingM),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Security',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Manage verification and password options',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.lightTextSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: AppConstants.kSpacingM),
+              if (showEmailWarning || showPasswordReset)
+                const SizedBox(height: AppConstants.kSpacingM),
 
-              // Email Verification Status (only for email/password users)
-              if (isEmailProvider && !isEmailVerified) ...[
+              if (showEmailWarning) ...[
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.orange),
+                    color: Colors.orange.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.orange.withOpacity(0.4)),
                   ),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.warning_amber, color: Colors.orange),
+                          const Icon(Icons.warning_amber, color: Colors.orange),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -252,7 +313,7 @@ class SettingsPage extends StatelessWidget {
                                   'Please verify your email to secure your account',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey[600],
+                                    color: Colors.grey[700],
                                   ),
                                 ),
                               ],
@@ -296,26 +357,35 @@ class SettingsPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                const Divider(),
               ],
 
-              // Reset Password (only for email/password users)
-              if (isEmailProvider) ...[
-                ListTile(
-                  leading: const Icon(Icons.lock_reset),
-                  title: const Text('Reset Password'),
-                  subtitle: const Text('Change your password'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _showResetPasswordDialog(context),
+              if (showEmailWarning && showPasswordReset)
+                const SizedBox(height: AppConstants.kSpacingM),
+
+              if (showPasswordReset) ...[
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.lightPeach,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppConstants.kSpacingM,
+                      vertical: AppConstants.kSpacingS,
+                    ),
+                    leading: const Icon(Icons.lock_reset, color: AppColors.primaryOrange),
+                    title: const Text('Reset Password'),
+                    subtitle: const Text('Change your password'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _showResetPasswordDialog(context),
+                  ),
                 ),
-                const Divider(),
               ],
             ],
-          );
-        }),
-      ),
-    );
+          ),
+        ),
+      );
+    });
   }
 
   void _showResetPasswordDialog(BuildContext context) {

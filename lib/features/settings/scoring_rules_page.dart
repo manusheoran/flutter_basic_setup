@@ -26,8 +26,6 @@ class ScoringRulesPage extends StatelessWidget {
           children: [
             _buildHeader(),
             const SizedBox(height: AppConstants.kSpacingL),
-            _buildTotalScoreCard(),
-            const SizedBox(height: AppConstants.kSpacingL),
             _buildTimestampActivitiesSection(),
             const SizedBox(height: AppConstants.kSpacingL),
             _buildDurationActivitiesSection(),
@@ -44,17 +42,24 @@ class ScoringRulesPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.lightSurface,
         borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
-        border: Border.all(color: AppColors.primaryOrange.withOpacity(0.35), width: 1),
+        border: Border.all(
+            color: AppColors.primaryOrange.withOpacity(0.35), width: 1),
         boxShadow: const [
-          BoxShadow(color: AppColors.shadowMedium, blurRadius: 10, offset: Offset(0, 4)),
-          BoxShadow(color: AppColors.shadowLight, blurRadius: 6, offset: Offset(0, 2)),
+          BoxShadow(
+              color: AppColors.shadowMedium,
+              blurRadius: 10,
+              offset: Offset(0, 4)),
+          BoxShadow(
+              color: AppColors.shadowLight,
+              blurRadius: 6,
+              offset: Offset(0, 2)),
         ],
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '🕉️ Sādhana Scoring System',
+            'Sādhana Scoring System',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -161,7 +166,7 @@ class ScoringRulesPage extends StatelessWidget {
         const SizedBox(height: AppConstants.kSpacingM),
         _buildActivityCard(
           icon: '🌙',
-          title: 'Nindra (To Bed)',
+          title: 'Nindra',
           maxPoints: 25,
           description: 'Evening sleep time',
           rules: [
@@ -177,7 +182,7 @@ class ScoringRulesPage extends StatelessWidget {
         const SizedBox(height: AppConstants.kSpacingM),
         _buildActivityCard(
           icon: '🌅',
-          title: 'Wake Up Time',
+          title: 'Wake Up',
           maxPoints: 25,
           description: 'Morning wake up time',
           rules: [
@@ -230,7 +235,6 @@ class ScoringRulesPage extends StatelessWidget {
           maxPoints: 25,
           description: 'Total sleep during daytime',
           rules: [
-            {'range': '0 min (not entered)', 'points': '0'},
             {'range': '1 - 60 min (≤ 1 hr)', 'points': '25'},
             {'range': '61 - 75 min', 'points': '20'},
             {'range': '76 - 90 min', 'points': '15'},
@@ -243,11 +247,11 @@ class ScoringRulesPage extends StatelessWidget {
         const SizedBox(height: AppConstants.kSpacingM),
         _buildActivityCard(
           icon: '📖',
-          title: 'Pathan (Reading/Study)',
+          title: 'Pathan',
           maxPoints: 30,
           description: 'Reading spiritual texts',
           rules: [
-            {'range': '> 60 min (> 1 hr)', 'points': '30', 'isBonus': true},
+            {'range': '> 60 min (> 1 hr)', 'points': '30'},
             {'range': '45 - 60 min', 'points': '25'},
             {'range': '35 - 44 min', 'points': '20'},
             {'range': '25 - 34 min', 'points': '15'},
@@ -259,11 +263,11 @@ class ScoringRulesPage extends StatelessWidget {
         const SizedBox(height: AppConstants.kSpacingM),
         _buildActivityCard(
           icon: '👂',
-          title: 'Sravan (Listening)',
+          title: 'Sravan',
           maxPoints: 30,
           description: 'Listening to spiritual discourses',
           rules: [
-            {'range': '> 60 min (> 1 hr)', 'points': '30', 'isBonus': true},
+            {'range': '> 60 min (> 1 hr)', 'points': '30'},
             {'range': '45 - 60 min', 'points': '25'},
             {'range': '35 - 44 min', 'points': '20'},
             {'range': '25 - 34 min', 'points': '15'},
@@ -275,14 +279,13 @@ class ScoringRulesPage extends StatelessWidget {
         const SizedBox(height: AppConstants.kSpacingM),
         _buildActivityCard(
           icon: '🙏',
-          title: 'Seva (Service)',
+          title: 'Seva',
           maxPoints: 100,
           description: 'Selfless service to others',
           rules: [
             {
               'range': '> 210 min (> 3.5 hrs)',
               'points': '100',
-              'isBonus': true
             },
             {'range': '181 - 210 min', 'points': '80'},
             {'range': '151 - 180 min', 'points': '60'},
