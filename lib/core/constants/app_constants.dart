@@ -36,6 +36,7 @@ class AppConstants {
 
   // Activity Settings
   static const int visibleActivityDays = 3; // Show today and 2 days before
+  static const int datePickerLookbackDays = 90; // Allow selecting up to ~3 months back
   
   // Activity Parameters
   static const List<String> activities = [

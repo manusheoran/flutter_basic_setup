@@ -101,6 +101,6 @@ class AppColors {
   }
 
   // Alias for backward compatibility
-  static const Color greenSuccess = orangeSuccess;
-  static const Color maroonDanger = coralDanger;
+  static const Color greenSuccess = Color(0xFF43A047); // Vibrant success green
+  static const Color maroonDanger = Color(0xFFD32F2F); // Bold error red
 }

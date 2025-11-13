@@ -189,7 +189,7 @@ class HomePage extends StatelessWidget {
                       final context = Get.context;
                       if (context == null) return;
                       final earliestDate = DateTime.now().subtract(
-                        Duration(days: AppConstants.visibleActivityDays),
+                        Duration(days: AppConstants.datePickerLookbackDays),
                       );
                       final pickedDate = await showDatePicker(
                         context: context,
@@ -347,7 +347,7 @@ class HomePage extends StatelessWidget {
                     if (currentContext == null) return;
 
                     final earliestDate = DateTime.now().subtract(
-                      Duration(days: AppConstants.visibleActivityDays),
+                      Duration(days: AppConstants.datePickerLookbackDays),
                     );
 
                     final pickedDate = await showDatePicker(
@@ -366,29 +366,49 @@ class HomePage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: controller.visibleDates.any((d) =>
+                              DateFormat('yyyy-MM-dd').format(d) ==
+                              DateFormat('yyyy-MM-dd')
+                                  .format(controller.selectedDate.value))
+                          ? Colors.white
+                          : AppColors.primaryOrange,
                       borderRadius:
                           BorderRadius.circular(AppConstants.kRadiusM),
                       border: Border.all(
-                        color: AppColors.lightBorder.withOpacity(0.5),
+                        color: controller.visibleDates.any((d) =>
+                                DateFormat('yyyy-MM-dd').format(d) ==
+                                DateFormat('yyyy-MM-dd')
+                                    .format(controller.selectedDate.value))
+                            ? AppColors.lightBorder.withOpacity(0.5)
+                            : AppColors.primaryOrange,
                       ),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.edit_calendar_outlined,
                           size: 18,
-                          color: AppColors.primaryOrange,
+                          color: controller.visibleDates.any((d) =>
+                                  DateFormat('yyyy-MM-dd').format(d) ==
+                                  DateFormat('yyyy-MM-dd')
+                                      .format(controller.selectedDate.value))
+                              ? AppColors.primaryOrange
+                              : Colors.white,
                         ),
                         const SizedBox(height: 2),
-                        const Text(
+                        Text(
                           'Pick',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.primaryOrange,
+                            color: controller.visibleDates.any((d) =>
+                                    DateFormat('yyyy-MM-dd').format(d) ==
+                                    DateFormat('yyyy-MM-dd')
+                                        .format(controller.selectedDate.value))
+                                ? AppColors.primaryOrange
+                                : Colors.white,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -406,7 +426,7 @@ class HomePage extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.lightTextSecondary,
+                              color: Colors.white,
                             ),
                           ),
                       ],
