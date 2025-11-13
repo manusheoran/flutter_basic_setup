@@ -56,9 +56,9 @@ class HomePage extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
                   AppConstants.kDefaultPadding,
-                  AppConstants.kSpacingM,
+                  AppConstants.kSpacingS,
                   AppConstants.kDefaultPadding,
-                  AppConstants.kSpacingXS,
+                  AppConstants.kSpacingS,
                 ),
                 child: Row(
                   children: [
@@ -89,7 +89,7 @@ class HomePage extends StatelessWidget {
             SliverPadding(
               padding: EdgeInsets.fromLTRB(
                 AppConstants.kDefaultPadding,
-                AppConstants.kSpacingL,
+                AppConstants.kSpacingS,
                 AppConstants.kDefaultPadding,
                 AppConstants.kSpacing3XL + 72,
               ),
