@@ -82,7 +82,7 @@ class TimestampPicker extends StatelessWidget {
       String period = hour >= 12 ? 'PM' : 'AM';
       int hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
       
-      return '${hour12.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
+      return '$hour12:${minute.toString().padLeft(2, '0')} $period';
     } catch (e) {
       return time24;
     }
@@ -126,31 +126,47 @@ class TimestampPicker extends StatelessWidget {
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryOrange,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20),
                     ),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
+                    ],
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel', style: TextStyle(color: Colors.white)),
-                      ),
-                      Text(
-                        title,
-                        style: const TextStyle(
+                      const Text(
+                        'Add time',
+                        style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primaryOrange,
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                              textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primaryOrange,
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                              textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                            ),
+                            onPressed: () {
                           // Convert to 24-hour format
                           int hour24 = selectedHour == 12 
                               ? (selectedPeriod == 0 ? 0 : 12)
@@ -173,8 +189,10 @@ class TimestampPicker extends StatelessWidget {
                           // Only call callback - the parent will update the value
                           onTimeChanged(timeString);
                           Navigator.pop(context);
-                        },
-                        child: const Text('Done', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            },
+                            child: const Text('Done'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -188,66 +206,98 @@ class TimestampPicker extends StatelessWidget {
                     ),
                   ),
                 Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Stack(
                     children: [
-                      // Hour picker (1-12)
-                      Expanded(
-                        child: CupertinoPicker(
-                          scrollController: FixedExtentScrollController(
-                            initialItem: selectedHour - 1,
+                      // Full-width selection band
+                      Positioned.fill(
+                        child: Center(
+                          child: Container(
+                            height: 40,
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.black54.withOpacity(0.03),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          itemExtent: 40,
-                          onSelectedItemChanged: (int index) {
-                            selectedHour = index + 1;
-                          },
-                          children: List<Widget>.generate(12, (int index) {
-                            return Center(
-                              child: Text(
-                                (index + 1).toString().padLeft(2, '0'),
-                                style: const TextStyle(fontSize: 28),
-                              ),
-                            );
-                          }),
                         ),
                       ),
-                      const Text(':', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                      // Minute picker (0-59)
-                      Expanded(
-                        child: CupertinoPicker(
-                          scrollController: FixedExtentScrollController(
-                            initialItem: selectedMinute,
-                          ),
-                          itemExtent: 40,
-                          onSelectedItemChanged: (int index) {
-                            selectedMinute = index;
-                          },
-                          children: List<Widget>.generate(60, (int index) {
-                            return Center(
-                              child: Text(
-                                index.toString().padLeft(2, '0'),
-                                style: const TextStyle(fontSize: 28),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Hour picker (1-12)
+                          Expanded(
+                            child: CupertinoPicker(
+                              scrollController: FixedExtentScrollController(
+                                initialItem: selectedHour - 1,
                               ),
-                            );
-                          }),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      // AM/PM picker
-                      Expanded(
-                        child: CupertinoPicker(
-                          scrollController: FixedExtentScrollController(
-                            initialItem: selectedPeriod,
+                              itemExtent: 40,
+                              looping: true,
+                              useMagnifier: true,
+                              magnification: 1.15,
+                              squeeze: 1.2,
+                              selectionOverlay: const SizedBox.shrink(),
+                              onSelectedItemChanged: (int index) {
+                                selectedHour = index + 1;
+                              },
+                              children: List<Widget>.generate(12, (int index) {
+                                return Center(
+                                  child: Text(
+                                    (index + 1).toString(),
+                                    style: const TextStyle(fontSize: 28),
+                                  ),
+                                );
+                              }),
+                            ),
                           ),
-                          itemExtent: 40,
-                          onSelectedItemChanged: (int index) {
-                            selectedPeriod = index;
-                          },
-                          children: const [
-                            Center(child: Text('AM', style: TextStyle(fontSize: 28))),
-                            Center(child: Text('PM', style: TextStyle(fontSize: 28))),
-                          ],
-                        ),
+                          const Text(':', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                          // Minute picker (0-59)
+                          Expanded(
+                            child: CupertinoPicker(
+                              scrollController: FixedExtentScrollController(
+                                initialItem: selectedMinute,
+                              ),
+                              itemExtent: 40,
+                              looping: true,
+                              useMagnifier: true,
+                              magnification: 1.15,
+                              squeeze: 1.2,
+                              selectionOverlay: const SizedBox.shrink(),
+                              onSelectedItemChanged: (int index) {
+                                selectedMinute = index;
+                              },
+                              children: List<Widget>.generate(60, (int index) {
+                                return Center(
+                                  child: Text(
+                                    index.toString().padLeft(2, '0'),
+                                    style: const TextStyle(fontSize: 28),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          // AM/PM picker
+                          Expanded(
+                            child: CupertinoPicker(
+                              scrollController: FixedExtentScrollController(
+                                initialItem: selectedPeriod,
+                              ),
+                              itemExtent: 40,
+                              looping: false,
+                              useMagnifier: true,
+                              magnification: 1.15,
+                              squeeze: 1.2,
+                              selectionOverlay: const SizedBox.shrink(),
+                              onSelectedItemChanged: (int index) {
+                                selectedPeriod = index;
+                              },
+                              children: const [
+                                Center(child: Text('AM', style: TextStyle(fontSize: 28))),
+                                Center(child: Text('PM', style: TextStyle(fontSize: 28))),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -373,89 +423,164 @@ class DurationPicker extends StatelessWidget {
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryOrange,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20),
                     ),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
+                    ],
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel', style: TextStyle(color: Colors.white)),
-                      ),
-                      Text(
-                        title,
-                        style: const TextStyle(
+                      const Text(
+                        'Add duration',
+                        style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          int totalMinutes = (selectedHours * 60) + selectedMinutes;
-                          onChanged(totalMinutes);
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Done', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primaryOrange,
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                              textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primaryOrange,
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                              textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                            ),
+                            onPressed: () {
+                              final int appliedHours = selectedHours > maxHours ? maxHours : selectedHours;
+                              if (appliedHours == 0 && selectedMinutes == 0) {
+                                Get.snackbar(
+                                  'Invalid Duration',
+                                  'Duration cannot be 0 minutes',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: Colors.red,
+                                  colorText: Colors.white,
+                                );
+                                return;
+                              }
+                              final int totalMinutes = (appliedHours * 60) + selectedMinutes;
+                              onChanged(totalMinutes);
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Done'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
                 Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Column(
                     children: [
-                      // Hours picker
-                      Expanded(
-                        child: CupertinoPicker(
-                          scrollController: FixedExtentScrollController(
-                            initialItem: selectedHours,
-                          ),
-                          itemExtent: 40,
-                          onSelectedItemChanged: (int index) {
-                            selectedHours = index;
-                          },
-                          children: List<Widget>.generate(maxHours + 1, (int index) {
-                            return Center(
-                              child: Text(
-                                index.toString().padLeft(2, '0'),
-                                style: const TextStyle(fontSize: 28),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                        child: Row(
+                          children: const [
+                            Expanded(
+                              child: Center(
+                                child: Text('Hours', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87)),
                               ),
-                            );
-                          }),
+                            ),
+                            SizedBox(width: 20),
+                            Expanded(
+                              child: Center(
+                                child: Text('Minutes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87)),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const Text('h', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-                      const SizedBox(width: 20),
-                      // Minutes picker
                       Expanded(
-                        child: CupertinoPicker(
-                          scrollController: FixedExtentScrollController(
-                            initialItem: selectedMinutes,
-                          ),
-                          itemExtent: 40,
-                          onSelectedItemChanged: (int index) {
-                            selectedMinutes = index;
-                          },
-                          children: List<Widget>.generate(60, (int index) {
-                            return Center(
-                              child: Text(
-                                index.toString().padLeft(2, '0'),
-                                style: const TextStyle(fontSize: 28),
+                        child: Stack(
+                          children: [
+                            // Full-width selection band
+                            Positioned.fill(
+                              child: Center(
+                                child: Container(
+                                  height: 40,
+                                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54.withOpacity(0.03),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
                               ),
-                            );
-                          }),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Hours picker
+                                Expanded(
+                                  child: CupertinoPicker(
+                                    scrollController: FixedExtentScrollController(
+                                      initialItem: selectedHours,
+                                    ),
+                                    itemExtent: 40,
+                                    looping: true,
+                                    useMagnifier: true,
+                                    magnification: 1.15,
+                                    squeeze: 1.2,
+                                    selectionOverlay: const SizedBox.shrink(),
+                                    onSelectedItemChanged: (int index) {
+                                      selectedHours = index;
+                                    },
+                                    children: List<Widget>.generate(13, (int index) {
+                                      return Center(
+                                        child: Text(
+                                          index.toString(),
+                                          style: const TextStyle(fontSize: 28),
+                                        ),
+                                      );
+                                    }),
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                // Minutes picker
+                                Expanded(
+                                  child: CupertinoPicker(
+                                    scrollController: FixedExtentScrollController(
+                                      initialItem: selectedMinutes,
+                                    ),
+                                    itemExtent: 40,
+                                    looping: true,
+                                    useMagnifier: true,
+                                    magnification: 1.15,
+                                    squeeze: 1.2,
+                                    selectionOverlay: const SizedBox.shrink(),
+                                    onSelectedItemChanged: (int index) {
+                                      selectedMinutes = index;
+                                    },
+                                    children: List<Widget>.generate(60, (int index) {
+                                      return Center(
+                                        child: Text(
+                                          index.toString().padLeft(2, '0'),
+                                          style: const TextStyle(fontSize: 28),
+                                        ),
+                                      );
+                                    }),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.only(right: 20),
-                        child: Text('m', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
                       ),
                     ],
                   ),
