@@ -44,8 +44,8 @@ class HomePage extends StatelessWidget {
             SliverPersistentHeader(
               pinned: true,
               delegate: _HomeHeaderDelegate(
-                maxExtentHeight: 280,
-                minExtentHeight: 120,
+                maxExtentHeight: 262,
+                minExtentHeight: 140,
                 dateSelectorBuilder: (context, progress) =>
                     _buildDateSelector(controller, progress),
                 scoreCardBuilder: (context, progress) =>
@@ -230,9 +230,11 @@ class HomePage extends StatelessWidget {
                           borderRadius:
                               BorderRadius.circular(AppConstants.kRadiusM),
                           child: AnimatedContainer(
+                            width: 80,
+                            alignment: Alignment.center,
                             duration: const Duration(milliseconds: 200),
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
+                              horizontal: 6,
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
@@ -285,7 +287,7 @@ class HomePage extends StatelessWidget {
                                 const SizedBox(height: 2),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
+                                    horizontal: 6,
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
@@ -303,9 +305,13 @@ class HomePage extends StatelessWidget {
                                     isToday
                                         ? 'Today'
                                         : DateFormat('MMM').format(date),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: false,
+                                    textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w400,
                                       color: isSelected
                                           ? Colors.white
                                           : AppColors.primaryOrange,
@@ -322,63 +328,75 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.85),
-                  borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
-                  border: Border.all(
-                    color: AppColors.primaryOrange.withOpacity(0.3),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primaryOrange.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
+              InkWell(
+                borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+                onTap: () async {
+                  final currentContext = Get.context;
+                  if (currentContext == null) return;
+
+                  final earliestDate = DateTime.now().subtract(
+                    Duration(days: AppConstants.visibleActivityDays),
+                  );
+
+                  final pickedDate = await showDatePicker(
+                    context: currentContext,
+                    initialDate: controller.selectedDate.value,
+                    firstDate: earliestDate,
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null) {
+                    controller.changeDate(pickedDate);
+                  }
+                },
+                child: AnimatedContainer(
+                  width: 68,
+                  duration: const Duration(milliseconds: 200),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
+                    border: Border.all(
+                      color: AppColors.lightBorder.withOpacity(0.5),
                     ),
-                  ],
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(AppConstants.kRadiusM),
-                  onTap: () async {
-                    final currentContext = Get.context;
-                    if (currentContext == null) return;
-
-                    final earliestDate = DateTime.now().subtract(
-                      Duration(days: AppConstants.visibleActivityDays),
-                    );
-
-                    final pickedDate = await showDatePicker(
-                      context: currentContext,
-                      initialDate: controller.selectedDate.value,
-                      firstDate: earliestDate,
-                      lastDate: DateTime.now(),
-                    );
-                    if (pickedDate != null) {
-                      controller.changeDate(pickedDate);
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(
-                          Icons.edit_calendar_outlined,
-                          size: 18,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.edit_calendar_outlined,
+                        size: 18,
+                        color: AppColors.primaryOrange,
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        'Pick',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.primaryOrange,
                         ),
-                        SizedBox(width: 8),
+                      ),
+                      const SizedBox(height: 2),
+                      if (!controller.visibleDates.any((d) =>
+                          DateFormat('yyyy-MM-dd').format(d) ==
+                          DateFormat('yyyy-MM-dd')
+                              .format(controller.selectedDate.value)))
                         Text(
-                          'Pick date',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primaryOrange,
+                          DateFormat('dd MMM')
+                              .format(controller.selectedDate.value),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.lightTextSecondary,
                           ),
                         ),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
               ),
