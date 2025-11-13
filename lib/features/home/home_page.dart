@@ -44,8 +44,8 @@ class HomePage extends StatelessWidget {
             SliverPersistentHeader(
               pinned: true,
               delegate: _HomeHeaderDelegate(
-                maxExtentHeight: 240,
-                minExtentHeight: 140,
+                maxExtentHeight: 280,
+                minExtentHeight: 120,
                 dateSelectorBuilder: (context, progress) =>
                     _buildDateSelector(controller, progress),
                 scoreCardBuilder: (context, progress) =>
@@ -657,31 +657,36 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: AppConstants.kSpacingM),
             ],
 
-            // Japa with both rounds and completion time
+            // Japa with time and rounds in the same card
             if (controller.shouldShowActivity('japa')) ...[
               _buildActivityWithScore(
                 controller,
-                TimestampPicker(
-                  title: '',
-                  selectedTime: controller.japaTime,
-                  onTimeChanged: (val) {
-                    controller.japaTime.value = val;
-                    controller.calculateScores();
-                  },
-                  defaultTime: '07:00',
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TimestampPicker(
+                      title: '',
+                      selectedTime: controller.japaTime,
+                      onTimeChanged: (val) {
+                        controller.japaTime.value = val;
+                        controller.calculateScores();
+                      },
+                      defaultTime: '07:00',
+                    ),
+                    const SizedBox(height: AppConstants.kSpacingS),
+                    RoundsPicker(
+                      title: 'Rounds (Optional)',
+                      value: controller.japaRounds,
+                      onChanged: (val) {
+                        controller.japaRounds.value = val;
+                      },
+                    ),
+                  ],
                 ),
                 'japa',
                 title: 'Japa (Chanting)',
                 icon: Icons.self_improvement,
                 color: AppColors.activityJapa,
-              ),
-              const SizedBox(height: AppConstants.kSpacingS),
-              RoundsPicker(
-                title: '📿 Japa Rounds (optional)',
-                value: controller.japaRounds,
-                onChanged: (val) {
-                  controller.japaRounds.value = val;
-                },
               ),
               const SizedBox(height: AppConstants.kSpacingM),
             ],
@@ -1002,7 +1007,6 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
             padding: padding,
             child: LayoutBuilder(
               builder: (context, constraints) {
-
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [

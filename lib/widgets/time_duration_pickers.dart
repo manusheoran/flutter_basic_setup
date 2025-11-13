@@ -658,6 +658,8 @@ class RoundsPicker extends StatelessWidget {
 
   void _showRoundsPicker(BuildContext context) {
     int selectedRounds = value.value;
+    if (selectedRounds < 0) selectedRounds = 0;
+    if (selectedRounds > 1000) selectedRounds = 1000;
 
     showDialog(
       context: context,
@@ -672,69 +674,103 @@ class RoundsPicker extends StatelessWidget {
             ),
             child: Column(
               children: [
+                // Header
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryOrange,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20),
                     ),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
+                    ],
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel', style: TextStyle(color: Colors.white)),
-                      ),
-                      Text(
-                        title,
-                        style: const TextStyle(
+                      const Text(
+                        'Add rounds',
+                        style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          onChanged(selectedRounds);
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Done', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primaryOrange,
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                              textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primaryOrange,
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                              textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                            ),
+                            onPressed: () {
+                              onChanged(selectedRounds);
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Done'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
+                // Body
                 Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Stack(
                     children: [
-                      Expanded(
-                        child: CupertinoPicker(
-                          scrollController: FixedExtentScrollController(
-                            initialItem: selectedRounds,
+                      Positioned.fill(
+                        child: Center(
+                          child: Container(
+                            height: 40,
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.black54.withOpacity(0.03),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          itemExtent: 40,
-                          onSelectedItemChanged: (int index) {
-                            selectedRounds = index;
-                          },
-                          children: List<Widget>.generate(33, (int index) {
-                            return Center(
-                              child: Text(
-                                index.toString(),
-                                style: const TextStyle(fontSize: 28),
-                              ),
-                            );
-                          }),
                         ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.only(right: 30),
-                        child: Text(
-                          'rounds',
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: CupertinoPicker(
+                              scrollController: FixedExtentScrollController(
+                                initialItem: selectedRounds,
+                              ),
+                              itemExtent: 40,
+                              looping: true,
+                              useMagnifier: true,
+                              magnification: 1.15,
+                              squeeze: 1.2,
+                              selectionOverlay: const SizedBox.shrink(),
+                              onSelectedItemChanged: (int index) {
+                                selectedRounds = index;
+                              },
+                              children: List<Widget>.generate(1001, (int index) {
+                                return Center(
+                                  child: Text(
+                                    index.toString(),
+                                    style: const TextStyle(fontSize: 28),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
