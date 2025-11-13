@@ -56,7 +56,7 @@ class HomePage extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
                   AppConstants.kDefaultPadding,
-                  AppConstants.kSpacingXL,
+                  AppConstants.kSpacingM,
                   AppConstants.kDefaultPadding,
                   AppConstants.kSpacingXS,
                 ),
