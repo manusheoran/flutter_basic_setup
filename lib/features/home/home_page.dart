@@ -44,8 +44,8 @@ class HomePage extends StatelessWidget {
             SliverPersistentHeader(
               pinned: true,
               delegate: _HomeHeaderDelegate(
-                maxExtentHeight: 262,
-                minExtentHeight: 140,
+                maxExtentHeight: 246,
+                minExtentHeight: 148,
                 dateSelectorBuilder: (context, progress) =>
                     _buildDateSelector(controller, progress),
                 scoreCardBuilder: (context, progress) =>
@@ -1009,7 +1009,7 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
       AppConstants.kDefaultPadding,
       lerpDouble(AppConstants.kSpacingS, AppConstants.kSpacingXS, collapseT)!,
       AppConstants.kDefaultPadding,
-      lerpDouble(AppConstants.kSpacingXS, 2.0, collapseT)!,
+      lerpDouble(AppConstants.kSpacingS, AppConstants.kSpacingXS, collapseT)!,
     );
 
     final double spacing =
