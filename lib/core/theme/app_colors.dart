@@ -13,7 +13,9 @@ class AppColors {
   static const Color orangeSuccess = Color(0xFFFFA94D); // Warm orange >80%
   static const Color lightOrangeWarning = Color(0xFFFFBF7A); // Light orange 60-80%
   static const Color peachWarning = Color(0xFFFFD4A3); // Soft peach 40-60%
+  static const Color yellowWarning = Color(0xFFFFC107);
   static const Color coralDanger = Color(0xFFFF7A5C); // Warm coral <40%
+  static const Color maroonScore = Color(0xFF800000); // Deep maroon for low score
   
   // Calming Accents - Sage and Deep Teal (spiritual, grounding)
   static const Color accentSage = Color(0xFF8DBF9F); // Calming sage accent
@@ -89,14 +91,14 @@ class AppColors {
   
   // Helper method to get color based on score percentage
   static Color getScoreColor(double percentage) {
-    if (percentage >= 80) {
-      return orangeSuccess; // Vibrant orange
-    } else if (percentage >= 60) {
-      return lightOrangeWarning; // Light orange
+    if (percentage >= 90) {
+      return greenSuccess;
+    } else if (percentage >= 70) {
+      return primaryOrange;
     } else if (percentage >= 40) {
-      return peachWarning; // Peach
+      return yellowWarning;
     } else {
-      return coralDanger; // Coral
+      return maroonScore;
     }
   }
 

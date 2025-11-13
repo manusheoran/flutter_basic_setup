@@ -26,7 +26,6 @@ class DashboardPage extends StatelessWidget {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
-
         return SingleChildScrollView(
           padding: const EdgeInsets.all(AppConstants.kDefaultPadding),
           child: Column(
@@ -274,7 +273,7 @@ class DashboardPage extends StatelessWidget {
               child: _buildStatCard(
                 title: 'Avg. Score',
                 value: controller.avgScore.value.toStringAsFixed(1),
-                subtitle: '/ ${AppConstants.maxTotalScore}',
+                subtitle: '/ ${controller.maxTotalScore.value.toInt()}',
                 color: AppColors.getScoreColor(controller.avgPercentage.value),
               ),
             ),
@@ -479,7 +478,7 @@ class DashboardPage extends StatelessWidget {
                       ),
                     ],
                     minY: -20, // Allow negative scores
-                    maxY: AppConstants.maxTotalScore.toDouble(),
+                    maxY: controller.maxTotalScore.value,
                   ),
                 ),
               ),
@@ -495,6 +494,16 @@ class DashboardPage extends StatelessWidget {
       if (controller.activities.isEmpty) {
         return const SizedBox.shrink();
       }
+
+      final dynamicMaxY = [
+        controller.getMaxPoints('nindra'),
+        controller.getMaxPoints('wake_up'),
+        controller.getMaxPoints('day_sleep'),
+        controller.getMaxPoints('japa'),
+        controller.getMaxPoints('pathan'),
+        controller.getMaxPoints('sravan'),
+        controller.getMaxPoints('seva'),
+      ].reduce((a, b) => a > b ? a : b) + 5;
 
       return Container(
         decoration: BoxDecoration(
@@ -558,7 +567,7 @@ class DashboardPage extends StatelessWidget {
                   BarChartData(
                     alignment: BarChartAlignment.spaceAround,
                     minY: -10, // Allow negative scores
-                    maxY: 105, // Max is 100 for Seva, add 5 for padding
+                    maxY: dynamicMaxY, // dynamic max + padding
                     barTouchData: BarTouchData(
                       enabled: true,
                       touchTooltipData: BarTouchTooltipData(
@@ -635,7 +644,12 @@ class DashboardPage extends StatelessWidget {
                             toY: controller.avgNindra.value,
                             color: controller.avgNindra.value < 0
                                 ? Colors.red
-                                : AppColors.primaryOrange,
+                                : AppColors.getScoreColor(
+                                    controller.getMaxPoints('nindra') > 0
+                                        ? (controller.avgNindra.value /
+                                                controller.getMaxPoints('nindra')) *
+                                            100
+                                        : 0),
                             width: 16)
                       ]),
                       BarChartGroupData(x: 1, barRods: [
@@ -643,7 +657,12 @@ class DashboardPage extends StatelessWidget {
                             toY: controller.avgWakeUp.value,
                             color: controller.avgWakeUp.value < 0
                                 ? Colors.red
-                                : Colors.blue,
+                                : AppColors.getScoreColor(
+                                    controller.getMaxPoints('wake_up') > 0
+                                        ? (controller.avgWakeUp.value /
+                                                controller.getMaxPoints('wake_up')) *
+                                            100
+                                        : 0),
                             width: 16)
                       ]),
                       BarChartGroupData(x: 2, barRods: [
@@ -651,7 +670,12 @@ class DashboardPage extends StatelessWidget {
                             toY: controller.avgDaySleep.value,
                             color: controller.avgDaySleep.value < 0
                                 ? Colors.red
-                                : Colors.purple,
+                                : AppColors.getScoreColor(
+                                    controller.getMaxPoints('day_sleep') > 0
+                                        ? (controller.avgDaySleep.value /
+                                                controller.getMaxPoints('day_sleep')) *
+                                            100
+                                        : 0),
                             width: 16)
                       ]),
                       BarChartGroupData(x: 3, barRods: [
@@ -659,7 +683,12 @@ class DashboardPage extends StatelessWidget {
                             toY: controller.avgJapa.value,
                             color: controller.avgJapa.value < 0
                                 ? Colors.red
-                                : Colors.green,
+                                : AppColors.getScoreColor(
+                                    controller.getMaxPoints('japa') > 0
+                                        ? (controller.avgJapa.value /
+                                                controller.getMaxPoints('japa')) *
+                                            100
+                                        : 0),
                             width: 16)
                       ]),
                       BarChartGroupData(x: 4, barRods: [
@@ -667,7 +696,12 @@ class DashboardPage extends StatelessWidget {
                             toY: controller.avgPathan.value,
                             color: controller.avgPathan.value < 0
                                 ? Colors.red
-                                : Colors.teal,
+                                : AppColors.getScoreColor(
+                                    controller.getMaxPoints('pathan') > 0
+                                        ? (controller.avgPathan.value /
+                                                controller.getMaxPoints('pathan')) *
+                                            100
+                                        : 0),
                             width: 16)
                       ]),
                       BarChartGroupData(x: 5, barRods: [
@@ -675,7 +709,12 @@ class DashboardPage extends StatelessWidget {
                             toY: controller.avgSravan.value,
                             color: controller.avgSravan.value < 0
                                 ? Colors.red
-                                : Colors.indigo,
+                                : AppColors.getScoreColor(
+                                    controller.getMaxPoints('sravan') > 0
+                                        ? (controller.avgSravan.value /
+                                                controller.getMaxPoints('sravan')) *
+                                            100
+                                        : 0),
                             width: 16)
                       ]),
                       BarChartGroupData(x: 6, barRods: [
@@ -683,7 +722,12 @@ class DashboardPage extends StatelessWidget {
                             toY: controller.avgSeva.value,
                             color: controller.avgSeva.value < 0
                                 ? Colors.red
-                                : Colors.red.shade400,
+                                : AppColors.getScoreColor(
+                                    controller.getMaxPoints('seva') > 0
+                                        ? (controller.avgSeva.value /
+                                                controller.getMaxPoints('seva')) *
+                                            100
+                                        : 0),
                             width: 16)
                       ]),
                     ],
@@ -751,48 +795,80 @@ class DashboardPage extends StatelessWidget {
                 child: RadarChart(
                   RadarChartData(
                     dataSets: [
+                      // 100% reference ring
                       RadarDataSet(
-                        fillColor: AppColors.primaryOrange.withOpacity(0.3),
-                        borderColor: AppColors.primaryOrange,
+                        fillColor: Colors.transparent,
+                        borderColor: Colors.grey.withOpacity(0.25),
+                        borderWidth: 1,
+                        entryRadius: 0,
+                        dataEntries: const [
+                          RadarEntry(value: 5),
+                          RadarEntry(value: 5),
+                          RadarEntry(value: 5),
+                          RadarEntry(value: 5),
+                          RadarEntry(value: 5),
+                          RadarEntry(value: 5),
+                          RadarEntry(value: 5),
+                        ],
+                      ),
+                      RadarDataSet(
+                        fillColor: AppColors
+                            .getScoreColor(controller.avgPercentage.value)
+                            .withOpacity(0.3),
+                        borderColor: AppColors
+                            .getScoreColor(controller.avgPercentage.value),
                         entryRadius: 3,
                         dataEntries: [
-                          // Normalize to 0-5 scale, treating negative as 0 for radar visualization
-                          RadarEntry(
-                              value:
-                                  ((controller.avgNindra.value.clamp(-5, 25) +
-                                              5) /
-                                          30) *
-                                      5),
-                          RadarEntry(
-                              value:
-                                  ((controller.avgWakeUp.value.clamp(-5, 25) +
-                                              5) /
-                                          30) *
-                                      5),
-                          RadarEntry(
-                              value:
-                                  ((controller.avgDaySleep.value.clamp(-5, 25) +
-                                              5) /
-                                          30) *
-                                      5),
-                          RadarEntry(
-                              value: ((controller.avgJapa.value.clamp(0, 25)) /
-                                      25) *
-                                  5),
-                          RadarEntry(
-                              value:
-                                  ((controller.avgPathan.value.clamp(0, 30)) /
-                                          30) *
-                                      5),
-                          RadarEntry(
-                              value:
-                                  ((controller.avgSravan.value.clamp(0, 30)) /
-                                          30) *
-                                      5),
-                          RadarEntry(
-                              value: ((controller.avgSeva.value.clamp(0, 100)) /
-                                      100) *
-                                  5),
+                          // Normalize to 0-5 scale using activity max; negatives shown as 0
+                          (() {
+                            final max = controller.getMaxPoints('nindra');
+                            final v = controller.avgNindra.value;
+                            final val = v < 0 ? 0 : v;
+                            final ratio = max > 0 ? (val / max) : 0.0;
+                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                          }()),
+                          (() {
+                            final max = controller.getMaxPoints('wake_up');
+                            final v = controller.avgWakeUp.value;
+                            final val = v < 0 ? 0 : v;
+                            final ratio = max > 0 ? (val / max) : 0.0;
+                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                          }()),
+                          (() {
+                            final max = controller.getMaxPoints('day_sleep');
+                            final v = controller.avgDaySleep.value;
+                            final val = v < 0 ? 0 : v;
+                            final ratio = max > 0 ? (val / max) : 0.0;
+                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                          }()),
+                          (() {
+                            final max = controller.getMaxPoints('japa');
+                            final v = controller.avgJapa.value;
+                            final val = v < 0 ? 0 : v;
+                            final ratio = max > 0 ? (val / max) : 0.0;
+                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                          }()),
+                          (() {
+                            final max = controller.getMaxPoints('pathan');
+                            final v = controller.avgPathan.value;
+                            final val = v < 0 ? 0 : v;
+                            final ratio = max > 0 ? (val / max) : 0.0;
+                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                          }()),
+                          (() {
+                            final max = controller.getMaxPoints('sravan');
+                            final v = controller.avgSravan.value;
+                            final val = v < 0 ? 0 : v;
+                            final ratio = max > 0 ? (val / max) : 0.0;
+                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                          }()),
+                          (() {
+                            final max = controller.getMaxPoints('seva');
+                            final v = controller.avgSeva.value;
+                            final val = v < 0 ? 0 : v;
+                            final ratio = max > 0 ? (val / max) : 0.0;
+                            return RadarEntry(value: (ratio.clamp(0.0, 1.0)) * 5);
+                          }()),
                         ],
                       ),
                     ],
@@ -800,44 +876,140 @@ class DashboardPage extends StatelessWidget {
                     borderData: FlBorderData(show: false),
                     radarBorderData:
                         const BorderSide(color: Colors.transparent),
-                    titlePositionPercentageOffset: 0.2,
+                    titlePositionPercentageOffset: 0.18,
                     titleTextStyle: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w500),
+                        fontSize: 11, fontWeight: FontWeight.w500),
                     getTitle: (index, angle) {
+                      String label;
+                      double pct;
                       switch (index) {
                         case 0:
-                          return const RadarChartTitle(text: 'Nindra');
+                          label = 'Nindra';
+                          pct = controller.getMaxPoints('nindra') > 0
+                              ? ((controller.avgNindra.value < 0 ? 0 : controller.avgNindra.value) /
+                                      controller.getMaxPoints('nindra')) *
+                                  100
+                              : 0;
+                          break;
                         case 1:
-                          return const RadarChartTitle(text: 'Wake Up');
+                          label = 'Wake Up';
+                          pct = controller.getMaxPoints('wake_up') > 0
+                              ? ((controller.avgWakeUp.value < 0 ? 0 : controller.avgWakeUp.value) /
+                                      controller.getMaxPoints('wake_up')) *
+                                  100
+                              : 0;
+                          break;
                         case 2:
-                          return const RadarChartTitle(text: 'Day Sleep');
+                          label = 'Day Sleep';
+                          pct = controller.getMaxPoints('day_sleep') > 0
+                              ? ((controller.avgDaySleep.value < 0 ? 0 : controller.avgDaySleep.value) /
+                                      controller.getMaxPoints('day_sleep')) *
+                                  100
+                              : 0;
+                          break;
                         case 3:
-                          return const RadarChartTitle(text: 'Japa');
+                          label = 'Japa';
+                          pct = controller.getMaxPoints('japa') > 0
+                              ? ((controller.avgJapa.value < 0 ? 0 : controller.avgJapa.value) /
+                                      controller.getMaxPoints('japa')) *
+                                  100
+                              : 0;
+                          break;
                         case 4:
-                          return const RadarChartTitle(text: 'Pathan');
+                          label = 'Pathan';
+                          pct = controller.getMaxPoints('pathan') > 0
+                              ? ((controller.avgPathan.value < 0 ? 0 : controller.avgPathan.value) /
+                                      controller.getMaxPoints('pathan')) *
+                                  100
+                              : 0;
+                          break;
                         case 5:
-                          return const RadarChartTitle(text: 'Sravan');
+                          label = 'Sravan';
+                          pct = controller.getMaxPoints('sravan') > 0
+                              ? ((controller.avgSravan.value < 0 ? 0 : controller.avgSravan.value) /
+                                      controller.getMaxPoints('sravan')) *
+                                  100
+                              : 0;
+                          break;
                         case 6:
-                          return const RadarChartTitle(text: 'Seva');
+                          label = 'Seva';
+                          pct = controller.getMaxPoints('seva') > 0
+                              ? ((controller.avgSeva.value < 0 ? 0 : controller.avgSeva.value) /
+                                      controller.getMaxPoints('seva')) *
+                                  100
+                              : 0;
+                          break;
                         default:
-                          return const RadarChartTitle(text: '');
+                          label = '';
+                          pct = 0;
                       }
+                      final showPct = pct > 0;
+                      String display;
+                      if (index == 2 || index == 5) {
+                        // Wrap percentage on a new line for Day Sleep and Sravan
+                        display = showPct
+                            ? '$label\n(${pct.toStringAsFixed(0)}%)'
+                            : label;
+                      } else {
+                        display = showPct
+                            ? '$label (${pct.toStringAsFixed(0)}%)'
+                            : label;
+                      }
+                      return RadarChartTitle(text: display);
                     },
                     tickCount: 5,
-                    ticksTextStyle: const TextStyle(
-                        fontSize: 10, color: Colors.transparent),
+                    ticksTextStyle:
+                        const TextStyle(fontSize: 10, color: Colors.transparent),
                     tickBorderData:
-                        const BorderSide(color: Colors.grey, width: 1),
+                        BorderSide(color: Colors.grey.withOpacity(0.3), width: 1),
                     gridBorderData:
-                        const BorderSide(color: Colors.grey, width: 1),
+                        BorderSide(color: Colors.grey.withOpacity(0.3), width: 1),
                   ),
                 ),
               ),
+              const SizedBox(height: AppConstants.kSpacingM),
+              _buildRadarLegend(controller),
             ],
           ),
         ),
       );
     });
+  }
+
+  Widget _buildRadarLegend(DashboardController controller) {
+    final items = [
+      ['Nindra', controller.avgNindra.value, controller.getMaxPoints('nindra')],
+      ['Wake Up', controller.avgWakeUp.value, controller.getMaxPoints('wake_up')],
+      ['Day Sleep', controller.avgDaySleep.value, controller.getMaxPoints('day_sleep')],
+      ['Japa', controller.avgJapa.value, controller.getMaxPoints('japa')],
+      ['Pathan', controller.avgPathan.value, controller.getMaxPoints('pathan')],
+      ['Sravan', controller.avgSravan.value, controller.getMaxPoints('sravan')],
+      ['Seva', controller.avgSeva.value, controller.getMaxPoints('seva')],
+    ];
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: items.map((e) {
+        final label = e[0] as String;
+        final val = (e[1] as double);
+        final max = (e[2] as double);
+        final safe = val < 0 ? 0 : val;
+        final pct = max > 0 ? (safe / max) * 100 : 0;
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: AppColors.lightBorder),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            '$label: ${pct.toStringAsFixed(0)}% (${safe.toStringAsFixed(1)}/${max.toStringAsFixed(0)})',
+            style: const TextStyle(fontSize: 11),
+          ),
+        );
+      }).toList(),
+    );
   }
 
   Widget _buildActivityBreakdown(DashboardController controller) {
@@ -879,15 +1051,13 @@ class DashboardPage extends StatelessWidget {
               ),
               const SizedBox(height: AppConstants.kSpacingM),
               _buildActivityRow(
-                  '🌙 Nindra (Sleep)', controller.avgNindra.value),
-              _buildActivityRow('🌅 Wake Up Time', controller.avgWakeUp.value),
-              _buildActivityRow('😴 Day Sleep', controller.avgDaySleep.value),
-              _buildActivityRow('📿 Japa Rounds', controller.avgJapa.value),
-              _buildActivityRow(
-                  '📖 Pathan Reading', controller.avgPathan.value),
-              _buildActivityRow(
-                  '👂 Sravan Listening', controller.avgSravan.value),
-              _buildActivityRow('🙏 Seva Service', controller.avgSeva.value),
+                  controller, 'nindra', '🌙 Nindra (Sleep)', controller.avgNindra.value),
+              _buildActivityRow(controller, 'wake_up', '🌅 Wake Up Time', controller.avgWakeUp.value),
+              _buildActivityRow(controller, 'day_sleep', '😴 Day Sleep', controller.avgDaySleep.value),
+              _buildActivityRow(controller, 'japa', '📿 Japa Rounds', controller.avgJapa.value),
+              _buildActivityRow(controller, 'pathan', '📖 Pathan Reading', controller.avgPathan.value),
+              _buildActivityRow(controller, 'sravan', '👂 Sravan Listening', controller.avgSravan.value),
+              _buildActivityRow(controller, 'seva', '🙏 Seva Service', controller.avgSeva.value),
             ],
           ),
         ),
@@ -895,8 +1065,18 @@ class DashboardPage extends StatelessWidget {
     });
   }
 
-  Widget _buildActivityRow(String label, double score) {
-    final percentage = (score / AppConstants.maxActivityScore) * 100;
+  Widget _buildActivityRow(
+      DashboardController controller, String key, String label, double score) {
+    final max = controller.getMaxPoints(key);
+    double ratio;
+    if (max <= 0) {
+      ratio = 0;
+    } else {
+      // For the horizontal bar, treat negatives as 0 so the bar never goes backward
+      ratio = (score <= 0 ? 0 : score) / max;
+    }
+    ratio = ratio.clamp(0.0, 1.0);
+    final percentage = ratio * 100;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -908,7 +1088,7 @@ class DashboardPage extends StatelessWidget {
           ),
           Expanded(
             child: LinearProgressIndicator(
-              value: percentage / 100,
+              value: ratio,
               backgroundColor: Colors.grey[200],
               valueColor:
                   AlwaysStoppedAnimation(AppColors.getScoreColor(percentage)),

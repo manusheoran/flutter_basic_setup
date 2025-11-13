@@ -3,14 +3,19 @@ import 'package:intl/intl.dart';
 import '../../data/models/activity_model.dart';
 import '../../data/services/firestore_service.dart';
 import '../../data/services/auth_service.dart';
+import '../../data/services/parameter_service.dart';
 
 class DashboardController extends GetxController {
   final FirestoreService _firestoreService = Get.find<FirestoreService>();
   final AuthService _authService = Get.find<AuthService>();
+  final ParameterService _parameterService = Get.find<ParameterService>();
   
   RxInt selectedTab = 0.obs;
   RxList<DailyActivity> activities = <DailyActivity>[].obs;
   RxBool isLoading = false.obs;
+  RxDouble maxTotalScore = 0.0.obs;
+  final Map<String, double> _activityMax = {};
+  final Map<String, double> _activityMin = {};
   
   // Overall averages
   RxDouble avgScore = 0.0.obs;
@@ -36,6 +41,11 @@ class DashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _initAsync();
+  }
+
+  Future<void> _initAsync() async {
+    await _loadParameterMeta();
     loadFirstActivityDate();
     loadActivitiesForDateRange();
   }
@@ -146,6 +156,28 @@ class DashboardController extends GetxController {
     }
   }
   
+  Future<void> _loadParameterMeta() async {
+    try {
+      await _parameterService.ensureLoaded();
+      maxTotalScore.value = _parameterService.getTotalMaxPoints();
+      final keys = ['nindra', 'wake_up', 'day_sleep', 'japa', 'pathan', 'sravan', 'seva'];
+      for (final k in keys) {
+        _activityMax[k] = _parameterService.getMaxPoints(k);
+        final param = _parameterService.getParameter(k);
+        double minVal = 0;
+        if (param != null && param.scoring.isNotEmpty) {
+          minVal = param.scoring.values.reduce((a, b) => a < b ? a : b);
+        }
+        _activityMin[k] = minVal;
+      }
+    } catch (e) {
+      print('❌ Error loading parameter metadata: $e');
+    }
+  }
+
+  double getMaxPoints(String key) => _activityMax[key] ?? 0;
+  double getMinPoints(String key) => _activityMin[key] ?? 0;
+
   void calculateAllAverages() {
     if (activities.isEmpty) {
       _resetAverages();
