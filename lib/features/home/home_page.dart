@@ -256,8 +256,7 @@ class HomePage extends StatelessWidget {
                                 border: Border.all(
                                   color: isSelected
                                       ? AppColors.primaryOrange
-                                      :
-                                          AppColors.lightBorder.withOpacity(0.5),
+                                      : AppColors.lightBorder.withOpacity(0.5),
                                 ),
                                 boxShadow: isSelected
                                     ? [
@@ -363,8 +362,8 @@ class HomePage extends StatelessWidget {
                   child: AnimatedContainer(
                     width: 68,
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                     decoration: BoxDecoration(
                       color: controller.visibleDates.any((d) =>
                               DateFormat('yyyy-MM-dd').format(d) ==
@@ -452,7 +451,7 @@ class HomePage extends StatelessWidget {
       final maxScore = controller.maxTotalScore.value.toStringAsFixed(0);
       final percentLabel = percentageValue.toStringAsFixed(1);
 
-      final double paddingVertical = showCompact ? 2.0 : AppConstants.kSpacingS;
+      final double paddingVertical = showCompact ? 8.0 : AppConstants.kSpacingS;
       final double valueFontSize = showCompact ? 18 : 28;
       final double percentFontSize = showCompact ? 18 : 28;
       final double dividerHeight = showCompact ? 30 : 60;
@@ -698,169 +697,169 @@ class HomePage extends StatelessWidget {
       }
 
       return Column(
-          children: [
-            // Timestamp Activities (with 12-hour format + AM/PM)
-            if (controller.shouldShowActivity('nindra')) ...[
-              _buildActivityWithScore(
-                controller,
-                TimestampPicker(
-                  title: '',
-                  selectedTime: controller.nindraTime,
-                  onTimeChanged: (val) {
-                    controller.nindraTime.value = val;
-                    controller.calculateScores();
-                  },
-                  minTime: '21:45', // 9:45 PM minimum
-                  defaultTime: '21:45',
-                ),
-                'nindra',
-                title: 'Nindra (To Bed)',
-                icon: Icons.bedtime,
-                color: AppColors.activityNindra,
+        children: [
+          // Timestamp Activities (with 12-hour format + AM/PM)
+          if (controller.shouldShowActivity('nindra')) ...[
+            _buildActivityWithScore(
+              controller,
+              TimestampPicker(
+                title: '',
+                selectedTime: controller.nindraTime,
+                onTimeChanged: (val) {
+                  controller.nindraTime.value = val;
+                  controller.calculateScores();
+                },
+                minTime: '21:45', // 9:45 PM minimum
+                defaultTime: '21:45',
               ),
-              const SizedBox(height: AppConstants.kSpacingM),
-            ],
-
-            if (controller.shouldShowActivity('wake_up')) ...[
-              _buildActivityWithScore(
-                controller,
-                TimestampPicker(
-                  title: '',
-                  selectedTime: controller.wakeUpTime,
-                  onTimeChanged: (val) {
-                    controller.wakeUpTime.value = val;
-                    controller.calculateScores();
-                  },
-                  minTime: '03:45', // 3:45 AM minimum
-                  defaultTime: '03:45',
-                ),
-                'wake_up',
-                title: 'Wake Up Time',
-                icon: Icons.wb_sunny,
-                color: AppColors.activityWakeUp,
-              ),
-              const SizedBox(height: AppConstants.kSpacingM),
-            ],
-
-            // Duration Activities (Hours + Minutes, no AM/PM)
-            if (controller.shouldShowActivity('day_sleep')) ...[
-              _buildActivityWithScore(
-                controller,
-                DurationPicker(
-                  title: '',
-                  subtitle: 'Total sleep during the day',
-                  value: controller.daySleepMinutes,
-                  onChanged: (val) {
-                    controller.daySleepMinutes.value = val;
-                    controller.calculateScores();
-                  },
-                  maxHours: 4, // Max 4 hours
-                ),
-                'day_sleep',
-                title: 'Day Sleep',
-                icon: Icons.hotel,
-                color: AppColors.activityDaySleep,
-              ),
-              const SizedBox(height: AppConstants.kSpacingM),
-            ],
-
-            // Japa with time and rounds in the same card
-            if (controller.shouldShowActivity('japa')) ...[
-              _buildActivityWithScore(
-                controller,
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TimestampPicker(
-                      title: '',
-                      selectedTime: controller.japaTime,
-                      onTimeChanged: (val) {
-                        controller.japaTime.value = val;
-                        controller.calculateScores();
-                      },
-                      defaultTime: '07:00',
-                    ),
-                    const SizedBox(height: AppConstants.kSpacingS),
-                    RoundsPicker(
-                      title: 'Rounds (Optional)',
-                      value: controller.japaRounds,
-                      onChanged: (val) {
-                        controller.japaRounds.value = val;
-                      },
-                    ),
-                  ],
-                ),
-                'japa',
-                title: 'Japa (Chanting)',
-                icon: Icons.self_improvement,
-                color: AppColors.activityJapa,
-              ),
-              const SizedBox(height: AppConstants.kSpacingM),
-            ],
-
-            if (controller.shouldShowActivity('pathan')) ...[
-              _buildActivityWithScore(
-                controller,
-                DurationPicker(
-                  title: '',
-                  subtitle: 'Scripture reading time',
-                  value: controller.pathanMinutes,
-                  onChanged: (val) {
-                    controller.pathanMinutes.value = val;
-                    controller.calculateScores();
-                  },
-                  maxHours: 2, // Max 2 hours
-                ),
-                'pathan',
-                title: 'Pathan (Reading)',
-                icon: Icons.menu_book,
-                color: AppColors.activityPathan,
-              ),
-              const SizedBox(height: AppConstants.kSpacingM),
-            ],
-
-            if (controller.shouldShowActivity('sravan')) ...[
-              _buildActivityWithScore(
-                controller,
-                DurationPicker(
-                  title: '',
-                  subtitle: 'Spiritual audio/lecture time',
-                  value: controller.sravanMinutes,
-                  onChanged: (val) {
-                    controller.sravanMinutes.value = val;
-                    controller.calculateScores();
-                  },
-                  maxHours: 3, // Max 3 hours
-                ),
-                'sravan',
-                title: 'Sravan (Listening)',
-                icon: Icons.headset,
-                color: AppColors.activitySravan,
-              ),
-              const SizedBox(height: AppConstants.kSpacingM),
-            ],
-
-            if (controller.shouldShowActivity('seva')) ...[
-              _buildActivityWithScore(
-                controller,
-                DurationPicker(
-                  title: '',
-                  subtitle: 'Service hours',
-                  value: controller.sevaMinutes,
-                  onChanged: (val) {
-                    controller.sevaMinutes.value = val;
-                    controller.calculateScores();
-                  },
-                  maxHours: 12, // Max 12 hours
-                ),
-                'seva',
-                title: 'Seva (Service)',
-                icon: Icons.volunteer_activism,
-                color: AppColors.activitySeva,
-              ),
-            ],
+              'nindra',
+              title: 'Nindra (To Bed)',
+              icon: Icons.bedtime,
+              color: AppColors.activityNindra,
+            ),
+            const SizedBox(height: AppConstants.kSpacingM),
           ],
-        );
+
+          if (controller.shouldShowActivity('wake_up')) ...[
+            _buildActivityWithScore(
+              controller,
+              TimestampPicker(
+                title: '',
+                selectedTime: controller.wakeUpTime,
+                onTimeChanged: (val) {
+                  controller.wakeUpTime.value = val;
+                  controller.calculateScores();
+                },
+                minTime: '03:45', // 3:45 AM minimum
+                defaultTime: '03:45',
+              ),
+              'wake_up',
+              title: 'Wake Up Time',
+              icon: Icons.wb_sunny,
+              color: AppColors.activityWakeUp,
+            ),
+            const SizedBox(height: AppConstants.kSpacingM),
+          ],
+
+          // Duration Activities (Hours + Minutes, no AM/PM)
+          if (controller.shouldShowActivity('day_sleep')) ...[
+            _buildActivityWithScore(
+              controller,
+              DurationPicker(
+                title: '',
+                subtitle: 'Total sleep during the day',
+                value: controller.daySleepMinutes,
+                onChanged: (val) {
+                  controller.daySleepMinutes.value = val;
+                  controller.calculateScores();
+                },
+                maxHours: 4, // Max 4 hours
+              ),
+              'day_sleep',
+              title: 'Day Sleep',
+              icon: Icons.hotel,
+              color: AppColors.activityDaySleep,
+            ),
+            const SizedBox(height: AppConstants.kSpacingM),
+          ],
+
+          // Japa with time and rounds in the same card
+          if (controller.shouldShowActivity('japa')) ...[
+            _buildActivityWithScore(
+              controller,
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TimestampPicker(
+                    title: '',
+                    selectedTime: controller.japaTime,
+                    onTimeChanged: (val) {
+                      controller.japaTime.value = val;
+                      controller.calculateScores();
+                    },
+                    defaultTime: '07:00',
+                  ),
+                  const SizedBox(height: AppConstants.kSpacingS),
+                  RoundsPicker(
+                    title: 'Rounds (Optional)',
+                    value: controller.japaRounds,
+                    onChanged: (val) {
+                      controller.japaRounds.value = val;
+                    },
+                  ),
+                ],
+              ),
+              'japa',
+              title: 'Japa (Chanting)',
+              icon: Icons.self_improvement,
+              color: AppColors.activityJapa,
+            ),
+            const SizedBox(height: AppConstants.kSpacingM),
+          ],
+
+          if (controller.shouldShowActivity('pathan')) ...[
+            _buildActivityWithScore(
+              controller,
+              DurationPicker(
+                title: '',
+                subtitle: 'Scripture reading time',
+                value: controller.pathanMinutes,
+                onChanged: (val) {
+                  controller.pathanMinutes.value = val;
+                  controller.calculateScores();
+                },
+                maxHours: 2, // Max 2 hours
+              ),
+              'pathan',
+              title: 'Pathan (Reading)',
+              icon: Icons.menu_book,
+              color: AppColors.activityPathan,
+            ),
+            const SizedBox(height: AppConstants.kSpacingM),
+          ],
+
+          if (controller.shouldShowActivity('sravan')) ...[
+            _buildActivityWithScore(
+              controller,
+              DurationPicker(
+                title: '',
+                subtitle: 'Spiritual audio/lecture time',
+                value: controller.sravanMinutes,
+                onChanged: (val) {
+                  controller.sravanMinutes.value = val;
+                  controller.calculateScores();
+                },
+                maxHours: 3, // Max 3 hours
+              ),
+              'sravan',
+              title: 'Sravan (Listening)',
+              icon: Icons.headset,
+              color: AppColors.activitySravan,
+            ),
+            const SizedBox(height: AppConstants.kSpacingM),
+          ],
+
+          if (controller.shouldShowActivity('seva')) ...[
+            _buildActivityWithScore(
+              controller,
+              DurationPicker(
+                title: '',
+                subtitle: 'Service hours',
+                value: controller.sevaMinutes,
+                onChanged: (val) {
+                  controller.sevaMinutes.value = val;
+                  controller.calculateScores();
+                },
+                maxHours: 12, // Max 12 hours
+              ),
+              'seva',
+              title: 'Seva (Service)',
+              icon: Icons.volunteer_activism,
+              color: AppColors.activitySeva,
+            ),
+          ],
+        ],
+      );
     });
   }
 

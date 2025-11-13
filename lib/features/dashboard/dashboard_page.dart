@@ -275,9 +275,10 @@ class DashboardPage extends StatelessWidget {
                 value: controller.avgScore.value.toStringAsFixed(1),
                 subtitle: '/ ${controller.maxTotalScore.value.toInt()}',
                 color: AppColors.getScoreColor(controller.avgPercentage.value),
+                icon: Icons.leaderboard,
               ),
             ),
-            const SizedBox(width: AppConstants.kSpacingM),
+            const SizedBox(width: AppConstants.kSpacingL),
             Expanded(
               child: Obx(() => _buildStatCard(
                     title: 'Avg. %',
@@ -286,6 +287,7 @@ class DashboardPage extends StatelessWidget {
                     subtitle: controller.selectedRangeLabel.value,
                     color:
                         AppColors.getScoreColor(controller.avgPercentage.value),
+                    icon: Icons.percent,
                   )),
             ),
           ],
@@ -297,62 +299,97 @@ class DashboardPage extends StatelessWidget {
     required String value,
     required String subtitle,
     required Color color,
+    required IconData icon,
   }) {
+    final highlightColor =
+        (color == AppColors.maroonScore || color == AppColors.maroonDanger)
+            ? AppColors.primaryOrange
+            : color;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.lightSurface,
-        border: Border.all(
-            color: AppColors.primaryOrange.withOpacity(0.35), width: 1),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.lightSurface,
+            AppColors.accentPeach.withOpacity(0.85),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(AppConstants.kRadiusL),
+        border: Border.all(
+          color: AppColors.primaryOrange.withOpacity(0.18),
+          width: 1,
+        ),
         boxShadow: const [
           BoxShadow(
-            color: AppColors.shadowMedium,
-            blurRadius: 10,
-            offset: Offset(0, 4),
-            spreadRadius: 0,
-          ),
-          BoxShadow(
             color: AppColors.shadowLight,
-            blurRadius: 6,
-            offset: Offset(0, 2),
-            spreadRadius: 0,
+            blurRadius: 12,
+            offset: Offset(0, 6),
+            spreadRadius: -2,
           ),
         ],
       ),
-      child: Container(
+      child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppConstants.kSpacingM,
-          vertical: AppConstants.kSpacingM,
+          horizontal: AppConstants.kSpacingL,
+          vertical: AppConstants.kSpacingL,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: AppColors.textOrange,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.8,
-              ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(9),
+                  decoration: BoxDecoration(
+                    color: highlightColor.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: highlightColor,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: AppColors.lightTextPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             Text(
               value,
-              style: const TextStyle(
-                color: AppColors.primaryOrange,
-                fontSize: 24,
+              style: TextStyle(
+                color: highlightColor,
+                fontSize: 32,
                 fontWeight: FontWeight.bold,
-                letterSpacing: -0.5,
+                letterSpacing: -0.8,
               ),
             ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: const TextStyle(
-                color: AppColors.lightTextSecondary,
-                fontSize: 11,
-                fontWeight: FontWeight.w400,
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.85),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                subtitle,
+                style: const TextStyle(
+                  color: AppColors.lightTextSecondary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],
@@ -1038,7 +1075,7 @@ class DashboardPage extends StatelessWidget {
     ];
 
     return Wrap(
-      spacing: 8,
+      spacing: 16,
       runSpacing: 8,
       children: items.map((e) {
         final label = e[0] as String;
