@@ -120,8 +120,16 @@ class HomePage extends StatelessWidget {
     if (isCollapsed) {
       return Obx(() {
         final visibleDates = controller.visibleDates;
-        final selectedKey =
-            DateFormat('yyyy-MM-dd').format(controller.selectedDate.value);
+        final selectedDate = controller.selectedDate.value;
+        final selectedKey = DateFormat('yyyy-MM-dd').format(selectedDate);
+
+        final datesToShow = <DateTime>[...visibleDates];
+        final hasSelectedInVisible = datesToShow.any((date) =>
+            DateFormat('yyyy-MM-dd').format(date) == selectedKey);
+
+        if (!hasSelectedInVisible) {
+          datesToShow.insert(0, selectedDate);
+        }
 
         return Container(
           width: double.infinity,
@@ -139,11 +147,21 @@ class HomePage extends StatelessWidget {
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
-                        children: visibleDates.map((date) {
+                        children: datesToShow.map((date) {
                           final key = DateFormat('yyyy-MM-dd').format(date);
                           final bool isSelected = key == selectedKey;
                           final bool isToday = key ==
                               DateFormat('yyyy-MM-dd').format(DateTime.now());
+                          final bool isCustomSelection = !visibleDates.any(
+                              (visibleDate) =>
+                                  DateFormat('yyyy-MM-dd')
+                                      .format(visibleDate) ==
+                                  key);
+                          final String label = isToday
+                              ? 'Today'
+                              : DateFormat(
+                                      isCustomSelection ? 'EEE, dd MMM' : 'EEE, dd')
+                                  .format(date);
                           return Padding(
                             padding: const EdgeInsets.only(
                                 right: AppConstants.kSpacingS),
@@ -160,14 +178,18 @@ class HomePage extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? AppColors.primaryOrange
-                                      : AppColors.lightPeach,
+                                      : Colors.white,
                                   borderRadius: BorderRadius.circular(
                                       AppConstants.kRadiusFull),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? AppColors.primaryOrange
+                                        : AppColors.lightBorder
+                                            .withOpacity(0.5),
+                                  ),
                                 ),
                                 child: Text(
-                                  isToday
-                                      ? 'Today'
-                                      : DateFormat('EEE, dd').format(date),
+                                  label,
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     color: isSelected
