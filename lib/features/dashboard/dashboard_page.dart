@@ -5,12 +5,64 @@ import 'package:intl/intl.dart';
 import 'dashboard_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/app_constants.dart';
+import '../../navigation/route_observer.dart';
 import '../reports/report_page.dart';
 
-class DashboardPage extends StatelessWidget {
-  DashboardPage({super.key});
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
 
-  final DashboardController controller = Get.put(DashboardController());
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> with RouteAware {
+  late final DashboardController controller;
+  ModalRoute<dynamic>? _route;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.isRegistered<DashboardController>()
+        ? Get.find<DashboardController>()
+        : Get.put(DashboardController(), permanent: true);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentRoute = ModalRoute.of(context);
+    if (currentRoute != null && currentRoute is PageRoute) {
+      if (_route != currentRoute) {
+        if (_route != null && _route is PageRoute) {
+          routeObserver.unsubscribe(this);
+        }
+        _route = currentRoute;
+        routeObserver.subscribe(this, currentRoute);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_route != null && _route is PageRoute) {
+      routeObserver.unsubscribe(this);
+    }
+    super.dispose();
+  }
+
+  void _refreshSilently() {
+    controller.refreshData(silent: true);
+  }
+
+  @override
+  void didPush() {
+    _refreshSilently();
+  }
+
+  @override
+  void didPopNext() {
+    _refreshSilently();
+  }
 
   @override
   Widget build(BuildContext context) {

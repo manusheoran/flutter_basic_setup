@@ -54,14 +54,14 @@ class DashboardController extends GetxController {
   void onReady() {
     super.onReady();
     // Reload data when dashboard is opened (in case data changed)
-    refreshData();
+    refreshData(silent: true);
   }
   
   // Refresh all data
-  Future<void> refreshData() async {
+  Future<void> refreshData({bool silent = false}) async {
     print('🔄 Refreshing dashboard data...');
     await loadFirstActivityDate();
-    await loadActivitiesForDateRange();
+    await loadActivitiesForDateRange(silent: silent);
   }
   
   // Load user's first activity date to calculate smart averages
@@ -121,8 +121,10 @@ class DashboardController extends GetxController {
     );
   }
   
-  Future<void> loadActivitiesForDateRange() async {
-    isLoading.value = true;
+  Future<void> loadActivitiesForDateRange({bool silent = false}) async {
+    if (!silent) {
+      isLoading.value = true;
+    }
     
     final userId = _authService.currentUserId;
         

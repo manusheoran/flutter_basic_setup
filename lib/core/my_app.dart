@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'theme/app_theme.dart';
 import '../navigation/app_pages.dart';
+import '../navigation/route_observer.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -54,6 +55,7 @@ class _MyAppState extends State<MyApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      navigatorObservers: [routeObserver],
     );
   }
 }
