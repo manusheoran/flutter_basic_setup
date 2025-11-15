@@ -13,7 +13,7 @@ class HomeController extends GetxController {
   final FirestoreService _firestoreService = Get.find<FirestoreService>();
   final AuthService _authService = Get.find<AuthService>();
   final ParameterService _parameterService = Get.find<ParameterService>();
-  
+
   Rx<DailyActivity?> currentActivity = Rx<DailyActivity?>(null);
   Rx<DateTime> selectedDate = DateTime.now().obs;
   RxList<DateTime> visibleDates = <DateTime>[].obs; // Show multiple days
@@ -22,30 +22,40 @@ class HomeController extends GetxController {
   RxBool documentNotFound = false.obs; // Track if document doesn't exist
   RxBool hasUnsavedChanges = false.obs;
   RxBool canEdit = true.obs;
-  
+
+  static const List<String> _allActivityKeys = [
+    'nindra',
+    'wake_up',
+    'day_sleep',
+    'japa',
+    'pathan',
+    'sravan',
+    'seva',
+  ];
+
   // User's activity tracking configuration
   RxMap<String, bool> userActivityTracking = <String, bool>{}.obs;
-  
+
   // Activity input values
   RxString nindraTime = ''.obs;
   RxString wakeUpTime = ''.obs;
   RxInt daySleepMinutes = 0.obs;
   RxInt japaRounds = 0.obs;
-  RxString japaTime = ''.obs;  // Time when japa was completed
+  RxString japaTime = ''.obs; // Time when japa was completed
   RxInt pathanMinutes = 0.obs;
   RxInt sravanMinutes = 0.obs;
   RxInt sevaMinutes = 0.obs;
-  
+
   RxDouble totalScore = 0.0.obs;
   RxDouble percentage = 0.0.obs;
   RxDouble maxTotalScore = 260.0.obs; // Dynamic max score from ParameterService
-  
+
   // Stream subscription
   StreamSubscription<DailyActivity?>? _activitySubscription;
   late final Worker _fieldChangeWorker;
   final Map<String, Map<String, dynamic>> _baselineSnapshots = {};
   bool _suppressDirtyCheck = false;
-  
+
   @override
   void onInit() {
     super.onInit();
@@ -66,19 +76,19 @@ class HomeController extends GetxController {
     _updateCanEdit(selectedDate.value, null);
     setupActivityStream(selectedDate.value);
   }
-  
+
   @override
   void onClose() {
     _activitySubscription?.cancel();
     _fieldChangeWorker.dispose();
     super.onClose();
   }
-  
+
   // Load user's activity tracking configuration
   Future<void> loadUserActivityConfig() async {
     final userId = _authService.currentUserId;
     if (userId == null) return;
-    
+
     try {
       final user = await _firestoreService.getUserById(userId);
       if (user != null && user.activityTracking != null) {
@@ -99,26 +109,29 @@ class HomeController extends GetxController {
       print('❌ Error loading user activity config: $e');
     }
   }
-  
+
   // Check if an activity is enabled for tracking
   bool isActivityEnabled(String key) {
     return userActivityTracking[key] ?? true;
   }
-  
+
   // Check if activity should be shown in UI
   // Logic: If no document exists -> show all activities
   //        If document exists -> show only activities in the activities map
   bool shouldShowActivity(String key) {
-    if (currentActivity.value == null) {
-      // No document - show all activities so user can fill them
-      return true;
-    } else {
-      // Document exists - show only activities that are being tracked
-      // (present in the activities map)
-      return currentActivity.value!.activities.containsKey(key);
+    final activity = currentActivity.value;
+    if (activity == null) {
+      final bool isSelectedToday =
+          _isSameDate(selectedDate.value, DateTime.now());
+      if (!isSelectedToday) {
+        return false;
+      }
+      return isActivityEnabled(key);
     }
+
+    return activity.activities.containsKey(key);
   }
-  
+
   void _initializeVisibleDates() {
     visibleDates.clear();
     final now = DateTime.now();
@@ -127,51 +140,84 @@ class HomeController extends GetxController {
       visibleDates.add(now.subtract(Duration(days: i)));
     }
   }
-  
+
   // Setup stream for real-time updates
   void setupActivityStream(DateTime date) {
     // Cancel existing subscription
     _activitySubscription?.cancel();
-    
+
     isLoading.value = true;
     documentNotFound.value = false;
-    
+
     final userId = _authService.currentUserId;
     if (userId == null) {
       isLoading.value = false;
       return;
     }
-    
+
     final dateStr = DateFormat('yyyy-MM-dd').format(date);
-    
+
     // Listen to activity stream
-    _activitySubscription = _firestoreService
-        .getActivityStreamByDate(userId, dateStr)
-        .listen(
+    _activitySubscription =
+        _firestoreService.getActivityStreamByDate(userId, dateStr).listen(
       (activity) {
         isLoading.value = false;
-        
+
         _suppressDirtyCheck = true;
         if (activity == null) {
           documentNotFound.value = true;
-          currentActivity.value = null;
           clearFields();
           print('📭 No document found for $dateStr');
+
+          if (_isSameDate(date, DateTime.now())) {
+            final defaultActivities = <String, ActivityItem>{};
+            _ensureDefaultActivities(defaultActivities, trackedOnly: true);
+            currentActivity.value = DailyActivity(
+              docId: '${userId}_$dateStr',
+              uid: userId,
+              date: dateStr,
+              activities: defaultActivities,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            );
+          } else {
+            currentActivity.value = null;
+          }
+
           _updateCanEdit(date, null);
         } else {
           documentNotFound.value = false;
           currentActivity.value = activity;
-          
+
           // Populate fields from activity
-          nindraTime.value = activity.getActivity('nindra')?.extras['value']?.toString() ?? '';
-          wakeUpTime.value = activity.getActivity('wake_up')?.extras['value']?.toString() ?? '';
-          japaTime.value = activity.getActivity('japa')?.extras['time']?.toString() ?? '';
-          daySleepMinutes.value = (activity.getActivity('day_sleep')?.extras['duration'] as num?)?.toInt() ?? 0;
-          japaRounds.value = (activity.getActivity('japa')?.extras['rounds'] as num?)?.toInt() ?? 0;
-          pathanMinutes.value = (activity.getActivity('pathan')?.extras['duration'] as num?)?.toInt() ?? 0;
-          sravanMinutes.value = (activity.getActivity('sravan')?.extras['duration'] as num?)?.toInt() ?? 0;
-          sevaMinutes.value = (activity.getActivity('seva')?.extras['duration'] as num?)?.toInt() ?? 0;
-          
+          nindraTime.value =
+              activity.getActivity('nindra')?.extras['value']?.toString() ?? '';
+          wakeUpTime.value =
+              activity.getActivity('wake_up')?.extras['value']?.toString() ??
+                  '';
+          japaTime.value =
+              activity.getActivity('japa')?.extras['time']?.toString() ?? '';
+          daySleepMinutes.value =
+              (activity.getActivity('day_sleep')?.extras['duration'] as num?)
+                      ?.toInt() ??
+                  0;
+          japaRounds.value =
+              (activity.getActivity('japa')?.extras['rounds'] as num?)
+                      ?.toInt() ??
+                  0;
+          pathanMinutes.value =
+              (activity.getActivity('pathan')?.extras['duration'] as num?)
+                      ?.toInt() ??
+                  0;
+          sravanMinutes.value =
+              (activity.getActivity('sravan')?.extras['duration'] as num?)
+                      ?.toInt() ??
+                  0;
+          sevaMinutes.value =
+              (activity.getActivity('seva')?.extras['duration'] as num?)
+                      ?.toInt() ??
+                  0;
+
           // Always recalculate scores
           calculateScores();
 
@@ -189,7 +235,7 @@ class HomeController extends GetxController {
       },
     );
   }
-  
+
   void clearFields() {
     nindraTime.value = '';
     wakeUpTime.value = '';
@@ -202,21 +248,27 @@ class HomeController extends GetxController {
     totalScore.value = 0.0;
     percentage.value = 0.0;
   }
-  
+
   void calculateScores() {
     if (!_parameterService.isLoaded) {
       print('⚠️ ParameterService not ready, skipping score calculation');
       return;
     }
 
-    final nindraScore = _parameterService.calculateScore('nindra', nindraTime.value);
-    final wakeUpScore = _parameterService.calculateScore('wake_up', wakeUpTime.value);
-    final daySleepScore = _parameterService.calculateScore('day_sleep', daySleepMinutes.value);
+    final nindraScore =
+        _parameterService.calculateScore('nindra', nindraTime.value);
+    final wakeUpScore =
+        _parameterService.calculateScore('wake_up', wakeUpTime.value);
+    final daySleepScore =
+        _parameterService.calculateScore('day_sleep', daySleepMinutes.value);
     final japaScore = _parameterService.calculateScore('japa', japaTime.value);
-    final pathanScore = _parameterService.calculateScore('pathan', pathanMinutes.value);
-    final sravanScore = _parameterService.calculateScore('sravan', sravanMinutes.value);
-    final sevaScore = _parameterService.calculateScore('seva', sevaMinutes.value);
-    
+    final pathanScore =
+        _parameterService.calculateScore('pathan', pathanMinutes.value);
+    final sravanScore =
+        _parameterService.calculateScore('sravan', sravanMinutes.value);
+    final sevaScore =
+        _parameterService.calculateScore('seva', sevaMinutes.value);
+
     print('🎯 Score Calculation:');
     print('  Nindra: $nindraScore (${nindraTime.value})');
     print('  Wake Up: $wakeUpScore (${wakeUpTime.value})');
@@ -225,18 +277,24 @@ class HomeController extends GetxController {
     print('  Pathan: $pathanScore (${pathanMinutes.value} min)');
     print('  Sravan: $sravanScore (${sravanMinutes.value} min)');
     print('  Seva: $sevaScore (${sevaMinutes.value} min)');
-    
-    final total = nindraScore + wakeUpScore + daySleepScore + japaScore + pathanScore + sravanScore + sevaScore;
+
+    final total = nindraScore +
+        wakeUpScore +
+        daySleepScore +
+        japaScore +
+        pathanScore +
+        sravanScore +
+        sevaScore;
     final maxTotal = _parameterService.getTotalMaxPoints();
-    
+
     print('  TOTAL: $total / $maxTotal');
     print('  Percentage: ${maxTotal > 0 ? (total / maxTotal) * 100 : 0}%');
-    
+
     totalScore.value = total;
     maxTotalScore.value = maxTotal; // Update dynamic max total
     percentage.value = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
   }
-  
+
   Future<void> saveActivity() async {
     if (!canEdit.value) {
       _showEditRestrictionMessage();
@@ -248,22 +306,29 @@ class HomeController extends GetxController {
       Get.snackbar('Error', 'User not logged in');
       return;
     }
-    
+
     isSaving.value = true;
     calculateScores();
-    
+
     try {
       final dateStr = DateFormat('yyyy-MM-dd').format(selectedDate.value);
-      
+
       // Calculate individual scores
-      final nindraScore = _parameterService.calculateScore('nindra', nindraTime.value);
-      final wakeUpScore = _parameterService.calculateScore('wake_up', wakeUpTime.value);
-      final daySleepScore = _parameterService.calculateScore('day_sleep', daySleepMinutes.value);
-      final japaScore = _parameterService.calculateScore('japa', japaTime.value);
-      final pathanScore = _parameterService.calculateScore('pathan', pathanMinutes.value);
-      final sravanScore = _parameterService.calculateScore('sravan', sravanMinutes.value);
-      final sevaScore = _parameterService.calculateScore('seva', sevaMinutes.value);
-      
+      final nindraScore =
+          _parameterService.calculateScore('nindra', nindraTime.value);
+      final wakeUpScore =
+          _parameterService.calculateScore('wake_up', wakeUpTime.value);
+      final daySleepScore =
+          _parameterService.calculateScore('day_sleep', daySleepMinutes.value);
+      final japaScore =
+          _parameterService.calculateScore('japa', japaTime.value);
+      final pathanScore =
+          _parameterService.calculateScore('pathan', pathanMinutes.value);
+      final sravanScore =
+          _parameterService.calculateScore('sravan', sravanMinutes.value);
+      final sevaScore =
+          _parameterService.calculateScore('seva', sevaMinutes.value);
+
       // Build activities map
       final activitiesMap = <String, ActivityItem>{
         if (nindraTime.value.isNotEmpty)
@@ -368,10 +433,14 @@ class HomeController extends GetxController {
             ),
           ),
       };
-      
+
+      if (documentNotFound.value) {
+        _ensureDefaultActivities(activitiesMap, trackedOnly: true);
+      }
+
       // Use consistent docId format: userId_date
       final docId = '${userId}_$dateStr';
-      
+
       final activity = DailyActivity(
         docId: docId,
         uid: userId,
@@ -384,9 +453,9 @@ class HomeController extends GetxController {
         createdAt: currentActivity.value?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      
+
       await _firestoreService.saveDailyActivity(activity);
-      
+
       Get.snackbar(
         'Success',
         'Activity saved successfully!',
@@ -406,13 +475,157 @@ class HomeController extends GetxController {
       isSaving.value = false;
     }
   }
-  
+
+  void _ensureDefaultActivities(Map<String, ActivityItem> activitiesMap,
+      {bool trackedOnly = false}) {
+    final Iterable<String> keys =
+        trackedOnly ? _trackedActivityKeys() : _allActivityKeys;
+
+    for (final key in keys) {
+      activitiesMap.putIfAbsent(key, () => _defaultActivityForKey(key));
+    }
+  }
+
+  ActivityItem _defaultActivityForKey(String key) {
+    switch (key) {
+      case 'nindra':
+        return ActivityItem(
+          id: 'nindra',
+          name: 'Night Sleep',
+          type: 'time',
+          extras: {'value': ''},
+          analytics: ActivityAnalytics(
+            pointsAchieved: 0,
+            maxAchievablePoints: _parameterService.getMaxPoints('nindra'),
+            defaultValue: 0,
+            status: 'active',
+          ),
+        );
+      case 'wake_up':
+        return ActivityItem(
+          id: 'wake_up',
+          name: 'Wake Up',
+          type: 'time',
+          extras: {'value': ''},
+          analytics: ActivityAnalytics(
+            pointsAchieved: 0,
+            maxAchievablePoints: _parameterService.getMaxPoints('wake_up'),
+            defaultValue: 0,
+            status: 'active',
+          ),
+        );
+      case 'day_sleep':
+        return ActivityItem(
+          id: 'day_sleep',
+          name: 'Day Sleep',
+          type: 'duration',
+          extras: {'duration': 0},
+          analytics: ActivityAnalytics(
+            duration: 0,
+            pointsAchieved: 0,
+            maxAchievablePoints: _parameterService.getMaxPoints('day_sleep'),
+            defaultValue: 0,
+            status: 'active',
+          ),
+        );
+      case 'japa':
+        return ActivityItem(
+          id: 'japa',
+          name: 'Japa',
+          type: 'time',
+          extras: {
+            'time': '',
+            'rounds': 0,
+          },
+          analytics: ActivityAnalytics(
+            pointsAchieved: 0,
+            maxAchievablePoints: _parameterService.getMaxPoints('japa'),
+            defaultValue: 0,
+            status: 'active',
+          ),
+        );
+      case 'pathan':
+        return ActivityItem(
+          id: 'pathan',
+          name: 'Pathan',
+          type: 'duration',
+          extras: {'duration': 0},
+          analytics: ActivityAnalytics(
+            duration: 0,
+            pointsAchieved: 0,
+            maxAchievablePoints: _parameterService.getMaxPoints('pathan'),
+            defaultValue: 0,
+            status: 'active',
+          ),
+        );
+      case 'sravan':
+        return ActivityItem(
+          id: 'sravan',
+          name: 'Sravan',
+          type: 'duration',
+          extras: {'duration': 0},
+          analytics: ActivityAnalytics(
+            duration: 0,
+            pointsAchieved: 0,
+            maxAchievablePoints: _parameterService.getMaxPoints('sravan'),
+            defaultValue: 0,
+            status: 'active',
+          ),
+        );
+      case 'seva':
+        return ActivityItem(
+          id: 'seva',
+          name: 'Seva',
+          type: 'duration',
+          extras: {'duration': 0},
+          analytics: ActivityAnalytics(
+            duration: 0,
+            pointsAchieved: 0,
+            maxAchievablePoints: _parameterService.getMaxPoints('seva'),
+            defaultValue: 0,
+            status: 'active',
+          ),
+        );
+      default:
+        return ActivityItem(
+          id: key,
+          name: key,
+          type: 'duration',
+          extras: {},
+          analytics: ActivityAnalytics(
+            pointsAchieved: 0,
+            maxAchievablePoints: _parameterService.getMaxPoints(key),
+            defaultValue: 0,
+            status: 'active',
+          ),
+        );
+    }
+  }
+
+  List<String> _trackedActivityKeys() {
+    if (userActivityTracking.isEmpty) {
+      return _allActivityKeys;
+    }
+
+    final tracked = <String>[];
+    for (final key in _allActivityKeys) {
+      if (isActivityEnabled(key)) {
+        tracked.add(key);
+      }
+    }
+    return tracked;
+  }
+
+  bool _isSameDate(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
   void changeDate(DateTime date) {
     selectedDate.value = date;
     _updateCanEdit(date, null);
     setupActivityStream(date);
   }
-  
+
   void discardChanges() {
     final dateKey = _dateKey(selectedDate.value);
     final baseline = _baselineSnapshots[dateKey];
@@ -493,11 +706,12 @@ class HomeController extends GetxController {
     final selected = DateTime(date.year, date.month, date.day);
 
     final int dayDifference = today.difference(selected).inDays;
-    final bool isWithinEditableWindow = dayDifference >= 0 && dayDifference <= 2;
+    final bool isWithinEditableWindow =
+        dayDifference >= 0 && dayDifference <= 2;
 
     final String? status = activity?.status;
-    final bool isUnblocked = status != null &&
-        status.toLowerCase().contains('unblock');
+    final bool isUnblocked =
+        status != null && status.toLowerCase().contains('unblock');
 
     canEdit.value = isWithinEditableWindow || isUnblocked;
   }

@@ -710,9 +710,9 @@ class HomePage extends StatelessWidget {
 
   Widget _buildActivityCards(HomeController controller, BuildContext context) {
     return Obx(() {
-      final bool canEdit = controller.canEditSelectedDate;
-      final bool showPlaceholder =
-          !canEdit && controller.documentNotFound.value;
+      final activity = controller.currentActivity.value;
+      final bool showPlaceholder = controller.documentNotFound.value &&
+          (activity == null || activity.activities.isEmpty);
 
       if (showPlaceholder) {
         return _buildNoActivityPlaceholder();
@@ -909,7 +909,7 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: AppConstants.kSpacingL),
           const Text(
-            'No activity recorded for this day',
+            'No activity found',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 18,
@@ -919,7 +919,7 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: AppConstants.kSpacingS),
           const Text(
-            'This date is locked for editing. Activity tracking resumes on allowed dates.',
+            'There are no activities saved for the selected date. Once data is recorded it will appear here.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
