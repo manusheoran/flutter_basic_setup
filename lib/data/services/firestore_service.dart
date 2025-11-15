@@ -140,24 +140,28 @@ class FirestoreService extends GetxService {
 
       print('🔍 Querying activities: userId=$userId, start=$start, end=$end');
 
-      // Query all user activities (no composite index needed)
       final querySnapshot = await _dailyActivities
           .where('uid', isEqualTo: userId)
+          .where('date', isGreaterThanOrEqualTo: start)
+          .where('date', isLessThanOrEqualTo: end)
+          .orderBy('date', descending: true)
           .get();
 
-      // Filter by date range in app code
       final activities = querySnapshot.docs
           .map((doc) => DailyActivity.fromFirestore(doc))
-          .where((activity) {
-            final activityDate = activity.dateString;
-            return activityDate.compareTo(start) >= 0 && 
-                   activityDate.compareTo(end) <= 0;
-          })
           .toList();
-      
+
       print('✅ Found ${activities.length} activities in date range');
-      
+
       return activities;
+    } on FirebaseException catch (e) {
+      if (e.code == 'failed-precondition') {
+        print(
+            '❌ Firestore index missing for getActivitiesInRange (uid/date). Create a composite index on uid ASC, date DESC.');
+      } else {
+        print('❌ Firestore error getting activities in range: ${e.message}');
+      }
+      return [];
     } catch (e) {
       print('❌ Error getting activities in range: $e');
       return [];
