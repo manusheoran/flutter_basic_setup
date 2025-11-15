@@ -399,7 +399,7 @@ class SettingsPage extends StatelessWidget {
     final RxBool showNewPassword = false.obs;
     final RxBool showConfirmPassword = false.obs;
 
-    Get.dialog(
+    Get.dialog<bool>(
       AlertDialog(
         title: const Text('Reset Password'),
         content: SingleChildScrollView(
@@ -468,10 +468,7 @@ class SettingsPage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              currentPasswordController.dispose();
-              newPasswordController.dispose();
-              confirmPasswordController.dispose();
-              Get.back();
+              Get.back(result: false);
             },
             child: const Text('Cancel'),
           ),
@@ -479,9 +476,12 @@ class SettingsPage extends StatelessWidget {
                 onPressed: isLoading.value
                     ? null
                     : () async {
-                        final currentPassword = currentPasswordController.text;
-                        final newPassword = newPasswordController.text;
-                        final confirmPassword = confirmPasswordController.text;
+                        final currentPassword =
+                            currentPasswordController.text.trim();
+                        final newPassword =
+                            newPasswordController.text.trim();
+                        final confirmPassword =
+                            confirmPasswordController.text.trim();
 
                         if (currentPassword.isEmpty ||
                             newPassword.isEmpty ||
@@ -496,10 +496,10 @@ class SettingsPage extends StatelessWidget {
                           return;
                         }
 
-                        if (newPassword != confirmPassword) {
+                        if (newPassword == currentPassword) {
                           Get.snackbar(
                             'Error',
-                            'New passwords do not match',
+                            'New password must be different from current password',
                             snackPosition: SnackPosition.BOTTOM,
                             backgroundColor: Colors.red,
                             colorText: Colors.white,
@@ -527,8 +527,6 @@ class SettingsPage extends StatelessWidget {
 
                         isLoading.value = false;
 
-                        Get.back(); // Close dialog
-
                         if (error != null) {
                           Get.snackbar(
                             'Error',
@@ -537,19 +535,10 @@ class SettingsPage extends StatelessWidget {
                             backgroundColor: Colors.red,
                             colorText: Colors.white,
                           );
-                        } else {
-                          Get.snackbar(
-                            'Success',
-                            'Password updated successfully',
-                            snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: Colors.green,
-                            colorText: Colors.white,
-                          );
+                          return;
                         }
 
-                        currentPasswordController.dispose();
-                        newPasswordController.dispose();
-                        confirmPasswordController.dispose();
+                        Get.back(result: true);
                       },
                 child: isLoading.value
                     ? const SizedBox(
@@ -564,7 +553,23 @@ class SettingsPage extends StatelessWidget {
               )),
         ],
       ),
-    );
+    ).then((result) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        currentPasswordController.dispose();
+        newPasswordController.dispose();
+        confirmPasswordController.dispose();
+
+        if (result == true) {
+          Get.snackbar(
+            'Success',
+            'Password updated successfully',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+        }
+      });
+    });
   }
 
   Widget _buildThemeCard() {
