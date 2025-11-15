@@ -124,8 +124,8 @@ class HomePage extends StatelessWidget {
         final selectedKey = DateFormat('yyyy-MM-dd').format(selectedDate);
 
         final datesToShow = <DateTime>[...visibleDates];
-        final hasSelectedInVisible = datesToShow.any((date) =>
-            DateFormat('yyyy-MM-dd').format(date) == selectedKey);
+        final hasSelectedInVisible = datesToShow.any(
+            (date) => DateFormat('yyyy-MM-dd').format(date) == selectedKey);
 
         if (!hasSelectedInVisible) {
           datesToShow.insert(0, selectedDate);
@@ -159,8 +159,9 @@ class HomePage extends StatelessWidget {
                                   key);
                           final String label = isToday
                               ? 'Today'
-                              : DateFormat(
-                                      isCustomSelection ? 'EEE, dd MMM' : 'EEE, dd')
+                              : DateFormat(isCustomSelection
+                                      ? 'EEE, dd MMM'
+                                      : 'EEE, dd')
                                   .format(date);
                           return Padding(
                             padding: const EdgeInsets.only(
@@ -254,6 +255,23 @@ class HomePage extends StatelessWidget {
                         final isToday = DateFormat('yyyy-MM-dd').format(date) ==
                             DateFormat('yyyy-MM-dd').format(DateTime.now());
 
+                        final Color todayBadgeBackground;
+                        final Color todayBadgeTextColor;
+                        if (isToday) {
+                          if (isSelected) {
+                            todayBadgeBackground =
+                                AppColors.yellowWarning.withOpacity(0.75);
+                            todayBadgeTextColor = AppColors.black;
+                          } else {
+                            todayBadgeBackground =
+                                AppColors.yellowWarning.withOpacity(0.65);
+                            todayBadgeTextColor = AppColors.black;
+                          }
+                        } else {
+                          todayBadgeBackground = Colors.white.withOpacity(0.0);
+                          todayBadgeTextColor = AppColors.primaryOrange;
+                        }
+
                         return Padding(
                           padding: const EdgeInsets.only(right: 10),
                           child: InkWell(
@@ -324,12 +342,7 @@ class HomePage extends StatelessWidget {
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: isToday
-                                          ? (isSelected
-                                              ? Colors.white.withOpacity(0.2)
-                                              : AppColors.accentPeach
-                                                  .withOpacity(0.6))
-                                          : Colors.white.withOpacity(0.0),
+                                      color: todayBadgeBackground,
                                       borderRadius: BorderRadius.circular(
                                         AppConstants.kRadiusFull,
                                       ),
@@ -345,9 +358,11 @@ class HomePage extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w400,
-                                        color: isSelected
-                                            ? Colors.white
-                                            : AppColors.primaryOrange,
+                                        color: isToday
+                                            ? todayBadgeTextColor
+                                            : (isSelected
+                                                ? Colors.white
+                                                : AppColors.primaryOrange),
                                       ),
                                     ),
                                   ),
@@ -473,6 +488,28 @@ class HomePage extends StatelessWidget {
       final maxScore = controller.maxTotalScore.value.toStringAsFixed(0);
       final percentLabel = percentageValue.toStringAsFixed(1);
 
+      int recordedActivities = 0;
+      void addIf(String key, bool condition) {
+        if (controller.shouldShowActivity(key) && condition) {
+          recordedActivities++;
+        }
+      }
+
+      addIf('nindra', controller.nindraTime.value.isNotEmpty);
+      addIf('wake_up', controller.wakeUpTime.value.isNotEmpty);
+      addIf('day_sleep', controller.daySleepMinutes.value > 0);
+      addIf(
+          'japa',
+          controller.japaTime.value.isNotEmpty ||
+              controller.japaRounds.value > 0);
+      addIf('pathan', controller.pathanMinutes.value > 0);
+      addIf('sravan', controller.sravanMinutes.value > 0);
+      addIf('seva', controller.sevaMinutes.value > 0);
+
+      final String completionSubtitle = recordedActivities > 0
+          ? 'for $recordedActivities activit${recordedActivities == 1 ? 'y' : 'ies'}'
+          : '';
+
       final double paddingVertical = showCompact ? 8.0 : AppConstants.kSpacingS;
       final double valueFontSize = showCompact ? 18 : 28;
       final double percentFontSize = showCompact ? 18 : 28;
@@ -581,7 +618,7 @@ class HomePage extends StatelessWidget {
                       child: _ScoreColumn(
                         title: 'Completion',
                         value: '$percentLabel%',
-                        subtitle: '',
+                        subtitle: completionSubtitle,
                         valueFontSize: percentFontSize,
                         compact: showCompact,
                         alignment: TextAlign.center,
