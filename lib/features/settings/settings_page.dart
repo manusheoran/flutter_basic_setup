@@ -518,6 +518,17 @@ class SettingsPage extends StatelessWidget {
                           return;
                         }
 
+                        if (newPassword != confirmPassword) {
+                          Get.snackbar(
+                            'Error',
+                            'New password and confirmation must match',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                          );
+                          return;
+                        }
+
                         isLoading.value = true;
 
                         final error = await _authService.resetPassword(
