@@ -260,11 +260,11 @@ class HomePage extends StatelessWidget {
                         if (isToday) {
                           if (isSelected) {
                             todayBadgeBackground =
-                                AppColors.yellowWarning.withOpacity(0.75);
+                                AppColors.lightBackground.withOpacity(0.65);
                             todayBadgeTextColor = AppColors.black;
                           } else {
                             todayBadgeBackground =
-                                AppColors.yellowWarning.withOpacity(0.65);
+                                AppColors.gradientMiddle.withOpacity(0.35);
                             todayBadgeTextColor = AppColors.black;
                           }
                         } else {
