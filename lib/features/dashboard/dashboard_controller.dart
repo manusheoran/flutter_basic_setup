@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/activity_model.dart';
@@ -16,6 +18,7 @@ class DashboardController extends GetxController {
   RxDouble maxTotalScore = 0.0.obs;
   final Map<String, double> _activityMax = {};
   final Map<String, double> _activityMin = {};
+  final Completer<void> _initialLoadCompleter = Completer<void>();
   
   // Overall averages
   RxDouble avgScore = 0.0.obs;
@@ -45,9 +48,15 @@ class DashboardController extends GetxController {
   }
 
   Future<void> _initAsync() async {
-    await _loadParameterMeta();
-    loadFirstActivityDate();
-    loadActivitiesForDateRange();
+    try {
+      await _loadParameterMeta();
+      await loadFirstActivityDate();
+      await loadActivitiesForDateRange(silent: true);
+    } finally {
+      if (!_initialLoadCompleter.isCompleted) {
+        _initialLoadCompleter.complete();
+      }
+    }
   }
   
   @override
@@ -155,7 +164,14 @@ class DashboardController extends GetxController {
       _resetAverages();
     } finally {
       isLoading.value = false;
+      if (!_initialLoadCompleter.isCompleted && silent) {
+        _initialLoadCompleter.complete();
+      }
     }
+  }
+
+  Future<void> waitForInitialLoad() {
+    return _initialLoadCompleter.future;
   }
   
   Future<void> _loadParameterMeta() async {

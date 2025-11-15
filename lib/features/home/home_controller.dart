@@ -55,6 +55,7 @@ class HomeController extends GetxController {
   late final Worker _fieldChangeWorker;
   final Map<String, Map<String, dynamic>> _baselineSnapshots = {};
   bool _suppressDirtyCheck = false;
+  final Completer<void> _initialLoadCompleter = Completer<void>();
 
   @override
   void onInit() {
@@ -82,6 +83,10 @@ class HomeController extends GetxController {
     _activitySubscription?.cancel();
     _fieldChangeWorker.dispose();
     super.onClose();
+  }
+
+  Future<void> waitForInitialLoad() {
+    return _initialLoadCompleter.future;
   }
 
   // Load user's activity tracking configuration
@@ -152,6 +157,9 @@ class HomeController extends GetxController {
     final userId = _authService.currentUserId;
     if (userId == null) {
       isLoading.value = false;
+      if (!_initialLoadCompleter.isCompleted) {
+        _initialLoadCompleter.complete();
+      }
       return;
     }
 
@@ -228,10 +236,16 @@ class HomeController extends GetxController {
         _storeBaseline(dateStr, snapshot);
         _suppressDirtyCheck = false;
         hasUnsavedChanges.value = false;
+        if (!_initialLoadCompleter.isCompleted) {
+          _initialLoadCompleter.complete();
+        }
       },
       onError: (error) {
         isLoading.value = false;
         print('❌ Stream error: $error');
+        if (!_initialLoadCompleter.isCompleted) {
+          _initialLoadCompleter.complete();
+        }
       },
     );
   }

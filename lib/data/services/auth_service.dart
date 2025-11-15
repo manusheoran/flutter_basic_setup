@@ -7,6 +7,8 @@ import 'package:local_auth/local_auth.dart';
 import '../models/user_model.dart';
 import 'parameter_service.dart';
 import '../../core/constants/app_constants.dart';
+import '../../features/home/home_controller.dart';
+import '../../features/dashboard/dashboard_controller.dart';
 
 class AuthService extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -155,6 +157,9 @@ class AuthService extends GetxService {
       // User is logged in and verified - load data and navigate
       await loadCurrentUser(user.uid);
 
+      // Preload home and dashboard controllers so data is ready when pages open
+      _preloadPrimaryScreens();
+
       // Determine target route based on role
       final targetRoute =
           currentUser.value?.role == 'admin' ? '/admin' : '/home';
@@ -224,6 +229,26 @@ class AuthService extends GetxService {
     } catch (e) {
       print('❌ Error loading user: $e');
     }
+  }
+
+  void _preloadPrimaryScreens() {
+    Future.microtask(() async {
+      try {
+        final homeController = Get.isRegistered<HomeController>()
+            ? Get.find<HomeController>()
+            : Get.put(HomeController(), permanent: true);
+        final dashboardController = Get.isRegistered<DashboardController>()
+            ? Get.find<DashboardController>()
+            : Get.put(DashboardController(), permanent: true);
+
+        await Future.wait([
+          homeController.waitForInitialLoad(),
+          dashboardController.waitForInitialLoad(),
+        ]);
+      } catch (e) {
+        print('⚠️ Preloading controllers failed: $e');
+      }
+    });
   }
 
   Future<String?> signUp({
