@@ -1209,7 +1209,7 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
 
     final double spacing =
-        lerpDouble(AppConstants.kSpacingS, AppConstants.kSpacingXS, collapseT)!;
+        lerpDouble(AppConstants.kSpacingM, AppConstants.kSpacingXS, collapseT)!;
 
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
